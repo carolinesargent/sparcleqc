@@ -1,7 +1,21 @@
 import numpy as np
 import pandas as pd
+from typing import Tuple
 
-def fix_numbers(pdb_file):
+def fix_numbers(pdb_file: str) -> None:
+    """
+    When given a pdb, creates a new copy {pdb_file}_fixed.pdb that has the protein residues followed by waters and then the ligand
+    Corrects for any mistakes in atom or residue numbering
+
+    Parameters
+    ----------
+    pdb_file: str
+        path to pdb
+
+    Returns
+    -------
+    None
+    """
 
     with open('ligand.pdb') as lig:
         lig_lines = lig.readlines()
@@ -47,7 +61,22 @@ def fix_numbers(pdb_file):
         out.write('CONECT\n')
     out.write('END')
     out.close()
-def get_coords(pdb_file1, atom_id1):
+
+def get_coords(pdb_file1: str, atom_id1: str) -> Tuple[str, str, str]:
+    """
+    extracts the x,y,z coordinates of a specified atom in a specified pdb
+
+    Parameters
+    ----------
+    pdb_file: str
+        path to uncapped complex pdb
+    
+    Returns
+    -------
+    x_coord, y_coord, z_coord: str, str, str
+        coordinates of specified atom
+    """
+
     with open(pdb_file1, 'r') as file:
         lines = file.readlines()
         for l in lines:
@@ -58,7 +87,20 @@ def get_coords(pdb_file1, atom_id1):
                     z_coord = l[46:54].strip()
                     return x_coord, y_coord, z_coord
 
-def match_coords(x, y, z, pdb_file2):
+def match_coords(x:str, y:str, z:str, pdb_file2:str) -> str:
+    """
+    returns the atom number that corresponds to the specified x,y,z coordinates in the specified pdb_file
+
+    Parameters
+    ----------
+    pdb_file: str
+        path to uncapped complex pdb
+
+    Returns
+    -------
+    atom_id: str
+        atom id that corresponds to the specified coordinates in the specified pdb file
+    """
     with open(pdb_file2, 'r') as file:
         lines = file.readlines()
         for l in lines:
@@ -68,12 +110,43 @@ def match_coords(x, y, z, pdb_file2):
                z_coord = l[46:54].strip()
                if x_coord == x and y_coord == y and z_coord == z:
                    return l[6:11].strip()
-def convert_atom_id(seed, seed_file, new_pdb ='cx_autocap_fixed.pdb'):
+def convert_atom_id(seed: str, seed_file:str, new_pdb ='cx_autocap_fixed.pdb':str) -> str:
+    """
+    finds the atom the corresponds to atom number = seed in seed_file pdb and then maps this to the newly created complex pdb
+
+    Parameters
+    ----------
+    seed: str
+        atom number in seed_file
+    seed_file: str
+        file to original pdb that contains seed
+    new_pdb: str
+        path to new pdb
+
+    Returns
+    -------
+    cx_id: str
+        atom in new_pdb that corresponds to the atom seed in seed_file
+    """
     x1,y1,z1 = get_coords(seed_file, seed)
     cx_id = match_coords(x1, y1, z1, new_pdb)
     return cx_id
 
-def check_resi_charges(mol2_file):
+def check_resi_charges(mol2_file: str) -> Tuple[int, str]:
+    """
+    checks the sum of the point charges for each residue listed in the mol2 and ensures that it sums to an integer
+
+    Parameters
+    ----------
+    mol2_file: str
+        path to mol2 file
+
+    Returns
+    -------
+    error_message: tuple(int, str)
+        tuple where the first entry is an integer. 0 = at least one residue is not integer charge. 1 = all residues are integer charge.
+        the second entry is a string containing information about which residue is not integer charge and the corresponding fractional charge
+    """
     total_charge = 0
     tolerance = 0.0001
     failed = False
@@ -102,8 +175,19 @@ def check_resi_charges(mol2_file):
     if not failed:
         return (1, 'passed')
 
-def check_df_charges():
+def check_df_charges() -> Tuple[int, str]:
+    """
+    checks the sum of the point charges for each residue listed in the dataframe and ensures that it sums to an integer
 
+    Parameters
+    ----------
+
+    Returns
+    -------
+    error_message: tuple(int, str)
+        tuple where the first entry is an integer. 0 = at least one residue is not integer charge. 1 = all residues are integer charge.
+        the second entry is a string containing information about which residue is not integer charge and the corresponding fractional charge
+    """
     total_charge = 0
     tolerance = 0.0001 
     failed = False
