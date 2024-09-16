@@ -2,19 +2,20 @@ import sys
 import shutil
 import subprocess
 import os
-from amber_prep import write_cpptraj, write_cpptraj_skip_autocap, write_tleap, autocap, skip_autocap 
-from charmm_prep import dictionary_nocut, psf_to_mol2, combine_charmm 
-from pdb_prep import check_df_charges, check_resi_charges, convert_atom_id, fix_numbers 
-from combine_data import combine_data
-from cut_protein import run_cut_protein 
-from convert_dict import convert_dictionary 
-from move_M3s import move_m3s
-from df_make_psi4 import write_QM, check_QM_file 
-from cap import run_cap
-from make_partition import partition 
 import threading
 import itertools
 import time
+
+from .amber_prep import write_cpptraj, write_cpptraj_skip_autocap, write_tleap, autocap, skip_autocap 
+from .charmm_prep import dictionary_nocut, psf_to_mol2, combine_charmm 
+from .pdb_prep import check_df_charges, check_resi_charges, convert_atom_id, fix_numbers 
+from .combine_data import combine_data
+from .cut_protein import run_cut_protein 
+from .convert_dict import convert_dictionary 
+from .move_M3s import move_m3s
+from .df_make_psi4 import write_QM, check_QM_file 
+from .cap import run_cap
+from .make_partition import partition 
 
 stop_flashing = threading.Event()
 
@@ -307,6 +308,6 @@ def run(input_file):
         flashing_thread.join()
 
 
-input_file = sys.argv[1]
-run(input_file)
+#input_file = sys.argv[1]
+#run(input_file)
 
