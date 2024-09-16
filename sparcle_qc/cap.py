@@ -17,7 +17,7 @@ from glob import glob
 import warnings
 from parmed.charmm import CharmmParameterSet
 
-def get_atom_types(Q1_coords, M1_coords, MOL2_PATH, ff_type):                            # atom indexing of mol2 and pdb do not match
+def get_atom_types(Q1_coords, M1_coords, MOL2_PATH, ff_type, params = None):                            # atom indexing of mol2 and pdb do not match
     out = open(glob('*.out')[0], 'a')
     # get atom types of Q1 and M1
     with open(MOL2_PATH, 'r', encoding="iso-8859-1") as mol2file:
@@ -42,8 +42,14 @@ def get_atom_types(Q1_coords, M1_coords, MOL2_PATH, ff_type):                   
         QH_bond = f'XC' + '-' + f"{'H1':<2}"
         QH_bond_perm = f"{'H1':<2}" + '-' + f'XC'
     else:
-        QH_bond = f'CT2-HB2'
-        QH_bond_perm = f"HB2-CT2"
+        try:
+            QH_bond = f'CT2-HB2'
+            QH_bond_perm = f"HB2-CT2"
+            test = params.bond_types[(atom1, atom2)].req
+        except:
+            QH_bond = f'CT2-HB'
+            QH_bond_perm = f"HB-CT2"
+            test = params.bond_types[(atom1, atom2)].req
     out.close()
     return QM_bond, QM_bond_perm, QH_bond, QH_bond_perm
 
@@ -115,7 +121,7 @@ def cap(no_HL, num_broken_bonds, PDB_PATH, MOL2_PATH, CAPPED_PDB_PATH, ff_type, 
         Q1_coords = [float(x) for x in Q1_coords]
         M1_coords = [float(x) for x in M1_coords]
         R_Q1M1 = math.dist(Q1_coords, M1_coords)
-        a,b,c,d = get_atom_types(Q1_coords, M1_coords, MOL2_PATH, ff_type = ff_type)
+        a,b,c,d = get_atom_types(Q1_coords, M1_coords, MOL2_PATH, ff_type = ff_type, params = params)
         out.close()
         out = open(glob('*.out')[0], 'a')
         #out.write(f'QM_bond: {a}\n')
