@@ -1,6 +1,22 @@
 import MDAnalysis as mda
 
-def partition(pdb_file):
+def partition(pdb_file: str) -> None:
+    """
+    Makes a partition file for each monomer for use in fisapt in psi4 (fA.dat and fB.dat)
+    All ligand atoms are in a single functional group 
+    Protein side chains, waters, and ions are in a functional group labeled by the resname+resnum (eg. ALA250)
+    Peptide bond atoms from neighboring residues (C,O,N,H) are in a functional group labeled by PEP+lower_residue_number 
+    (eg. the C and O from residue 250 and N and H from residue 251 would be labeled PEP250)
+
+    Parameters
+    ----------
+    pdb_file: str
+        path to complex pdb
+
+    Returns
+    -------
+    None
+    """
     #this function takes in a pdb file and creates the necessary partition files for FSAPT
     #fA.dat is the partition of the protein and waters
     #fB.dat is the partition for the ligand
@@ -15,6 +31,8 @@ def partition(pdb_file):
             fA[f"{atom.resname}{atom.resnum}"] = str(atom.id)
         else:
             fA[f"{atom.resname}{atom.resnum}"] = fA[f"{atom.resname}{atom.resnum}"] + " " +  str(atom.id)
+
+    #Detecting which atoms are in disulfide bonds the two bridged SG atoms in their own functional group (DIS) 
     sg_atoms = u.select_atoms("protein and name SG")
     for atom in sg_atoms:
         sg_num = atom.id
@@ -44,6 +62,7 @@ def partition(pdb_file):
             fA[f"CYS{cur_resnum}"] = str(atom.id)
             for atom in u.select_atoms(f'resnum {cur_resnum}'):
                 fA[f"CYS{cur_resnum}"] += " " + str(atom.id)
+   
     pep = u.select_atoms("protein or resname ACE or resname NME or resname NTER or resname NNEU or resname GLYP or resname P    ROP or resname ACP or resname CTER or resname CNEU or resname CT1 or resname CT2 or resname CT3 or resname 5TER or resname 3TER")
     pep = pep.select_atoms("name C or name O or name N or name H or name HN")
     for atom in pep:
