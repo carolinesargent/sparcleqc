@@ -10,7 +10,7 @@ description = "Software Package that Automatically Redistributes Charges for Emb
 dynamic = ["version"]
 readme = "README.md"
 authors = [
-    { name = "Caroline S. Glick", email = "csargent30@gatech.edu" }
+    { name = "Caroline S. Glick", email = "csargent30@gatech.edu" }, { name = "Isabel P. Berry", email = "iberry7@gatech.edu"}, { name = "C. David Sherrill", email = "sherrill@gatech.edu" }
 ]
 license = { text = "BSD-3-Clause" }
 # See https://pypi.org/classifiers/
