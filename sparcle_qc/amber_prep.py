@@ -1,6 +1,5 @@
 from pymol.cgo import *
 from pymol import cmd, editor
-import argparse
 
 def autocap(pdb_file: str) -> None:
     """
@@ -60,7 +59,7 @@ def autocap(pdb_file: str) -> None:
 def skip_autocap(pdb_file: str) -> None:
     """
     When given an amber complex pdb that already has capping residues at each termini, this function is called instead of autocap(pdb_file) 
-    Saves the just the capped protein as prot_autocap.pdb, and the ligand as ligand.pdb
+    Saves just the capped protein as prot_autocap.pdb and the ligand as ligand.pdb
 
     Parameters
     ----------

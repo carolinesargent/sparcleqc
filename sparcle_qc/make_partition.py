@@ -18,8 +18,8 @@ def partition(pdb_file: str) -> None:
     None
     """
     #this function takes in a pdb file and creates the necessary partition files for FSAPT
-    #fA.dat is the partition of the protein and waters
-    #fB.dat is the partition for the ligand
+    #fA.dat is the partition for the ligand
+    #fB.dat is the partition of the protein and waters
     u = mda.Universe(pdb_file)
     fA = {}
     fB = {}
@@ -62,7 +62,7 @@ def partition(pdb_file: str) -> None:
             fA[f"CYS{cur_resnum}"] = str(atom.id)
             for atom in u.select_atoms(f'resnum {cur_resnum}'):
                 fA[f"CYS{cur_resnum}"] += " " + str(atom.id)
-   
+    #creating pep functional groups containing atoms of two neighboring residues 
     pep = u.select_atoms("protein or resname ACE or resname NME or resname NTER or resname NNEU or resname GLYP or resname P    ROP or resname ACP or resname CTER or resname CNEU or resname CT1 or resname CT2 or resname CT3 or resname 5TER or resname 3TER")
     pep = pep.select_atoms("name C or name O or name N or name H or name HN")
     for atom in pep:
@@ -78,9 +78,8 @@ def partition(pdb_file: str) -> None:
                 fA[f"PEP{atom.resnum}"] = str(atom.id)
             else:
                 fA[f"PEP{atom.resnum}"] = fA[f"PEP{atom.resnum}"] + " " +  str(atom.id)
-
-    #not_prot = u.select_atoms("not protein")
-    #ligand = not_prot.select_atoms("not resname HOH")
+    
+    #selecting ligand and making dictionary
     ligand = u.select_atoms('not protein and not resname HOH and not resname TIP and not resname TIP3 and not resname LIN and not resname ACE and not resname NME and not resname NTER and not resname NNEU and not resname GLYP and not resname PROP and not resname ACP and not resname CTER and not resname CNEU and not resname CT1 and not resname CT2 and not resname CT3 and not resname 5TER and not resname 3TER')
 
     ligand_count = 0
@@ -92,6 +91,8 @@ def partition(pdb_file: str) -> None:
             fB[f"LIGAND"] = str(atom.id)
         else:
             fB[f"LIGAND"] = fB[f"LIGAND"] + " " +  str(atom.id)
+    
+    #writing results to partition files
     with open('fB.dat', "x") as f:
         for residue in fA:
             f.write(f"{residue} {fA[residue]}\n")

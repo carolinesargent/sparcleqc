@@ -1,23 +1,40 @@
-'''
-Takes 'no_HL' dictionary; caps Q1 atoms with hydrogen, scaled along Q1 M1 bond; 
-produces new dictionary 'with_HL'
-
-Needs dictionary.dat (produced from cutting script print_pocketfrag_cs.py),
-prepped PDB, and mol2 to run.
-
-Make sure that no files exist in the same directory named with_HL.dat or CAPPED-x.pdb. 
-This file adds to those files if they have been created previously (and it needs to stay that way)
-'''
 import os
 import math 
 import shutil
 import json
-import sys
 from glob import glob
 import warnings
 from parmed.charmm import CharmmParameterSet
+from typing import Dict, List, Tuple
 
-def get_atom_types(Q1_coords, M1_coords, MOL2_PATH, ff_type, params = None):                            # atom indexing of mol2 and pdb do not match
+def get_atom_types(Q1_coords:Tuple[str,str,str], M1_coords:Tuple[str,str,str], MOL2_PATH:str, ff_type:str, params:CharmmParameterSet = None) -> Tuple[str,str,str,str]: 
+    """
+    Given the coordinates of two atoms that were in a bond (the Q1 atom and M1 atom of a bond that is cut) returns that atom types in the old bond as well as atom types for the new Q1-capping H bond
+    this is necessary because the indexing of the mol2 and pdb do not match
+
+    Parameters
+    ----------
+    Q1_coords: Tuple[str,str,str]
+        coordiantes of the Q1 atom that is being capped
+
+    M1_coords: Tuple[str, str, str]
+        coordinates of the M1 atom that was attached to the Q1 atom
+
+    MOL2_PATH: str
+        path to mol2
+
+    ff_type: str
+        forcefield type, charmm or amber
+
+    params: CharmmParameterSet or None
+        parmed object containing information from the charmm topology and parameters
+
+    Returns
+    -------
+    QM_bond, QM_bond_perm, QH_bond, QH_bond_perm: Tuple[str,str,str,str]
+        bond information for the old bond containing the Q1 atom and M1 atom, a permutation of that bond, the new Q1-capping H bond, and a permutation of that bond
+
+    """
     out = open(glob('*.out')[0], 'a')
     # get atom types of Q1 and M1
     with open(MOL2_PATH, 'r', encoding="iso-8859-1") as mol2file:
@@ -54,7 +71,41 @@ def get_atom_types(Q1_coords, M1_coords, MOL2_PATH, ff_type, params = None):    
     return QM_bond, QM_bond_perm, QH_bond, QH_bond_perm
 
 
-def calc_C_HL(QM_bond, QM_bond_perm, QH_bond, QH_bond_perm, ff_type, params = None, PARM_PATH= None, FRCMOD_PATH = None):
+def calc_C_HL(QM_bond:str, QM_bond_perm:str, QH_bond:str, QH_bond_perm:str, ff_type:str, params:CharmmParameterSet = None, PARM_PATH:str= None, FRCMOD_PATH:str = None) -> float:
+    """
+    this function returns the scaling factor for a given cut bond based on the lengths of the old Q1-M1 bond and the new Q1-capping H bond
+
+    Parameters
+    ----------
+    QM_bond:str
+        atoms in the old bond that was cut with one atom in the QM region and one atom in the MM region
+
+    QM_bond_perm:str
+        permutation of QM_bond
+
+    QH_bond:str
+        atoms in the new bond that is being capped with one atom in QM region and one atom is the new capping hydrogen 
+
+    QH_bond_perm:str
+        permutation of QH_bond
+
+    ff_type: str
+        forcefield type, charmm or amber
+
+    params: CharmmParameterSet or None
+        parmed object containing information from the charmm topology and parameters
+
+    PARM_PATH: str or None
+        path to parameters for amber forcefield
+
+    FRCMOD_PATH:str or None
+        path to modified parameters of amber forcefield
+
+    Returns
+    -------
+    R0_Q1H1/R0_Q1M1: float
+        length of scaling factor
+    """
     out = open(glob('*.out')[0], 'a')
     # get bond parameters and divide them
     if ff_type =='amber':
@@ -86,8 +137,43 @@ def calc_C_HL(QM_bond, QM_bond_perm, QH_bond, QH_bond_perm, ff_type, params = No
     out.close() 
     return R0_Q1HL/R0_Q1M1
 
+def cap(no_HL:Dict[str,List[int]], num_broken_bonds:int, PDB_PATH:str, MOL2_PATH:str, CAPPED_PDB_PATH:str, ff_type:str, params:CharmmParameterSet = None, PARM_PATH:str=None, FRCMOD_PATH:str = None) -> None:
+    """
+    caps Q1 atoms with hydrogen, scaled along Q1 M1 bond; produces new dictionary 'with_HL'
 
-def cap(no_HL, num_broken_bonds, PDB_PATH, MOL2_PATH, CAPPED_PDB_PATH, ff_type, params = None, PARM_PATH=None, FRCMOD_PATH = None):
+    Parameters
+    ----------
+    no_HL: Dict[str, List[int]]
+        Dictionary containing keys for each region and values of a list of each atom in that region
+
+    num_broken_bonds: int
+        number of bonds that were broken in cut_protein and need to be capped with hydrogens on the QM side
+
+    PDB_PATH: str
+        path to cx PDB
+
+    MOL2_PATH: str
+        path to mol2
+
+    CAPPED_PDB_PATH: str
+        path to the pdb containing the new capping atoms
+
+    ff_type: str
+        forcefield type, charmm or amber
+
+    params: CharmmParameterSet or None
+        parmed object containing information from the charmm topology and parameters
+
+    PARM_PATH: str or None
+        path to parameters for amber forcefield
+
+    FRCMOD_PATH:str or None
+        path to modified parameters of amber forcefield
+
+    Returns
+    -------
+    None
+    """
     out = open(glob('*.out')[0], 'a')
     with open(PDB_PATH, 'r') as pdbfile:
         lines = pdbfile.readlines()
@@ -150,7 +236,7 @@ def cap(no_HL, num_broken_bonds, PDB_PATH, MOL2_PATH, CAPPED_PDB_PATH, ff_type, 
             HL_atom_num = int(cap_lines[int(idx_last_HETATM)-1][6:11].strip())
             HL_atom_num = HL_atom_num + bond
             HL_bond =f'HL{bond}'
-            HL_line =f"{'ATOM':<6}"+f"{HL_atom_num:>5}"+f"{HL_bond:>5} "+'LIN K '+ +f"{bond:03d}"
+            HL_line =f"{'ATOM':<6}"+f"{HL_atom_num:>5}"+f"{HL_bond:>5} "+'LIN K '+ f"{bond:03d}"
             HL_line += f"{HL_coords[0]:>12}"+f"{HL_coords[1]:>8}"+f"{HL_coords[2]:>8}"
             HL_line += f"{'1.00':>6}"+f"{'0.00':>6}"+f"{'H':>12}"+'\n'
             cap_lines.insert(idx_last_ATOM_line+1, HL_line)
@@ -164,10 +250,30 @@ def cap(no_HL, num_broken_bonds, PDB_PATH, MOL2_PATH, CAPPED_PDB_PATH, ff_type, 
     with open('with_HL.dat', 'w+') as wfile:
         json.dump(with_HL, wfile)
     out.close()
-    return with_HL
+    return 
 
-def run_cap(ff_type, path_to_env = None, rtf = None, prm = None):    
-    print('run_cap:', ff_type)
+def run_cap(ff_type:str, path_to_env:str = None, rtf:str = None, prm:str = None) -> None:    
+    """
+    caps Q1 atoms with hydrogen, scaled along Q1 M1 bond; produces new dictionary 'with_HL'
+
+    Parameters
+    ----------
+    ff_type: str
+        forcefield type (charmm or amber)
+
+    path_to_env: str or None
+        path to installation of amber. required if ff_type is amber to look up ff parameters
+
+    rtf: str or None
+        path to topology for charmm forcefield. required if ff_type is charmm to look up ff parameters
+
+    prm: str or None
+        path to paramteres for charmm forcefield. required if ff_type is charmm to look up ff parameters
+
+    Returns
+    -------
+    None
+    """
     out = open(glob('*.out')[0], 'a')
     out.write('----------------------------------------------------------------------------------------------------\n')
     out.write('cap'.center(100)+'\n')
@@ -186,7 +292,6 @@ def run_cap(ff_type, path_to_env = None, rtf = None, prm = None):
     CAPPED_PDB_PATH = 'CAPPED-prot_autocap_fixed.pdb'
         
     if ff_type =='amber':
-        print('if 2:', ff_type)
         PARM_PATH = f'{path_to_env}dat/leap/parm/parm19.dat' 
         FRCMOD_PATH = f'{path_to_env}dat/leap/parm/frcmod.ff19SB' 
         cap(no_HL, num_broken_bonds, PDB_PATH, MOL2_PATH, CAPPED_PDB_PATH, ff_type ='amber', PARM_PATH = PARM_PATH, FRCMOD_PATH = FRCMOD_PATH)

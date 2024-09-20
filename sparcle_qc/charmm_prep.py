@@ -31,7 +31,7 @@ def combine_charmm(prot_file: str) -> None:
 
 def psf_to_mol2(original_pdb: str) -> None:
     """
-    When given a CHARMM psf, converts the information encoded into the style of an AMBER mol2 
+    When given a CHARMM psf, converts the information encoded into the style of a mol2 
 
     Parameters
     ----------
@@ -92,8 +92,8 @@ def psf_to_mol2(original_pdb: str) -> None:
     mol2_file.write('@<TRIPOS>BOND\n')
     mol2_file.close()
 
-
-def dictionary_nocut(cx_pdb = 'cx_autocap_fixed.pdb': str) -> None:
+#this is not a charmm specific function, but is located in this module because of its dependence on parmed
+def dictionary_nocut(cx_pdb:str = 'cx_autocap_fixed.pdb') -> None:
     """
     if the cutoff specified in the input file is 0 angstroms, the the entirety of the protein should be located in the MM region
     this function uses parmed to loop through each atom in the complex pdb and add into the MM list of atoms in dictionary.dat

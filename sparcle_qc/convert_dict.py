@@ -3,21 +3,17 @@ import json
 import sys
 
 from pymol.cgo import *
-from math import *
 from pymol import cmd
-import argparse
 from glob import glob
 import os
 from typing import List
+from typing import Dict
 
-
-
-
-#this is a converter to ignore protonation states because we want to allow different protonation between the proteins but still consider this the same residue
 def match_resi(Me_PDB_lines: List[List[str]], Cl_PDB_lines: List[List[str]]) -> Dict[str,str]:
     """
     this function will use the 'neighborhood' of a given Me residue to match it to the residue in the cl pdb 
     inputs are the PDB lines from both
+    this is necessary if the QM region is desired to be the same but there are small differences between protonation states or resnums are different
     output will be a dictionary that has the cl residue as the key and the me residue as the value
     'residue' is considered 3 letter code + resnum (eg LEU251) 
     because the resnum may not be the same between the pdbs, we need a list of basically just the sequence to match the neighborhoods
@@ -59,15 +55,15 @@ def match_resi(Me_PDB_lines: List[List[str]], Cl_PDB_lines: List[List[str]]) -> 
 
 def check_resi_me(Me_d: Dict[str,str],Me_PDB_lines: List[List[str]]) -> None:
     """
-    this function checks to see how much of a given residue is in the QM region
+    this function checks to see how much of a given residue is in the QM region in the reference PDB to take the same amount of that residue later from the current PDB
     will return f for full residue, c for only the carbonyl or xc for everything except the carbonyl or n for none of the residue 
     
     Parameters
     ----------
-    Me_PDB_Lines: List(List(str))
-        List containing the lines of the reference PDB where each line is another list containing each category from the PDB
     Me_D: Dict[str,str]
         Dictionary containing the atoms from the reference PDB and which region they belong to
+    Me_PDB_Lines: List(List(str))
+        List containing the lines of the reference PDB where each line is another list containing each category from the PDB
 
     Returns
     -------
@@ -114,8 +110,8 @@ def convert_dictionary(cutoff: str,template_path:str) -> None:
     Parameters
     ----------
     cutoff: str
-        cutoff in angstroms to determine the radius of the QM region
-    template_peth: str
+        cutoff in angstroms to determine the radius of the QM region for residues that are in the current PDB but not in the reference PDB and for waters
+    template_path: str
          path to the reference PDB
 
     Returns
@@ -123,13 +119,14 @@ def convert_dictionary(cutoff: str,template_path:str) -> None:
     """
 
     #reading in the reference dict, reference pdb, and current pdb and parsing it into the correct data structure
+    #path to reference pdb
+    Me_PDB_PATH = '../' + template_path 
+    print(f'{os.path.dirname(Me_PDB_PATH)}/dictionary.dat')
+    Me_DICT_PATH = glob(f'{os.path.dirname(Me_PDB_PATH)}/dictionary.dat')[0]
     with open(Me_DICT_PATH, 'r') as dictfile:
         Me_d = json.load(dictfile)
-    Me_PDB_PATH = template_path 
-    #path for the smalled sub
-    Cl_PDB_PATH = '../cx_autocap_fixed.pdb'
-
-    Me_DICT_PATH = glob(f'{os.path.dirname(Me_PDB_PATH)}/*/dictionary.dat')[0]
+    #path for the current pdb 
+    Cl_PDB_PATH = 'cx_autocap_fixed.pdb'
     Me_PDB_lines = []
     with open(Me_PDB_PATH, 'r') as Me_PDB_file:
         all_Me_PDB_lines = Me_PDB_file.readlines()
@@ -203,7 +200,7 @@ def convert_dictionary(cutoff: str,template_path:str) -> None:
                     cmd.load(Cl_PDB_PATH,"pdb")
                     cmd.show("sticks", "all")
                     cmd.label("all", "name")
-                    cmd.select('close', f'organic and not solvent and not resname NME and not resname NMA and not resname ACE around {args.cutoff}')
+                    cmd.select('close', f'organic and not solvent and not resname NME and not resname NMA and not resname ACE around {cutoff}')
                     cmd.select('QM',f'close and id {line[1]}')
                     inqm = cmd.count_atoms('QM')
                     #check distance

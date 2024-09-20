@@ -1,34 +1,24 @@
-'''
-takes dictionary with link atoms as input;
-creates psi4 python input files for different charge schemes:
-    SEE: no changes to point charges (M1 charge does not change)
-    Z1: M1 charge is zeroed-out
-    Z2: M1 and M2 charges are zeroed-out
-    Z3: M1, M2, and M3 charges are zeroed-out
-    RC: M1 charge is evenly redistributed to the midpoints of M1-M2 bonds
-    RCD: same as RC, but M1-M2 bond dipoles are preserved
-'''
 import numpy as np
-import subprocess
-import sys
 import json
-import argparse
 import os
 import pandas as pd
 from glob import glob
-#proc = subprocess.Popen("python cs_charges.py ./data/", stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-#out = proc.communicate()[0]
-#split_out = out.split()
-#print(split_out)
-#c_QM = float(split_out[6])
-#c_QM = str(int(c_QM))
-#print(c_QM)
-#c_ligand = float(split_out[11])
+from typing import List, Dict, Tuple
 
+def qm_ligand(LIGAND_PDB_PATH: str) -> List[str]:
+    """
+    This functions converts a pdb into a list of lines in the pdb
 
-# load json dictionary; this maps PDB_IDs to different QM/MM regions
+    Parameters
+    ----------
+    LIGAND_PDB_PATH: str
+        path to the ligand pdb
 
-def qm_ligand(LIGAND_PDB_PATH):
+    Returns
+    -------
+    lines: List[str]
+        list of the lines of the pdb
+    """
     #gets QM ligand lines from ligand PDB file
     lines = []
     with open(LIGAND_PDB_PATH, 'r') as pdbfile:
@@ -39,7 +29,20 @@ def qm_ligand(LIGAND_PDB_PATH):
                     lines.append(l)
     return lines
 
-def pdb_to_xyz(PDB_lines):
+def pdb_to_xyz(PDB_lines: List[str]) -> List[str]:
+    """
+    This functions converts a list pdb lines into a list of xyzs with atom types
+
+    Parameters
+    ----------
+    PDB_lines: str
+        path to the ligand pdb
+
+    Returns
+    -------
+    xyz: List[str]
+        list of the atom types along with xyz coords
+    """
     # translates PDB lines to XYZ lines
     xyz = []
     for l in PDB_lines:
@@ -55,7 +58,22 @@ def pdb_to_xyz(PDB_lines):
         xyz.append(z_coord+'\n')
     return xyz
 
-def atoms_to_pdb_lines(CAPPED_PDB_PATH, atoms):
+def atoms_to_pdb_lines(CAPPED_PDB_PATH:str, atoms:List[str]) -> List[str]:
+    """
+    This functions converts a set of atoms in a PDB into List of information from those specified atoms in the PDB
+
+    Parameters
+    ----------
+    CAPPED_PDB_PATH: str
+        path to the capped complex pdb
+    atoms: List[str]
+        a list of atoms in the CAPPED_PDB_PATH to create a pdb for
+
+    Returns
+    -------
+    lines: List[str]
+        list of the lines of the pdb
+    """
     # gets indexed lines from PDB file
     pdb_lines = []
     with open(CAPPED_PDB_PATH, 'r') as pdbfile:
@@ -67,7 +85,23 @@ def atoms_to_pdb_lines(CAPPED_PDB_PATH, atoms):
                         pdb_lines.append(l)
     return pdb_lines
 
-def write_pdb(CAPPED_PDB_PATH, atoms, CAPPED_QM_PATH, LIGAND_PATH):
+def write_pdb(CAPPED_PDB_PATH:str, atoms:List[str], CAPPED_QM_PATH:str, LIGAND_PATH:str) -> None:
+    """
+    This functions converts a set of atoms in a PDB into a new PDB
+
+    Parameters
+    ----------
+    CAPPED_PDB_PATH: str
+        path to the capped complex pdb
+    atoms: List[str]
+        a list of atoms in the CAPPED_PDB_PATH to create a pdb for
+    CAPPED_QM_PATH: str
+        path to write the new pdb
+
+    Returns
+    -------
+    None
+    """
     # gets indexed lines from PDB file
     atomnum = 0
     output_pdb = open(CAPPED_QM_PATH, 'w')
@@ -88,7 +122,28 @@ def write_pdb(CAPPED_PDB_PATH, atoms, CAPPED_QM_PATH, LIGAND_PATH):
     output_pdb.close()
     return 
 
-def MM_xyz_to_charge_array(MM_lines_c, MM_lines_0, MOL2_PATH, MM_for_array):
+def MM_xyz_to_charge_array(MM_lines_c: List[str], MM_lines_0: List[str], MOL2_PATH:str, MM_for_array: List[str]) -> List[str]:
+    #TODO should we always just initialize MM_for_array to be empty at the start of this function instead of passing it as a parameter
+    """
+    Given an array of MM coordinates, this function returns the array of coordinates and charges needed for the QM input file 
+
+    Parameters
+    ----------
+    MM_lines_c: List[str]
+
+    MM_lines_0: list[str]
+
+    MOL2_PATH: str
+        path to mol2
+
+    MM_for_array: List[str]
+        List of charges of each MM atom along with their XYZ coordinates
+
+    Returns
+    -------
+    MM_for_array: List[str]
+        list of the charges along with xyz coords
+    """
     # takes MM lines from PDB file, matches them to MOL2 file, gets charges, then builds array of MM atoms
     with open(MOL2_PATH, 'r', encoding="iso-8859-1") as mol2file:
         H2_WAT_atms = []
@@ -142,7 +197,22 @@ def MM_xyz_to_charge_array(MM_lines_c, MM_lines_0, MOL2_PATH, MM_for_array):
                         MM_for_array.append(str(mol2z)+'\n')
     return MM_for_array
  
-def SEE_atoms(num_bonds_broken, with_HL):
+def SEE_atoms(num_bonds_broken:int, with_HL:Dict[str,List[int]]) -> List[str]:
+    """
+    Returns all M1, M2, and M3 atoms
+
+    Parameters
+    ----------
+    num_bonds_broken: int
+        number of bonds broken that need to be capped
+    with_HL: Dict[str, List[int]]
+        Dictionary with key of the region and value with a list of atoms in that region
+
+    Returns
+    -------
+    MM_for_array: List[str]
+        list of the charges along with xyz coords
+    """
     MM_atoms = []
     for bond in range(1,num_bonds_broken+1):
         if f'M1_{bond}' in with_HL and f'M2_{bond}' in with_HL and f'M3_{bond}' in with_HL:
@@ -153,20 +223,65 @@ def SEE_atoms(num_bonds_broken, with_HL):
             MM_atoms += (with_HL[f'M1_{bond}'])
     return MM_atoms
 
-def SEE(MOL2_PATH, CAPPED_PDB_PATH, with_HL, num_bonds_broken):
+def SEE(MOL2_PATH:str, CAPPED_PDB_PATH: str, with_HL: Dict[str,List[int]], num_bonds_broken: int) -> List[str]:
+    """
+    Makes no changes to the MM region
+
+    Parameters
+    ----------
+    num_bonds_broken: int
+        number of bonds broken that need to be capped
+    with_HL: Dict[str, List[int]]
+        Dictionary with key of the region and value with a list of atoms in that region
+
+    Returns
+    -------
+    MM_for_array: List[str]
+        list of the charges along with xyz coords
+    """
     seeatoms = SEE_atoms(num_bonds_broken, with_HL) #get atoms from indexing
     seelines = atoms_to_pdb_lines(CAPPED_PDB_PATH, seeatoms) #get PDB lines from atoms list
     seexyz = pdb_to_xyz(seelines) # get XYZ lines from PDB lines
     mm_env = MM_xyz_to_charge_array(seexyz, None, MOL2_PATH, MM_for_array) # get charges from XYZ lines
     return mm_env
 
-def Z1_atoms_zero(num_bonds_broken, with_HL):
+def Z1_atoms_zero(num_bonds_broken: int, with_HL: Dict[str,List[int]]) -> List[int]:
+    """
+    returns the M1 atoms that need to be zeroed
+
+    Parameters
+    ----------
+    num_bonds_broken: int
+        number of bonds broken that need to be capped
+    with_HL: Dict[str, List[int]]
+        Dictionary with key of the region and value with a list of atoms in that region
+
+    Returns
+    -------
+    MM_atoms: List[int]
+        list of the MM atoms to zero
+    """
     MM_atoms = []
     for bond in range(1,num_bonds_broken+1):
         MM_atoms += with_HL[f'M1_{bond}']
     return MM_atoms
 
-def Z1_atoms_charge(num_bonds_broken, with_HL):
+def Z1_atoms_charge(num_bonds_broken:int, with_HL: Dict[str,List[int]]) -> List[str]:
+    """
+    returns the M2 and M3 atoms 
+
+    Parameters
+    ----------
+    num_bonds_broken: int
+        number of bonds broken that need to be capped
+    with_HL: Dict[str, List[int]]
+        Dictionary with key of the region and value with a list of atoms in that region
+
+    Returns
+    -------
+    MM_atoms: List[int]
+        list of the MM atoms to keep
+    """
     MM_atoms = []
     for bond in range(1,num_bonds_broken+1):
         if f'M2_{bond}' in with_HL.keys():
@@ -175,7 +290,24 @@ def Z1_atoms_charge(num_bonds_broken, with_HL):
             MM_atoms += with_HL[f'M3_{bond}']
     return MM_atoms
 
-def Z1(df, with_HL, num_bonds_broken):
+def Z1(df:pd.DataFrame, with_HL:Dict[str,List[int]], num_bonds_broken: int) -> List[str]:
+    """
+    zeroes the M1 atoms
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        pandas dataframe containing all atoms in the system
+    with_HL: Dict[str, List[int]]
+        Dictionary with key of the region and value with a list of atoms in that region
+    num_bonds_broken: int
+        number of bonds broken that need to be capped
+
+    Returns
+    -------
+    MM_for_array: List[str]
+        list of the charges along with xyz coords
+    """
     MM_for_array = []
     z1atoms0 = Z1_atoms_zero(num_bonds_broken, with_HL)
     z1atomsc = Z1_atoms_charge(num_bonds_broken, with_HL) + with_HL['MM']
@@ -198,7 +330,24 @@ def Z1(df, with_HL, num_bonds_broken):
     mm_env = MM_for_array
     return mm_env
 
-def DZn(k, df, with_HL, num_bonds_broken):
+def DZn(k:int, df:pd.DataFrame, with_HL:Dict[str,List[int]], num_bonds_broken:int) -> List[str]:
+    """
+    zeros the ___ atoms and redistributes that charge into the ___ atoms
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        pandas dataframe containing all atoms in the system
+    with_HL: Dict[str, List[int]]
+        Dictionary with key of the region and value with a list of atoms in that region
+    num_bonds_broken: int
+        number of bonds broken that need to be capped
+
+    Returns
+    -------
+    MM_for_array: List[str]
+        list of the charges along with xyz coords
+    """
     output = open(glob('*.out')[0], 'a')
     MM_for_array = []
     MM_used = [] # keep track of MM atoms placed in psi4 file already
@@ -279,7 +428,22 @@ def DZn(k, df, with_HL, num_bonds_broken):
     return mm_env
 
 
-def Z2_atoms_zero(num_bonds_broken, with_HL):
+def Z2_atoms_zero(num_bonds_broken:int, with_HL:Dict[str,List[int]]) -> List[int]:
+    """
+    returns the M1  and M2 atoms that need to be zeroed
+
+    Parameters
+    ----------
+    num_bonds_broken: int
+        number of bonds broken that need to be capped
+    with_HL: Dict[str, List[int]]
+        Dictionary with key of the region and value with a list of atoms in that region
+
+    Returns
+    -------
+    MM_atoms: List[int]
+        list of the MM atoms to zero
+    """
     MM_atoms = []
     for bond in range(1,num_bonds_broken+1):
         if f'M1_{bond}' in with_HL.keys():
@@ -288,14 +452,46 @@ def Z2_atoms_zero(num_bonds_broken, with_HL):
             MM_atoms += with_HL[f'M2_{bond}']
     return MM_atoms
 
-def Z2_atoms_charge(num_bonds_broken, with_HL):
+def Z2_atoms_charge(num_bonds_broken:int, with_HL:Dict[str,List[int]]) -> List[str]:
+    """
+    returns the and M3 atoms 
+
+    Parameters
+    ----------
+    num_bonds_broken: int
+        number of bonds broken that need to be capped
+    with_HL: Dict[str, List[int]]
+        Dictionary with key of the region and value with a list of atoms in that region
+
+    Returns
+    -------
+    MM_atoms: List[int]
+        list of the MM atoms to keep
+    """
     MM_atoms = []
     for bond in range(1,num_bonds_broken+1):
         if f'M3_{bond}' in with_HL.keys():
             MM_atoms += with_HL[f'M3_{bond}']
     return MM_atoms
 
-def Z2(df, with_HL, num_bonds_broken):
+def Z2(df:pd.DataFrame, with_HL:Dict[str,List[int]], num_bonds_broken:int) -> List[str]:
+    """
+    zeroes the M1  and M2 atoms
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        pandas dataframe containing all atoms in the system
+    with_HL: Dict[str, List[int]]
+        Dictionary with key of the region and value with a list of atoms in that region
+    num_bonds_broken: int
+        number of bonds broken that need to be capped
+
+    Returns
+    -------
+    MM_for_array: List[str]
+        list of the charges along with xyz coords
+    """
     MM_for_array = []
     z2atoms0 = Z2_atoms_zero(num_bonds_broken, with_HL)
     z2atomsc = Z2_atoms_charge(num_bonds_broken, with_HL) + with_HL['MM']
@@ -318,7 +514,22 @@ def Z2(df, with_HL, num_bonds_broken):
     mm_env = MM_for_array
     return mm_env
 
-def Z3_atoms_zero(num_bonds_broken, with_HL):
+def Z3_atoms_zero(num_bonds_broken:int, with_HL:Dict[str,List[int]]) -> List[int]:
+    """
+    returns the M1 and M2 and M3 atoms that need to be zeroed
+
+    Parameters
+    ----------
+    num_bonds_broken: int
+        number of bonds broken that need to be capped
+    with_HL: Dict[str, List[int]]
+        Dictionary with key of the region and value with a list of atoms in that region
+
+    Returns
+    -------
+    MM_atoms: List[int]
+        list of the MM atoms to zero
+    """
     MM_atoms = []
     for bond in range(1,num_bonds_broken+1):
         if f'M1_{bond}' in with_HL.keys():
@@ -329,7 +540,24 @@ def Z3_atoms_zero(num_bonds_broken, with_HL):
             MM_atoms += with_HL[f'M3_{bond}']
     return MM_atoms
 
-def Z3(with_HL, num_bonds_broken):
+def Z3(with_HL:Dict[str,List[int]], num_bonds_broken:int) -> List[str]:
+    """
+    zeroes the M1 and M2  and M3 atoms
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        pandas dataframe containing all atoms in the system
+    with_HL: Dict[str, List[int]]
+        Dictionary with key of the region and value with a list of atoms in that region
+    num_bonds_broken: int
+        number of bonds broken that need to be capped
+
+    Returns
+    -------
+    MM_for_array: List[str]
+        list of the charges along with xyz coords
+    """
     MM_for_array = []
     z3atoms0 = Z3_atoms_zero(num_bonds_broken, with_HL)
     z3atomsc = with_HL['MM']
@@ -352,7 +580,22 @@ def Z3(with_HL, num_bonds_broken):
     mm_env = MM_for_array
     return mm_env
 
-def get_charge_residue(MOL2_PATH, MM_line): # get charge for one MM PDB line
+def get_charge_residue(MOL2_PATH:str, MM_line:str) -> Tuple[float, str]: # get charge for one MM PDB line
+    """
+    returns the charge of a specified MM atom based on coordinates
+
+    Parameters
+    ----------
+    MOL2_PATH: str
+        path to the mol2 file
+    MM_line: str
+        mm line to find in the mol2
+
+    Returns
+    -------
+    charge, residue: Tuple[int,str]
+        charge and residue of the MM line specified
+    """
     with open(MOL2_PATH, 'r', encoding="iso-8859-1") as mol2file:
         lines = mol2file.readlines()
         for n,l in enumerate(lines):                                        # filter lines for atoms only
@@ -380,7 +623,28 @@ def get_charge_residue(MOL2_PATH, MM_line): # get charge for one MM PDB line
             residue = ''
     return charge, residue
 
-def redist_charges(num_bonds_broken, MM_for_array, MOL2_PATH, CAPPED_PDB_PATH, with_HL):
+def redist_charges(num_bonds_broken:int, MM_for_array:List[str], MOL2_PATH:str, CAPPED_PDB_PATH:str, with_HL:Dict[str,List[int]]) -> List[str]:
+    """
+    RC: M1 charge is evenly redistributed to the midpoints of M1-M2 bonds
+
+    Parameters
+    ----------
+    num_bonds_broken: int
+        number of bonds broken that need to be capped
+    MM_for_array: List[str]
+        List of charges of each MM atom along with their XYZ coordinates
+    MOL2_PATH: str
+        path to mol2 file
+    CAPPED_PDB_PATH: str
+        path to capped complex pdb
+    with_HL: Dict[str, List[int]]
+        Dictionary with key of the region and value with a list of atoms in that region
+
+    Returns
+    -------
+    MM_for_array: List[str]
+        list of the charges along with xyz coords
+    """
     for bond in range(1,num_bonds_broken+1):
         # get coordinates of M1 and M2 atoms
         M1_atom = with_HL[f'M1_{bond}']
@@ -418,7 +682,30 @@ def redist_charges(num_bonds_broken, MM_for_array, MOL2_PATH, CAPPED_PDB_PATH, w
     return MM_for_array
 
 
-def bal_redist_charges(num_bonds_broken, MM_for_array, MM_atoms, charge_method, df, with_HL):
+def bal_redist_charges(num_bonds_broken:int, MM_for_array:List[str], MM_atoms:List[str], charge_method:str, df:pd.DataFrame, with_HL:Dict[str,List[int]]) -> List[str]:
+    """
+    TODO Insert description
+
+    Parameters
+    ----------
+    num_bonds_broken: int
+        number of bonds broken that need to be capped
+    MM_for_array: List[str]
+        List of charges of each MM atom along with their XYZ coordinates
+    MM_atoms: MM_atoms: List[str]
+       List of MM atoms 
+    charge_method: str
+        redistribution scheme
+    df: pd.DataFrame
+        pandas dataframe containing all atoms in the system
+    with_HL: Dict[str, List[int]]
+        Dictionary with key of the region and value with a list of atoms in that region
+
+    Returns
+    -------
+    MM_for_array: List[str]
+        list of the charges along with xyz coords
+    """
     for bond in range(1,num_bonds_broken+1):
         # get coordinates of M1 and M2 atoms
         M1_atom = with_HL[f'M1_{bond}']
@@ -488,7 +775,26 @@ def bal_redist_charges(num_bonds_broken, MM_for_array, MM_atoms, charge_method, 
                         MM_for_array.append(f'{coord:.3f}\n')
     return MM_for_array
 
-def balanced_RC(charge_method, df, with_HL, num_bonds_broken):
+def balanced_RC(charge_method:str, df:pd.DataFrame, with_HL:Dict[str,List[int]], num_bonds_broken:int) -> List[str]:
+    """
+    TODO Insert description
+
+    Parameters
+    ----------
+    charge_method: str
+        redistribution scheme
+    df: pd.DataFrame
+        pandas dataframe containing all atoms in the system
+    with_HL: Dict[str, List[int]]
+        Dictionary with key of the region and value with a list of atoms in that region
+    num_bonds_broken: int
+        number of bonds broken that need to be capped
+
+    Returns
+    -------
+    MM_for_array: List[str]
+        list of the charges along with xyz coords
+    """
     #print(df)
     if charge_method == 'BRC':
         BRC_ext = Z1_atoms_charge(num_bonds_broken, with_HL) + with_HL['MM']
@@ -518,14 +824,52 @@ def balanced_RC(charge_method, df, with_HL, num_bonds_broken):
     #print(mm_env)
     return mm_env
 
+#TODO do we want to keep this method
+def write_extern_xyz(filepath:str, mm_env:List[str]) -> None:
+    """
+    Given a list of point charges and the coordinates to place those charges, writes an xyz 
+    
+    Parameters
+    ----------
+    filepath: str
+        filepath to write the external xyz
+    MM_env: List[str]
+        list of all the MM atoms with the point charges and x, y, z coordinates
 
-def write_extern_xyz(filepath, mm_env):
+    Returns
+    -------
+    None
+    """
     with open(filepath, 'w') as wfile:
         wfile.write(' '.join(mm_env)[:-1])
 
 #def write_psi4_file(PSI4_FILE_PATH):
 
-def write_QM(charge_method, c_ligand, basis_set, method):
+def write_QM(charge_method:str, c_ligand:str, basis_set:str, method:str) -> None:
+    """
+    creates psi4 python input files for different charge schemes:
+    SEE: no changes to point charges (M1 charge does not change)
+    Z1: M1 charge is zeroed-out
+    Z2: M1 and M2 charges are zeroed-out
+    Z3: M1, M2, and M3 charges are zeroed-out
+    RC: M1 charge is evenly redistributed to the midpoints of M1-M2 bonds
+    RCD: same as RC, but M1-M2 bond dipoles are preserved
+
+    Parameters
+    ----------
+    charge_method: str
+        redistribution scheme
+    c_ligand: str
+        charge of the ligand
+    basis_set: str
+        basis set for the QM computation
+    method: str
+        method for QM energy 
+
+    Returns
+    -------
+    None
+    """
     CAPPED_PDB_PATH = 'CAPPED-prot_autocap_fixed.pdb'
     PSI4_FILE_PATH = f"psi4_input_file.py"
     LIGAND_PDB_PATH = 'ligand.pdb'
@@ -595,7 +939,7 @@ start = time.time()
 
 psi4.set_memory('70 GB')
 psi4.core.set_num_threads(10)
-psi4.core.set_output_file('psi4.out', False)\n
+psi4.core.set_output_file('psi4_output.out', False)\n
 
 dimer =psi4.geometry('''\n""" + c_ligand + ' 1\n'
 + ' '.join(qm_lig) + '--\n' + c_QM + ' 1\n '
@@ -631,7 +975,19 @@ def dump_pkl():
         out.write(json.dumps(results))
 '''
 
-def check_QM_file():
+def check_QM_file() -> None:
+    """
+    Checks that the charge of the QM region in the created input file is integer
+    prints the charge, along with the number of atoms in the QM and MM region
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
     out = open(glob('*.out')[0], 'a')
     psi4files =[x for x in os.listdir() if 'psi4_input_file.py' in x]
     out.write('----------------------------------------------------------------------------------------------------\n')

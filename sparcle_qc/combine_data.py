@@ -1,19 +1,16 @@
 import pandas as pd
-import json
-import os
-import sys
 from typing import Dict
 
-def read_pdb(PDB_PATH: str, d: Dict[]) -> pd.DataFrame:
+def read_pdb(PDB_PATH: str, d:Dict) -> pd.DataFrame:
     """
-    populates a pandas dataframe with the information in the pdb (x_coord, y_coord, z_coordi, resname, atom type) indexed by atom id
+    Populates a pandas dataframe with the information in the pdb (x_coord, y_coord, z_coordi, resname, atom type) indexed by atom id
 
     Parameters
     ----------
     PDB_PATH: str
         path to protein pdb to populate the dataframe
     d: Dict
-        Dictionary that has one key, pdb_id, with the value as an empty list
+        Dictionary that has one key, PDB_ID, with the value as an empty list
 
     Returns
     -------
@@ -43,16 +40,16 @@ def read_pdb(PDB_PATH: str, d: Dict[]) -> pd.DataFrame:
                 df.loc[l[6:11].strip(), 'AT_LABEL'] = l[66:87].strip() 
     return df
 
-def read_mol2(MOL2_PATH:str, m:Dict[]) -> pd.DataFrame: 
+def read_mol2(MOL2_PATH:str, m:Dict) -> pd.DataFrame: 
     """
-    populates a pandas dataframe with the information in the mol2 (x_coord, y_coord, z_coordi, resname, atom type) indexed by atom id
+    Populates a pandas dataframe with the information in the mol2 (x_coord, y_coord, z_coordi, resname, atom type) indexed by atom id
 
     Parameters
     ----------
-    PDB_PATH: str
-        path to protein pdb to populate the dataframe
+    MOL2_PATH: str
+        path to protein mol2 to populate the dataframe
     d: Dict
-        Dictionary that has one key, pdb_id, with the value as an empty list
+        Dictionary that has one key, MOL2_ID, with the value as an empty list
 
     Returns
     -------
@@ -123,16 +120,16 @@ def combine(pdb_df:pd.DataFrame, mol2_df:pd.DataFrame) -> pd.DataFrame:
                 pdb_df.loc[str(float(EPW_idx)+.5), 'PDB_RES'] = pdb_df.loc[idx, 'PDB_RES']
     return pdb_df
 
-def read_cx_pdb(CX_PDB_PATH:str, d: Dict[]) -> pd.DataFrame:
+def read_cx_pdb(CX_PDB_PATH:str, d:Dict) -> pd.DataFrame:
     """
-    populates a pandas dataframe with the information in the pdb (x_coord, y_coord, z_coordi, resname, atom type) indexed by atom id
+    Populates a pandas dataframe with the information in the pdb (x_coord, y_coord, z_coordi, resname, atom type) indexed by atom id
 
     Parameters
     ----------
-    PDB_PATH: str
+    CX_PDB_PATH: str
         path to complex pdb to populate the dataframe
     d: Dict
-        Dictionary that has one key, pdb_id, with the value as an empty list
+        Dictionary that has one key, CX_PDB_ID, with the value as an empty list
 
     Returns
     -------
@@ -165,7 +162,7 @@ def combine2(pdb_df:pd.DataFrame, cx_pdb_df:pd.DataFrame) -> pd.DataFrame:
     ----------
     pdb_df: pd.DataFrame
         dataframe containing information from the protein pdb
-    cx_df: pd.DataFrame
+    cx_pdb_df: pd.DataFrame
         dataframe containing information from the cx pdb
 
     Returns
@@ -223,7 +220,7 @@ def change_water_charges(df: pd.DataFrame, o: str, h: str, ep:str = None) -> pd.
 
 def combine_data(o_charge:str = None, h_charge:str = None, ep_charge:str = None) -> None:
     """
-    creates a dataframe from the provided protein pdb, complex pdb, and mol2 information and then updates it with the desired water atom charges
+    Creates a dataframe from the provided protein pdb, complex pdb, and mol2 information and then updates it with the desired water atom charges
 
     Parameters
     ----------
@@ -247,11 +244,7 @@ def combine_data(o_charge:str = None, h_charge:str = None, ep_charge:str = None)
     pdb_info = read_pdb(PDB_PATH, p)
     mol2_info = read_mol2(MOL2_PATH, m)
     cx_pdb_info = read_cx_pdb(CX_PDB_PATH, c)
-    #print(pdb_info.head(20))
-    #print(mol2_info.head(20))
-    #print(cx_pdb_info.head(20))
     combined = combine(pdb_info, mol2_info)
-    #print(combined.head(20))
     combined2 = combine2(combined, cx_pdb_info)
     if o_charge!= None and h_charge != None and ep_charge !=None:
         final = change_water_charges(combined2, o_charge, h_charge, ep_charge)

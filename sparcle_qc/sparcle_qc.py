@@ -5,6 +5,7 @@ import os
 import threading
 import itertools
 import time
+from typing import Dict
 
 from .amber_prep import write_cpptraj, write_cpptraj_skip_autocap, write_tleap, autocap, skip_autocap 
 from .charmm_prep import dictionary_nocut, psf_to_mol2, combine_charmm 
@@ -19,7 +20,18 @@ from .make_partition import partition
 
 stop_flashing = threading.Event()
 
-def flashing_sparkle():
+def flashing_sparkle() -> None:
+    """
+    creates the flashing sparkle on the terminal
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
     sparkle_emoji = "✨"
     cycle = itertools.cycle([sparkle_emoji, ' '])
     
@@ -28,7 +40,23 @@ def flashing_sparkle():
         sys.stdout.write(next(cycle) + '\r')
         sys.stdout.flush()
         time.sleep(0.25)
-def input_parser(filename):
+
+def input_parser(filename:str) -> Dict:
+    """
+    parses the specified input file into a dictionary of keywords
+    ensures that the specified inputs are valid options
+    ensures that the necessary inputs are specified
+
+    Parameters
+    ----------
+    filename: str
+        path to input file
+
+    Returns
+    -------
+    keywords: Dict
+        dictionary of specified inputs
+    """
     keywords = {}
     with open(filename, 'r') as f:
         for line in f:
@@ -187,12 +215,27 @@ def input_parser(filename):
     return keywords
 
 
-def run(input_file):
+def run(input_file) -> None:
+    """
+    given an input file, parses the specified parameters into a dictionary of keywords and runs the necessary sparcle_qc functions to create an input file to be run with a quantum chemistry software by preparing pdbs, obtaining mol2s, carving out the QM region, capping the Q1 bonds with hydrogens, and finally writing an input file
+
+    Parameters
+    ----------
+    input_file: str
+        path to input file
+
+    Returns
+    -------
+    None
+    """
     
+    #starting sparkle on command line
     flashing_thread = threading.Thread(target=flashing_sparkle)
     flashing_thread.start()
     try:
+        #parsing input file into dictionary
         keywords = input_parser(input_file)
+        #creating new directory for the created files, changing working directories, and copying necessary files into the new directory
         new_dir = input_file[:-3]
         os.mkdir(new_dir)
         if 'charmm_rtf' in keywords:
@@ -205,7 +248,7 @@ def run(input_file):
         os.chdir(new_dir)
         output = open(f'{new_dir}.out', 'w')
         output.write('----------------------------------------------------------------------------------------------------\n')
-        output.write('''                                                                                 QC 
+        output.write('''                                                                                    QC 
                                                                                     /
                                                                                    /  *
                    ____                       _             ___   ____      /\u203E\u203E\u203E\u203E\u203E\u203E\\    *
@@ -216,6 +259,7 @@ def run(input_file):
                         |_|                                               * \\______/ 
                                                                         *    \n''')
         output.write('----------------------------------------------------------------------------------------------------\n\n\n')
+        #if forcefield is amber, writing and running cpptraj files and dealing with capping residues
         if 'amber_ff' in keywords: 
             if 'pre-capped' in keywords:
                 if keywords['pre-capped'] == 'true':
@@ -238,15 +282,19 @@ def run(input_file):
                 autocap('uncapped.pdb')
             fix_numbers('prot_autocap.pdb')
             os.remove('prot_autocap.pdb')
+        #otherwise, the forcefield is charmm and combining protein and ligand into a complex pdb
         else:
             combine_charmm(keywords['pdb_file'])
         fix_numbers('cx_autocap.pdb')
         os.remove('cx_autocap.pdb')
+
+        #obtaining seed containing information of which group to grow the QM region from
         if keywords['seed'] =='ligand':
             seed = 'ligand'
         else:
             seed = convert_atom_id(keywords['seed'], keywords['seed_file'])
-
+        
+        #if forcefield is amber, writing and running tleap
         if 'amber_ff' in keywords:
             write_tleap(keywords['amber_ff'], keywords['water_model'])
             result = subprocess.run(['tleap -f tleap.in'], text = True, shell = True, capture_output = True)
@@ -254,48 +302,63 @@ def run(input_file):
             output.write('tleap'.center(100)+'\n')
             output.write('----------------------------------------------------------------------------------------------------\n')
             output.write(result.stdout)
+        #else, the forcefield is charmm and converting psf to mol2
         else:
             psf_to_mol2(keywords['pdb_file'])
             shutil.copy(keywords['pdb_file'], 'prot_autocap_fixed.pdb')
+        
+        #checking for integer charge in the mol2
         resi_output = check_resi_charges('prot_autocap_fixed.mol2')
         if resi_output[0] == 0:
             print(resi_output[1])
             sys.exit()
+        #combining information from the cx pdb, protein pdb, and mol2 into a dataframe for easy handling
+        #updating water charges if needed
         if 'ep_charge' in keywords:
             combine_data(keywords['o_charge'], keywords['h_charge'], keywords['ep_charge'])
         elif 'h_charge' in keywords:
             combine_data(keywords['o_charge'], keywords['h_charge'])
         else:
             combine_data()
+
+        #checking created dataframe for integer charges
         df_output = check_df_charges()
         if df_output[0] ==0:
             print(df_output[1])
             sys.exit() 
         output.close()
-        if 'template_path' not in keywords and keywords['cutoff'] !='0':
-            run_cut_protein('cx_autocap_fixed.pdb', seed, keywords['cutoff'])
+
         
+        #if the cutoff is zero, creating dictionary with all atoms in the MM region
         if keywords['cutoff'] =='0':
             dictionary_nocut()
             #shutil.move('dictionary.dat', new_dir)
             shutil.copy(keywords['pdb_file'], f'{new_dir}/external.pdb')
+        #elif the a template path has been specified, mapping the QM region to the QM region of the template
         elif 'template_path' in keywords:
             convert_dictionary(keywords['cutoff'], keywords['template_path'])
+        #if there is no template specified then cutting the protein
         else:
+            run_cut_protein('cx_autocap_fixed.pdb', seed, keywords['cutoff'])
             os.mkdir(f'data')
             shutil.move('QM.pdb', f'data/QM-sub-cut-protein-fragment-ligand.pdb')
+            #if the protein was cut then move M3 atoms that are in different residues than the M2 atoms into the MM region
+            move_m3s()
             #shutil.move('external.pdb', new_dir)
             #shutil.move('pre-dictionary.dat', new_dir)
             #shutil.move('ligand.pdb', new_dir)
-        if 'template_path' not in keywords and keywords['cutoff']!='0':
-            move_m3s()
+        
+        #if any cuts were made, cap the cut QM bonds with link hydrogens
         if keywords['cutoff']!='0':
             if 'amber_ff' in keywords:
                 run_cap(ff_type = 'amber', path_to_env = keywords['env_path'])
             else:
                 run_cap(ff_type = 'charmm', rtf = keywords['charmm_rtf'], prm = keywords['charmm_prm'])
-            write_QM(keywords['charge_scheme'], keywords['ligand_charge'], keywords['method'], keywords['basis_set'])
+            #redistribute charge based on charge scheme and write QM input file
+            write_QM(keywords['charge_scheme'], keywords['ligand_charge'], keywords['basis_set'], keywords['method'])
+            #check the charges and number of atoms in the written QM input file
             check_QM_file()
+        #write fsapt files
         if keywords['fisapt_partition'] == 'true':
             partition('CAPPED_qm.pdb')
         print(f"\u2728Sparcle-QC has sparkled\u2728")
@@ -306,8 +369,3 @@ def run(input_file):
     
     # Wait for the flashing thread to finish
         flashing_thread.join()
-
-
-#input_file = sys.argv[1]
-#run(input_file)
-
