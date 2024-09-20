@@ -152,6 +152,11 @@ def input_parser(filename:str) -> Dict:
                     if os.path.isfile(value) == False:
                         print('Error: Invalid input file. Path to template PDB does not exist')
                         sys.exit()
+                if key_word == 'do_fsapt':
+                    value = value.lower()
+                    if value != 'true' and value != 'false':
+                        print("Error: Invalid input file. do_fsapt is not true or false")
+                        sys.exit()
                 keywords[key_word]=value
             
     if 'cutoff' not in keywords.keys():
@@ -200,8 +205,8 @@ def input_parser(filename:str) -> Dict:
         except KeyError:
             print('Error: Invalid input file. Both Oxygen and Hydrogen charges are not provided for water')
             sys.exit()
-    if 'fisapt_partition' not in keywords.keys():
-        keywords['fisapt_partition'] = 'false'
+    if 'do_fsapt' not in keywords.keys():
+        keywords['do_fsapt'] = 'false'
     if 'ep_charge' in keywords.keys():
         try:
             o_charge = keywords['o_charge']
@@ -357,7 +362,12 @@ def run(input_file) -> None:
                 run_cap(ff_type = 'charmm', rtf = keywords['charmm_rtf'], prm = keywords['charmm_prm'])
             #redistribute charge based on charge scheme and write QM input file
             write_input(input_file, f'{new_dir}_psi4_file.py')
-            write_QM(keywords['charge_scheme'], keywords['ligand_charge'], keywords['basis_set'], keywords['method'], f'{new_dir}_psi4_file.py')
+            if 'do_fsapt' in keywords:
+                if keywords['do_fsapt'] == 'false':
+                    write_QM(keywords['charge_scheme'], keywords['ligand_charge'], keywords['basis_set'], keywords['method'], f'{new_dir}_psi4_file.py', False)
+            else:
+                write_QM(keywords['charge_scheme'], keywords['ligand_charge'], keywords['basis_set'], keywords['method'], f'{new_dir}_psi4_file.py')
+
             #check the charges and number of atoms in the written QM input file
             check_QM_file()
         #write fsapt files

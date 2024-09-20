@@ -845,7 +845,7 @@ def write_extern_xyz(filepath:str, mm_env:List[str]) -> None:
 
 #def write_psi4_file(PSI4_FILE_PATH):
 
-def write_QM(charge_method:str, c_ligand:str, basis_set:str, method:str, PSI4_FILE_PATH) -> None:
+def write_QM(charge_method:str, c_ligand:str, basis_set:str, method:str, PSI4_FILE_PATH, do_fsapt: bool = None) -> None:
     """
     creates psi4 python input files for different charge schemes:
     SEE: no changes to point charges (M1 charge does not change)
@@ -867,6 +867,8 @@ def write_QM(charge_method:str, c_ligand:str, basis_set:str, method:str, PSI4_FI
         method for QM energy 
     PSI4_FILE_PATH: str
         name for created psi4 file
+    do_fsapt: boolean or None
+        if fsapt needs to be turned off in the psi4 input file this option will be False
 
     Returns
     -------
@@ -960,8 +962,11 @@ psi4.set_options({
 'basis': '""" + basis_set +"""',\n"""+
 """'freeze_core': 'True',
 'scf_type': 'df',
-'mp2_type': 'df'
-})\n
+'mp2_type': 'df'\n""")
+        if do_fsapt ==False:
+            inpfile.write("'do_fsapt': 'False'\n")
+
+        inpfile.write("""})\n
 e = psi4.energy('"""+method+"""', external_potentials={'B':Chargefield_B})\n
 
 end=time.time()
