@@ -7,9 +7,9 @@ import itertools
 import time
 from typing import Dict
 
-from .amber_prep import write_cpptraj, write_cpptraj_skip_autocap, write_tleap, autocap, skip_autocap 
-from .charmm_prep import dictionary_nocut, psf_to_mol2, combine_charmm 
-from .pdb_prep import check_df_charges, check_resi_charges, convert_atom_id, fix_numbers 
+from .amber_prep import write_cpptraj, write_cpptraj_skip_autocap, write_tleap, autocap, skip_autocap, fix_numbers_amber
+from .charmm_prep import dictionary_nocut, psf_to_mol2, combine_charmm, fix_numbers_charmm
+from .pdb_prep import check_df_charges, check_resi_charges, convert_atom_id 
 from .combine_data import combine_data
 from .cut_protein import run_cut_protein 
 from .convert_dict import convert_dictionary 
@@ -280,12 +280,13 @@ def run(input_file) -> None:
                     autocap('uncapped.pdb')
             else:
                 autocap('uncapped.pdb')
-            fix_numbers('prot_autocap.pdb')
+            fix_numbers_amber('prot_autocap.pdb')
+            fix_numbers_amber('cx_autocap.pdb')
             os.remove('prot_autocap.pdb')
         #otherwise, the forcefield is charmm and combining protein and ligand into a complex pdb
         else:
             combine_charmm(keywords['pdb_file'])
-        fix_numbers('cx_autocap.pdb')
+            fix_numbers_charmm('cx_autocap.pdb')
         os.remove('cx_autocap.pdb')
 
         #obtaining seed containing information of which group to grow the QM region from

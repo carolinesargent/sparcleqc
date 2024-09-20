@@ -10,6 +10,71 @@ with open(os.devnull, 'w') as devnull:
         sys.stdout = old_stdout
 import json
 
+def fix_numbers_charmm(pdb_file: str) -> None:
+    """
+    When given a pdb, creates a new copy {pdb_file}_fixed.pdb that has the protein residues followed by waters and then the ligand
+    Corrects for any mistakes in atom or residue numbering that may have been caused by manipulation of the system in pymol
+    Ensures that the ligand atoms are labeled as HETATM
+
+    Parameters
+    ----------
+    pdb_file: str
+        path to pdb
+
+    Returns
+    -------
+    None
+    """
+
+    charmmsys = pmd.load_file(pdb_file)
+    with open('ligand.pdb') as lig:
+        lig_lines = lig.readlines()
+    lig_name = lig_lines[3][16:20].strip()
+    
+    out = open(f'{pdb_file[:-4]}_fixed.pdb', 'w') 
+    with open(pdb_file) as w:
+        lines = w.readlines()
+    resnum =0
+    atomnum = 0
+    ligand_lines = []
+    HOH_lines = []
+    oldres = ''
+    for line in lines:
+        if 'HOH' not in line and 'TIP' not in line and len(line)>70 and line[16:20].strip() !=lig_name and (line[0:6].strip()=='ATOM' or line[0:6].strip()=='HETATM'):
+            atomnum +=1
+            if line[22:26].strip()!=oldres:
+                resnum+=1
+                oldres = line[22:26].strip()
+            atomtype = charmmsys.atoms[int(line[6:11].strip())-1].element_name
+            out.write(f'ATOM  {atomnum:>5}{line[11:16].strip():>5}{line[16:20].strip():>4}{line[20:22].strip():>2}{resnum:>4}{line[30:38].strip():>12}{line[38:46].strip():>8}{line[46:54].strip():>8}{line[54:60].strip():>6}{line[60:66].strip():>6}{atomtype:>12}\n')
+        elif 'HOH' in line or 'TIP' in line and (line[0:6].strip()=='ATOM' or line[0:6].strip()=='HETATM'):
+            HOH_lines.append(line)
+        elif lig_name in line and (line[0:6].strip()=='ATOM' or line[0:6].strip()=='HETATM'):
+            ligand_lines.append(line)
+        else:
+            pass
+    
+    for line in HOH_lines:
+        if len(line)>70:
+            atomnum +=1
+            if line[22:26].strip()!=oldres:
+                resnum+=1
+                oldres = line[22:26].strip()
+            atomtype = charmmsys.atoms[int(line[6:11].strip())-1].element_name
+            out.write(f'ATOM  {atomnum:>5}{line[11:16].strip():>5}{line[16:20].strip():>4}{line[20:22].strip():>2}{resnum:>4}{line[30:38].strip():>12}{line[38:46].strip():>8}{line[46:54].strip():>8}{line[54:60].strip():>6}{line[60:66].strip():>6}{atomtype:>12}\n')
+    for line in ligand_lines:
+        if len(line)>70 and line[0:6].strip()=='ATOM' or line[0:6].strip()=='HETATM':
+            atomnum +=1
+            if line[22:26].strip()!=oldres:
+                resnum+=1
+                oldres = line[22:26].strip()
+            atomtype = charmmsys.atoms[int(line[6:11].strip())-1].element_name
+            out.write(f'HETATM{atomnum:>5}{line[11:16].strip():>5}{line[16:20].strip():>4}{line[20:22].strip():>2}{resnum:>4}{line[30:38].strip():>12}{line[38:46].strip():>8}{line[46:54].strip():>8}{line[54:60].strip():>6}{line[60:66].strip():>6}{atomtype:>12}\n')
+    if 'cx' in pdb_file:
+        out.write('CONECT\n')
+    out.write('END')
+    out.close()
+
 def combine_charmm(prot_file: str) -> None:
     """
     When given a CHARMM protein pdb, uses parmed to combine it with the ligand into a single complex pdb
