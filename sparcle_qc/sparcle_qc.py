@@ -14,7 +14,7 @@ from .combine_data import combine_data
 from .cut_protein import run_cut_protein 
 from .convert_dict import convert_dictionary 
 from .move_M3s import move_m3s
-from .df_make_psi4 import write_QM, check_QM_file 
+from .df_make_psi4 import write_QM, check_QM_file, write_input 
 from .cap import run_cap
 from .make_partition import partition 
 
@@ -356,7 +356,8 @@ def run(input_file) -> None:
             else:
                 run_cap(ff_type = 'charmm', rtf = keywords['charmm_rtf'], prm = keywords['charmm_prm'])
             #redistribute charge based on charge scheme and write QM input file
-            write_QM(keywords['charge_scheme'], keywords['ligand_charge'], keywords['basis_set'], keywords['method'])
+            write_input(input_file, f'{new_dir}_psi4_file.py')
+            write_QM(keywords['charge_scheme'], keywords['ligand_charge'], keywords['basis_set'], keywords['method'], f'{new_dir}_psi4_file.py')
             #check the charges and number of atoms in the written QM input file
             check_QM_file()
         #write fsapt files

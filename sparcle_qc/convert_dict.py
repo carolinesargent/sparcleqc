@@ -121,7 +121,6 @@ def convert_dictionary(cutoff: str,template_path:str) -> None:
     #reading in the reference dict, reference pdb, and current pdb and parsing it into the correct data structure
     #path to reference pdb
     Me_PDB_PATH = '../' + template_path 
-    print(f'{os.path.dirname(Me_PDB_PATH)}/dictionary.dat')
     Me_DICT_PATH = glob(f'{os.path.dirname(Me_PDB_PATH)}/dictionary.dat')[0]
     with open(Me_DICT_PATH, 'r') as dictfile:
         Me_d = json.load(dictfile)

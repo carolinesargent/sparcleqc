@@ -36,13 +36,10 @@ def partition(pdb_file: str) -> None:
     sg_atoms = u.select_atoms("protein and name SG")
     for atom in sg_atoms:
         sg_num = atom.id
-        print('sg_num:', sg_num)
         other_sg = u.select_atoms(f'protein and name SG and around 3 id {sg_num}')
         close_h = u.select_atoms(f'protein and (name HG or name HG1) and around 1.5 id {sg_num}')
-        print('other_sg:', other_sg)
         if len(other_sg) > 0 and len(close_h) == 0:
             cur_resnum = atom.resid
-            print('cur_resnum:', cur_resnum)
             other_resnum = other_sg.resids[0]
             if f"DIS{other_resnum}" not in fA.keys():
                 fA[f"DIS{cur_resnum}"] = str(atom.id)
@@ -58,7 +55,6 @@ def partition(pdb_file: str) -> None:
                         fA[f"CYX{other_resnum}"] += " " + str(atom.id)
         else: #then not a disulfide bridge
             cur_resnum = atom.resid
-            print('else cur_resnum:', cur_resnum)
             fA[f"CYS{cur_resnum}"] = str(atom.id)
             for atom in u.select_atoms(f'resnum {cur_resnum}'):
                 fA[f"CYS{cur_resnum}"] += " " + str(atom.id)

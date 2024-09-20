@@ -390,7 +390,7 @@ def DZn(k:int, df:pd.DataFrame, with_HL:Dict[str,List[int]], num_bonds_broken:in
             q_to_dist = -(group_charge - QM_res_charge)
         #q_to_dist = 0
         for x in zeroed:
-            print('q',df.loc[x,'q'])
+            #print('q',df.loc[x,'q'])
             q_to_dist += df.loc[x, 'q']
         dist_df = dist_df[['q', 'X', 'Y', 'Z']]
         if round(q_to_dist, 5) != 0:
@@ -845,7 +845,7 @@ def write_extern_xyz(filepath:str, mm_env:List[str]) -> None:
 
 #def write_psi4_file(PSI4_FILE_PATH):
 
-def write_QM(charge_method:str, c_ligand:str, basis_set:str, method:str) -> None:
+def write_QM(charge_method:str, c_ligand:str, basis_set:str, method:str, PSI4_FILE_PATH) -> None:
     """
     creates psi4 python input files for different charge schemes:
     SEE: no changes to point charges (M1 charge does not change)
@@ -865,13 +865,14 @@ def write_QM(charge_method:str, c_ligand:str, basis_set:str, method:str) -> None
         basis set for the QM computation
     method: str
         method for QM energy 
+    PSI4_FILE_PATH: str
+        name for created psi4 file
 
     Returns
     -------
     None
     """
     CAPPED_PDB_PATH = 'CAPPED-prot_autocap_fixed.pdb'
-    PSI4_FILE_PATH = f"psi4_input_file.py"
     LIGAND_PDB_PATH = 'ligand.pdb'
     CAPPED_QM_PDB_PATH = 'CAPPED_qm.pdb'
     MOL2_PATH = 'prot_autocap_fixed.mol2'
@@ -923,12 +924,14 @@ def write_QM(charge_method:str, c_ligand:str, basis_set:str, method:str) -> None
     elif charge_method == 'BRCD':
           mm_env = balanced_RC(charge_method, df, with_HL, num_bonds_broken)
     else:
+        #we check for this in the input file so this else shouldn't ever be reached
         print('incorrect charge scheme')
+        sys.exit()
     
     #write_extern_xyz(f'{charge_method}/extern.xyz', mm_env)
     #dump_pkl()
     #write_psi4_file(PSI4_FILE_PATH, lig_charge)
-    with open(PSI4_FILE_PATH, 'w+') as inpfile:
+    with open(PSI4_FILE_PATH, 'a') as inpfile:
         inpfile.write("""
 import psi4
 import numpy as np
@@ -939,7 +942,7 @@ start = time.time()
 
 psi4.set_memory('70 GB')
 psi4.core.set_num_threads(10)
-psi4.core.set_output_file('psi4_output.out', False)\n
+psi4.core.set_output_file('"""+f'{inp_filename[:-3]}.out'+"""', False)\n
 
 dimer =psi4.geometry('''\n""" + c_ligand + ' 1\n'
 + ' '.join(qm_lig) + '--\n' + c_QM + ' 1\n '
@@ -974,6 +977,14 @@ def dump_pkl():
     with open('results.dat','w+') as out:
         out.write(json.dumps(results))
 '''
+
+def write_input(inputfile, psi4file):
+    with open(inputfile) as inp:
+        with open(psi4file, 'w') as psi4file:
+            psi4file.write('"""\nThis Psi4 file was created using Sparcle-QC with the following specifications:\n')
+            for line in inp:
+                psi4file.write(line)
+            psi4file.write('"""\n\n')
 
 def check_QM_file() -> None:
     """
