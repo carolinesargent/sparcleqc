@@ -12,9 +12,11 @@ import json
 
 def fix_numbers_charmm(pdb_file: str) -> None:
     """
-    When given a pdb, creates a new copy {pdb_file}_fixed.pdb that has the protein residues followed by waters and then the ligand
-    Corrects for any mistakes in atom or residue numbering that may have been caused by manipulation of the system in pymol
-    Ensures that the ligand atoms are labeled as HETATM
+    When given a pdb, creates a new copy {pdb_file}_fixed.pdb that
+    has the protein residues followed by waters and then the ligand.
+    Corrects for any mistakes in atom or residue numbering that may
+    have been caused by manipulation of the system in pymol.
+    Ensures that the ligand atoms are labeled as HETATM.
 
     Parameters
     ----------
