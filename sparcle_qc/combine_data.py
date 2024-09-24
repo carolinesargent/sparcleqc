@@ -1,10 +1,23 @@
 import pandas as pd
-import json
-import os
-import sys
+from typing import Dict
 
+def read_pdb(PDB_PATH: str, d:Dict) -> pd.DataFrame:
+    """
+    Populates a pandas dataframe with the information in the pdb (x_coord, y_coord, z_coordi, resname, atom type) indexed by atom id
 
-def read_pdb(PDB_PATH, d):
+    Parameters
+    ----------
+    PDB_PATH: str
+        path to protein pdb to populate the dataframe
+    d: Dict
+        Dictionary that has one key, PDB_ID, with the value as an empty list
+
+    Returns
+    -------
+    df: pd.DataFrame
+        dataframe containing the information from the PDB
+
+    """
     with open(PDB_PATH, 'r') as pdbfile:
         lines = pdbfile.readlines()
         for l in lines:
@@ -27,7 +40,23 @@ def read_pdb(PDB_PATH, d):
                 df.loc[l[6:11].strip(), 'AT_LABEL'] = l[66:87].strip() 
     return df
 
-def read_mol2(MOL2_PATH, m): 
+def read_mol2(MOL2_PATH:str, m:Dict) -> pd.DataFrame: 
+    """
+    Populates a pandas dataframe with the information in the mol2 (x_coord, y_coord, z_coordi, resname, atom type) indexed by atom id
+
+    Parameters
+    ----------
+    MOL2_PATH: str
+        path to protein mol2 to populate the dataframe
+    d: Dict
+        Dictionary that has one key, MOL2_ID, with the value as an empty list
+
+    Returns
+    -------
+    df: pd.DataFrame
+        dataframe containing the information from the MOL2
+
+    """
     with open(MOL2_PATH, 'r') as molfile:
         lines = molfile.readlines()
         for l in lines:
@@ -48,7 +77,23 @@ def read_mol2(MOL2_PATH, m):
                 df.loc[l.split()[0], 'q'] = l.split()[-2]
     return df        
 
-def combine(pdb_df, mol2_df):
+def combine(pdb_df:pd.DataFrame, mol2_df:pd.DataFrame) -> pd.DataFrame:
+    """
+    combines information from a dataframe from the pdb with a dataframe from the mol2 based on matching the coordinates
+
+    Parameters
+    ----------
+    pdb_df: pd.DataFrame
+        dataframe containing information from the protein pdb
+    mol2_df: pd.DataFrame
+        dataframe containing information from the protein mol2
+
+    Returns
+    -------
+    df: pd.DataFrame
+        dataframe containing information combined from the pdb_df and the mol2_df with one entry per atom
+
+    """
     for idx in pdb_df.index:
         mol2_idx_x = mol2_df.loc[mol2_df['X'] == pdb_df.loc[idx, 'X']].index.tolist()
         mol2_idx_y = mol2_df.loc[mol2_df['Y'] == pdb_df.loc[idx, 'Y']].index.tolist()
@@ -75,7 +120,23 @@ def combine(pdb_df, mol2_df):
                 pdb_df.loc[str(float(EPW_idx)+.5), 'PDB_RES'] = pdb_df.loc[idx, 'PDB_RES']
     return pdb_df
 
-def read_cx_pdb(CX_PDB_PATH, d):
+def read_cx_pdb(CX_PDB_PATH:str, d:Dict) -> pd.DataFrame:
+    """
+    Populates a pandas dataframe with the information in the pdb (x_coord, y_coord, z_coordi, resname, atom type) indexed by atom id
+
+    Parameters
+    ----------
+    CX_PDB_PATH: str
+        path to complex pdb to populate the dataframe
+    d: Dict
+        Dictionary that has one key, CX_PDB_ID, with the value as an empty list
+
+    Returns
+    -------
+    df: pd.DataFrame
+        dataframe containing the information from the PDB
+
+    """
     with open(CX_PDB_PATH, 'r') as pdbfile:
         lines = pdbfile.readlines()
         for l in lines:
@@ -93,7 +154,23 @@ def read_cx_pdb(CX_PDB_PATH, d):
                 df.loc[l[6:11].strip(), 'Z'] = float(z_coord)
     return df
 
-def combine2(pdb_df, cx_pdb_df):
+def combine2(pdb_df:pd.DataFrame, cx_pdb_df:pd.DataFrame) -> pd.DataFrame:
+    """
+    combines information from a dataframe from the proteinpdb with a dataframe from the cx pdb based on matching the coordinates
+
+    Parameters
+    ----------
+    pdb_df: pd.DataFrame
+        dataframe containing information from the protein pdb
+    cx_pdb_df: pd.DataFrame
+        dataframe containing information from the cx pdb
+
+    Returns
+    -------
+    df: pd.DataFrame
+        dataframe containing information combined from the pdb_df and the cx_df with one entry per atom
+
+    """
     for idx in pdb_df.index:
         cx_idx_x = cx_pdb_df.loc[cx_pdb_df['X'] == pdb_df.loc[idx, 'X']].index.tolist()
         cx_idx_y = cx_pdb_df.loc[cx_pdb_df['Y'] == pdb_df.loc[idx, 'Y']].index.tolist()
@@ -107,42 +184,27 @@ def combine2(pdb_df, cx_pdb_df):
             pdb_df.loc[idx,'CX_PDB_ID'] = idx
     return pdb_df
 
-def check_charges(combined_df, mol2_info):
-    # Get indicies of Nan or zero charges
-    df = combined_df[['q']]
-    d = df.apply(lambda s: pd.to_numeric(s, errors="coerce"))
-    m = d.eq(0) | d.isna()
-    s = m.stack()
-    indices = s[s].index.tolist()
-    #print(indices)
-    # For Hs of ACE or NME, correct their charges. Else, print residue.
-    for idx, q in indices:
-        pdb_at = combined_df.loc[idx, 'PDB_AT']
-        mol2_at = combined_df.loc[idx, 'MOL2_AT']
-        pdb_res = combined_df.loc[idx, 'PDB_RES'][:3]
-        
-        '''
-        if 'ACE' in pdb_res and pdb_at == '1HH3':
-            combined_df.loc[idx, 'q'] = 0.1123
-        if 'ACE' in pdb_res and pdb_at == '2HH3':
-            combined_df.loc[idx, 'q'] = 0.1123
-        if 'ACE' in pdb_res and pdb_at == '3HH3':
-            combined_df.loc[idx, 'q'] = 0.1123
-        if 'NME' in pdb_res and pdb_at == '1HH3':
-            combined_df.loc[idx, 'q'] = 0.0976
-        if 'NME' in pdb_res and pdb_at == '2HH3':
-            combined_df.loc[idx, 'q'] = 0.0976
-        if 'NME' in pdb_res and pdb_at == '3HH3':
-            combined_df.loc[idx, 'q'] = 0.0976
-        if 'NME' in pdb_res and pdb_at == 'CH3':
-            combined_df.loc[idx, 'q'] = -0.1490
-        '''
-        #if pdb_res != 'NME' and pdb_res != 'ACE' and pdb_res != 'HOH':
-            #print('For the residue(s) below, check charges between the mol2 file and dataframe.csv. Dataframe.csv likely needs updating.')
-            #print(combined_df.loc[idx, 'PDB_RES'])
-    return combined_df
+def change_water_charges(df: pd.DataFrame, o: str, h: str, ep:str = None) -> pd.DataFrame:
+    """
+    Changes charges of the water atoms (and possibly EP) depending on the user specified inputs
 
-def change_water_charges(df, o, h, ep=None):
+    Parameters
+    ----------
+    df: pd.DataFrame
+        dataframe containing information from the mol2s and pdbs
+    o: str
+        desired oxygen charge
+    h: str
+        desired hydrogen charge
+    ep: str
+        desired extra point charge
+
+    Returns
+    -------
+    df: pd.DataFrame
+        original dataframe with water charges updated accordingly 
+
+    """
     for idx in df.index:
         resi = df.loc[idx, 'PDB_RES']
         if 'HOH' in resi or 'WAT' in resi:
@@ -156,7 +218,23 @@ def change_water_charges(df, o, h, ep=None):
                     df.loc[idx, 'q'] = float(ep)
     return df
 
-def combine_data(o_charge=None, h_charge = None, ep_charge = None):
+def combine_data(o_charge:str = None, h_charge:str = None, ep_charge:str = None) -> None:
+    """
+    Creates a dataframe from the provided protein pdb, complex pdb, and mol2 information and then updates it with the desired water atom charges
+
+    Parameters
+    ----------
+    o: str
+        desired oxygen charge
+    h: str
+        desired hydrogen charge
+    ep: str
+        desired extra point charge
+
+    Returns
+    -------
+
+    """
     PDB_PATH = 'prot_autocap_fixed.pdb'
     MOL2_PATH = 'prot_autocap_fixed.mol2'
     CX_PDB_PATH = 'cx_autocap_fixed.pdb'
@@ -166,11 +244,7 @@ def combine_data(o_charge=None, h_charge = None, ep_charge = None):
     pdb_info = read_pdb(PDB_PATH, p)
     mol2_info = read_mol2(MOL2_PATH, m)
     cx_pdb_info = read_cx_pdb(CX_PDB_PATH, c)
-    #print(pdb_info.head(20))
-    #print(mol2_info.head(20))
-    #print(cx_pdb_info.head(20))
     combined = combine(pdb_info, mol2_info)
-    #print(combined.head(20))
     combined2 = combine2(combined, cx_pdb_info)
     if o_charge!= None and h_charge != None and ep_charge !=None:
         final = change_water_charges(combined2, o_charge, h_charge, ep_charge)

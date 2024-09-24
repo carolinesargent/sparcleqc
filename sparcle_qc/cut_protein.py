@@ -4,33 +4,27 @@ import warnings
 import json
 from glob import glob
 
-def pocketfrag(sub, split = "sidechains", monoC = None, prep_fisapt=False, cutcap=False):
+def pocketfrag(sub:str, split:str = "sidechains", monoC:str = None, prep_fisapt:bool=False, cutcap:bool=False):
     """
-    DESCRIPTION
+    Fragments a protein 
 
-        Fragments a ligand@protein system and prepares F-/ISAPT input & accompanying fragment
-        files.
+    Parameters
+    ----------
+    split :str
+        specification of how to split the protein subsystem.
+        Options: "residues", "sidechains" or "ss"
+        Default: "sidechains"
 
-    USAGE
+    monoC : selection expression for defining ISAPT "monomer C", if any
+        Default: None
 
-        pocketfrag [, [split, [monoC, [prep_fisapt]]]]
-    
-    ARGUMENTS
+    prep_fisapt : Boolean for whether or not to prepare F-/ISAPT input & fragment files
+        Default: False
 
-        split : how to split the protein subsystem.
-            Options: "residues", "sidechains" or "ss"
-            Default: "sidechains"
-
-        monoC : selection expression for defining ISAPT "monomer C", if any
-            Default: None
-
-        prep_fisapt : Boolean for whether or not to prepare F-/ISAPT input & fragment files
-            Default: False
-
-        cutcap : bool **EXPERIMENTAL** 
-            Carve out the A:B:C subset from the entire protein by cutting bonds to anything
-            else, and capping with the naive PyMOL cmd.h_add()
-            Default: False
+    cutcap : bool **EXPERIMENTAL** 
+        Carve out the A:B:C subset from the entire protein by cutting bonds to anything
+        else, and capping with the naive PyMOL cmd.h_add()
+        Default: False
 
     NOTES
 
@@ -64,19 +58,9 @@ def pocketfrag(sub, split = "sidechains", monoC = None, prep_fisapt=False, cutca
             in the pocket, i.e., the single bond connecting the sidechain (monomer B) and
             backbone CA (monomer C) is cut.
     
-    EXAMPLES
-
-        # Fragment entire protein with respect to sidechains
-        PyMOL> pocketfrag split="sidechain" 
-
-        # Fragment protein wrt sidechains with an arbitrary selection expression defining
-        # ISAPT monomer C
-        PyMOL> pocketfrag split="ss", monoC="chain B and not sol."
-
-        # Fragment protein wrt sidechains with cutoff distance from ligand defining ISAPT
-        # monomer C
-        PyMOL> pocketfrag split="ss", monoC="be. 10"
-
+    Returns
+    -------
+    None
     """
     name="pocketfrag"
 
@@ -214,7 +198,20 @@ and may lead to garbage results in F-SAPT fragmentation!!""")
     out.close()
     return
 
-def make_dictionary(cutoff): #for capping with Caroline's code
+def make_dictionary(cutoff:str) -> None: #for capping with Caroline's code
+    """
+    Creates an initial version of the dictionary that assigns each atom to its region
+    Creates a dictionary based on the cuts that were made where the key is the region and the value is a list of all atoms in that region
+
+    Parameters
+    ----------
+    cutoff: str
+       radius in angstroms for making cut 
+
+    Returns
+    -------
+    None
+    """
     M1_atms = cmd.identify("(neighbor sys%s_B)" % cutoff)
     bond_dict = {}
     bond_dict['QM'] = cmd.identify('sys%s_B' % cutoff)
@@ -251,10 +248,27 @@ def make_dictionary(cutoff): #for capping with Caroline's code
 cmd.extend("pocketfrag", pocketfrag)
 cmd.extend("make_dictionary", make_dictionary)
 
-def run_cut_protein(pdb_file, sub, cutoff):
+def run_cut_protein(pdb_file:str, sub:str, cutoff:str) -> None:
+    """
+    Calls the other necessary functions to cut the system in pdb_file by including everything that is {cutoff} angstroms away from {sub}
+
+    Parameters
+    ----------
+    pdb_file: str
+       path to pdb
+    sub: str
+       atom or group to grow QM region around
+    cutoff: str
+       radius in angstroms for making cut 
+
+    Returns
+    -------
+    None
+    """
     cmd.feedback("disable", "all", "everything")
     cmd.reinitialize()
     cmd.load(pdb_file)
+    #TODO fix this path so that cut_protein doesn't need to be in their own directory
     cmd.do('run ../cut_protein.py')
     cmd.do(f'pocketfrag {sub}, split="ss", monoC="be. {cutoff}"')
     cmd.do(f'make_dictionary {cutoff}')

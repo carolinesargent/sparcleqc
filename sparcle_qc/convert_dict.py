@@ -3,26 +3,34 @@ import json
 import sys
 
 from pymol.cgo import *
-from math import *
 from pymol import cmd
-import argparse
 from glob import glob
 import os
+from typing import List
+from typing import Dict
 
-
-
-
-#this is a converter to ignore protonation states because we want to allow different protonation between the proteins but still consider this the same residue
-# load Me_dictionary
-def match_resi(Me_PDB_lines, Cl_PDB_lines):
-    #this function will use the 'neighborhood' of a given Me residue to match it to the residue in the cl pdb 
-    #inputs are the PDB lines from both
-    #output will be a dictionary that has the cl residue as the key and the me residue as the value
-    #'residue' is considered 3 letter code + resnum (eg LEU251) 
+def match_resi(Me_PDB_lines: List[List[str]], Cl_PDB_lines: List[List[str]]) -> Dict[str,str]:
+    """
+    this function will use the 'neighborhood' of a given Me residue to match it to the residue in the cl pdb 
+    inputs are the PDB lines from both
+    this is necessary if the QM region is desired to be the same but there are small differences between protonation states or resnums are different
+    output will be a dictionary that has the cl residue as the key and the me residue as the value
+    'residue' is considered 3 letter code + resnum (eg LEU251) 
+    because the resnum may not be the same between the pdbs, we need a list of basically just the sequence to match the neighborhoods
+    Parameters
+    ----------
+    Me_PDB_Lines: List(List(str))
+        List containing the lines of the reference PDB where each line is another list containing each category from the PDB
+    Cl_PDB_lines: List(List(str))
+        List containing the lines of the PDB to map where each line is another list containing each category from the PDB
+    Returns
+    -------
+    mapping_dict: Dict[str, str]
+        the key contains the residue in the reference PDB and the value is the corresponding residue in the PDB to map
+    """
     me_resis = []
     cl_resis = []
     mapping_dict = {}
-    #because the resnum may not be the same between the pdbs, we need a list of basically just the sequence to match the neighborhoods
     for i in range(len(Me_PDB_lines)):
         if [Me_PDB_lines[i][3][:-1], Me_PDB_lines[i][5]] not in me_resis:
             me_resis.append([Me_PDB_lines[i][3][:-1], Me_PDB_lines[i][5]])
@@ -45,9 +53,23 @@ def match_resi(Me_PDB_lines, Cl_PDB_lines):
     return mapping_dict
 
 
-def check_resi_me(Me_d,Me_PDB_lines):
-    #this function checks to see how much of a given residue is in the QM region
-    #will return f for full residue, c for only the carbonyl or xc for everything except the carbonyl or n for none of the residue 
+def check_resi_me(Me_d: Dict[str,str],Me_PDB_lines: List[List[str]]) -> None:
+    """
+    this function checks to see how much of a given residue is in the QM region in the reference PDB to take the same amount of that residue later from the current PDB
+    will return f for full residue, c for only the carbonyl or xc for everything except the carbonyl or n for none of the residue 
+    
+    Parameters
+    ----------
+    Me_D: Dict[str,str]
+        Dictionary containing the atoms from the reference PDB and which region they belong to
+    Me_PDB_Lines: List(List(str))
+        List containing the lines of the reference PDB where each line is another list containing each category from the PDB
+
+    Returns
+    -------
+    return_dict: Dict[str, str]
+        the key contains the residue in the reference PDB and the value corresponds to how much of that residue is in the QM region
+    """
     QM_list = []
     for key in Me_d:
         if 'Q' in key:
@@ -80,14 +102,31 @@ def check_resi_me(Me_d,Me_PDB_lines):
 
 
 
-def convert_dictionary(cutoff,template_path):     
+def convert_dictionary(cutoff: str,template_path:str) -> None:     
+    """
+    this function will take the dictionary for the template and find the corresponding residues in the current pdb and put the same amount of each residue in the QM region
+    if there are residues, waters, or anything else that is in the current PDB but not in the template PDB, whether it is QM or MM will be determined by the cutoff radius
+
+    Parameters
+    ----------
+    cutoff: str
+        cutoff in angstroms to determine the radius of the QM region for residues that are in the current PDB but not in the reference PDB and for waters
+    template_path: str
+         path to the reference PDB
+
+    Returns
+    -------
+    """
+
+    #reading in the reference dict, reference pdb, and current pdb and parsing it into the correct data structure
+    #path to reference pdb
+    Me_PDB_PATH = '../' + template_path 
+    print(f'{os.path.dirname(Me_PDB_PATH)}/dictionary.dat')
+    Me_DICT_PATH = glob(f'{os.path.dirname(Me_PDB_PATH)}/dictionary.dat')[0]
     with open(Me_DICT_PATH, 'r') as dictfile:
         Me_d = json.load(dictfile)
-    Me_PDB_PATH = template_path 
-    #path for the smalled sub
-    Cl_PDB_PATH = '../cx_autocap_fixed.pdb'
-
-    Me_DICT_PATH = glob(f'{os.path.dirname(Me_PDB_PATH)}/*/dictionary.dat')[0]
+    #path for the current pdb 
+    Cl_PDB_PATH = 'cx_autocap_fixed.pdb'
     Me_PDB_lines = []
     with open(Me_PDB_PATH, 'r') as Me_PDB_file:
         all_Me_PDB_lines = Me_PDB_file.readlines()
@@ -100,9 +139,12 @@ def convert_dictionary(cutoff,template_path):
         for line in all_Cl_PDB_lines:
             if line.startswith('ATOM') or line.startswith('HETATM'):
                 Cl_PDB_lines.append([line[0:6].strip(),line[6:11].strip(), line[11:16].strip(), line[16:20].strip(), line[20:22].strip(), line[22:26].strip(), line[26:38].strip(), line[38:46].strip(), line[46:54].strip(), line[54:60].strip(), line[60:66].strip(), line[66:79].strip()])
+    
+    #finds how much of the reference residues are in the QM region and maps each residue between the two PDBS
     grab_dict = check_resi_me(Me_d,Me_PDB_lines)
     mapping = match_resi(Me_PDB_lines, Cl_PDB_lines)
    
+    #directly maps the link regions
     me_atom_dict = {}
     for line in Me_PDB_lines:
         me_atom_dict[line[1]]= line[3][:-1]+line[5]
@@ -150,6 +192,7 @@ def convert_dictionary(cutoff,template_path):
                 else:
                     pass
             else:
+                #if the current residue is not in the reference PDB, go based on the cutoff
                 if line[3]+line[5]!=old_res:
                     old_res = line[3]+line[5]
                     cmd.reinitialize()
@@ -157,7 +200,7 @@ def convert_dictionary(cutoff,template_path):
                     cmd.load(Cl_PDB_PATH,"pdb")
                     cmd.show("sticks", "all")
                     cmd.label("all", "name")
-                    cmd.select('close', f'organic and not solvent and not resname NME and not resname NMA and not resname ACE around {args.cutoff}')
+                    cmd.select('close', f'organic and not solvent and not resname NME and not resname NMA and not resname ACE around {cutoff}')
                     cmd.select('QM',f'close and id {line[1]}')
                     inqm = cmd.count_atoms('QM')
                     #check distance
