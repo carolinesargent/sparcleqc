@@ -12,9 +12,11 @@ import json
 
 def fix_numbers_charmm(pdb_file: str) -> None:
     """
-    When given a pdb, creates a new copy {pdb_file}_fixed.pdb that has the protein residues followed by waters and then the ligand
-    Corrects for any mistakes in atom or residue numbering that may have been caused by manipulation of the system in pymol
-    Ensures that the ligand atoms are labeled as HETATM
+    When given a pdb, creates a new copy {pdb_file}_fixed.pdb that
+    has the protein residues followed by waters and then the ligand.
+    Corrects for any mistakes in atom or residue numbering that may
+    have been caused by manipulation of the system in pymol.
+    Ensures that the ligand atoms are labeled as HETATM.
 
     Parameters
     ----------
@@ -157,11 +159,15 @@ def psf_to_mol2(original_pdb: str) -> None:
     mol2_file.write('@<TRIPOS>BOND\n')
     mol2_file.close()
 
-#this is not a charmm specific function, but is located in this module because of its dependence on parmed
 def dictionary_nocut(cx_pdb:str = 'cx_autocap_fixed.pdb') -> None:
-    """
-    if the cutoff specified in the input file is 0 angstroms, the the entirety of the protein should be located in the MM region
-    this function uses parmed to loop through each atom in the complex pdb and add into the MM list of atoms in dictionary.dat
+    """ 
+    Note: this is not a charmm specific function, but is located
+    in this module because of its dependence on parmed
+
+    If the cutoff specified in the input file is 0 angstroms, then
+    the entirety of the protein should be located in the MM region.
+    This function uses parmed to loop through each atom in the complex
+    pdb and add into the MM list of atoms in dictionary.dat
 
     Parameters
     ----------

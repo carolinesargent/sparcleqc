@@ -2,11 +2,19 @@ import MDAnalysis as mda
 
 def partition(pdb_file: str) -> None:
     """
-    Makes a partition file for each monomer for use in fisapt in psi4 (fA.dat and fB.dat)
-    All ligand atoms are in a single functional group 
-    Protein side chains, waters, and ions are in a functional group labeled by the resname+resnum (eg. ALA250)
-    Peptide bond atoms from neighboring residues (C,O,N,H) are in a functional group labeled by PEP+lower_residue_number 
-    (eg. the C and O from residue 250 and N and H from residue 251 would be labeled PEP250)
+
+    Makes a partition file for each monomer for use in fisapt in psi4
+    (fA.dat and fB.dat)
+
+    All ligand atoms are in a single functional group
+
+    Protein side chains, waters, and ions are in a functional group
+    labeled by the resname+resnum (eg. ALA250)
+
+    Peptide bond atoms from neighboring residues (C,O,N,H) are in
+    a functional group labeled by PEP+lower_residue_number (eg. the
+    C and O from residue 250 and N and H from residue 251 would be
+    labeled PEP250)
 
     Parameters
     ----------
@@ -23,7 +31,7 @@ def partition(pdb_file: str) -> None:
     u = mda.Universe(pdb_file)
     fA = {}
     fB = {}
-    # CHARMM terminal patch residues from https://charmm-gui.org/?doc=help&id=terminal_patch
+    # CHARMM terminal patch residues are from https://charmm-gui.org/?doc=help&id=terminal_patch
     prot = u.select_atoms("((protein or resname ACE or resname NME or resname NTER or resname NNEU or resname GLYP or resname PROP or resname ACP or resname CTER or resname CNEU or resname CT1 or resname CT2 or resname CT3 or resname 5TER or resname 3TER) and not name C and not name O and not name N and not name H and not resname CYX and not resname CYS) or resname LIN or resname HOH or resname TIP or resname TIP3")
     last_prot_atom = int(prot[-1].id)
     for atom in prot:
@@ -32,7 +40,7 @@ def partition(pdb_file: str) -> None:
         else:
             fA[f"{atom.resname}{atom.resnum}"] = fA[f"{atom.resname}{atom.resnum}"] + " " +  str(atom.id)
 
-    #Detecting which atoms are in disulfide bonds the two bridged SG atoms in their own functional group (DIS) 
+    #Detecting which atoms are in disulfide bonds; the two bridged SG atoms create their own functional group (DIS) 
     sg_atoms = u.select_atoms("protein and name SG")
     for atom in sg_atoms:
         sg_num = atom.id

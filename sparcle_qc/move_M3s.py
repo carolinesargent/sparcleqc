@@ -4,7 +4,8 @@ from typing import Dict, List
 
 def get_M2_N_resn(bond:str, df:pd.DataFrame, no_HL:Dict[str, List[int]]) -> str:
     """
-    Given a bond number, this function returns the resname that bond is apart of, indicated by the N atom
+    For a specific fronteir bond, this function returns the dominant MM
+    residue, indicated by the M2 N atom
 
     Parameters
     ----------
@@ -28,7 +29,9 @@ def get_M2_N_resn(bond:str, df:pd.DataFrame, no_HL:Dict[str, List[int]]) -> str:
 
 def find_M3(bond:str, M2resn:str, df:pd.DataFrame, no_HL:Dict[str,List[int]]) -> int:
     """
-    Given a bond number, this function returns an atom number if there is an M3 atom for that bond that is a different resname than the M2resn
+    For a specific fronteir bond, this function returns an atom number
+    if there is an M3 atom for that bond that is a different resname
+    than dominant MM residue (M2Nresn)
 
     Parameters
     ----------
@@ -54,7 +57,9 @@ def find_M3(bond:str, M2resn:str, df:pd.DataFrame, no_HL:Dict[str,List[int]]) ->
 
 def get_key(val:str, no_HL:Dict[str,List[int]]) -> str:
     """
-    Given a value in the dictionary defining the atoms in each region, this function returns the key that corresponds to the given unique value
+    Given a value in the dictionary defining the atoms in each region,
+    this function returns the key that corresponds to the given unique
+    value
 
     Parameters
     ----------

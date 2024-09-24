@@ -4,9 +4,11 @@ from pymol import cmd, editor
 
 def fix_numbers_amber(pdb_file: str) -> None:
     """
-    When given a pdb, creates a new copy {pdb_file}_fixed.pdb that has the protein residues followed by waters and then the ligand
-    Corrects for any mistakes in atom or residue numbering that may have been caused by manipulation of the system in pymol
-    Ensures that the ligand atoms are labeled as HETATM
+    When given a pdb, creates a new copy {pdb_file}_fixed.pdb that
+    has the protein residues followed by waters and then the ligand.
+    Corrects for any mistakes in atom or residue numbering that may
+    have been caused by manipulation of the system in pymol.
+    Ensures that the ligand atoms are labeled as HETATM.
 
     Parameters
     ----------
@@ -63,10 +65,13 @@ def fix_numbers_amber(pdb_file: str) -> None:
     out.write('END')
     out.close()
 def autocap(pdb_file: str) -> None:
-    """
-    When given an amber complex pdb, caps the ends of each chain with a capping group (NME on C-terminal and ACE on N-terminal)
-    and then renames the default pymol atom names to amber atom names for the new capping residues
-    Saves the entire new, capped complex as cx_autocap.pdb, just the capped protein as prot_autocap.pdb, and the ligand as ligand.pdb
+    """ 
+    When given an amber complex pdb, caps the ends of each chain
+    with a capping group (NME on C-terminal and ACE on N-terminal)
+    and then renames the default pymol atom names to amber atom names
+    for the new capping residues. Saves the entire new, capped complex
+    as cx_autocap.pdb, just the capped protein as prot_autocap.pdb,
+    and the ligand as ligand.pdb
 
     Parameters
     ----------
@@ -88,12 +93,14 @@ def autocap(pdb_file: str) -> None:
     chains = []
     chains = cmd.get_chains("sidechains")
     for chain in chains:
+        #clean termini
         cmd.select('capped_n', 'not name H1 and element H and bound_to (first name N and chain %s)' % chain)
         cmd.remove('capped_n')
         cmd.select("capped_c", "last name OXT and chain %s" % chain)
         cmd.remove("capped_c")
         cmd.alter('first name H1 and chain %s' % chain, "name='H'")
         #cmd.set('retain_order', 0)
+        #cap termini
         editor.attach_amino_acid("last name C and chain %s" % chain, 'nme' )
         editor.attach_amino_acid("first name N and chain %s" % chain, 'ace')
     
@@ -116,11 +123,13 @@ def autocap(pdb_file: str) -> None:
     cmd.remove("ligand")
     
     cmd.save(f"prot_autocap.pdb", "pdb")
-	# creating a cpptraj script for the given pdb file
+
 def skip_autocap(pdb_file: str) -> None:
     """
-    When given an amber complex pdb that already has capping residues at each termini, this function is called instead of autocap(pdb_file) 
-    Saves just the capped protein as prot_autocap.pdb and the ligand as ligand.pdb
+    When given an amber complex pdb that already has capping residues at
+    each termini, this function is called instead of autocap(pdb_file)
+    Saves just the capped protein as prot_autocap.pdb and the ligand
+    as ligand.pdb
 
     Parameters
     ----------
@@ -143,9 +152,10 @@ def skip_autocap(pdb_file: str) -> None:
     cmd.remove("ligand")
     
     cmd.save(f"prot_autocap.pdb", "pdb")
+
 def write_cpptraj(pdb_file: str)-> None:
     """
-    Writes a cpptraj input file for the provided pdb
+    Writes a cpptraj input file for the provided (un-capped) pdb
 
     Parameters
     ----------
@@ -160,9 +170,10 @@ def write_cpptraj(pdb_file: str)-> None:
         f.write(f'parm {pdb_file}\n')
         f.write(f'loadcrd {pdb_file} name tmp1\n')
         f.write(f'prepareforleap crdset tmp1 name tmp2 pdbout uncapped.pdb nosugar\n')
+
 def write_cpptraj_skip_autocap(pdb_file: str) -> None:
     """
-    Writes a cpptraj input file for the provided pdb, but with a different name than write_cpptraj since the complex is already capped
+    Writes a cpptraj input file for the provided (capped) pdb
 
     Parameters
     ----------
@@ -177,6 +188,7 @@ def write_cpptraj_skip_autocap(pdb_file: str) -> None:
         f.write(f'parm {pdb_file}\n')
         f.write(f'loadcrd {pdb_file} name tmp1\n')
         f.write(f'prepareforleap crdset tmp1 name tmp2 pdbout cx_autocap.pdb nosugar\n')
+
 def write_tleap(forcefield: str, water_model: str) -> None:
     """
     Writes a tleap input file that loads the given forcefield and water model

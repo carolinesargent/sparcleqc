@@ -2,8 +2,9 @@ import pandas as pd
 from typing import Dict
 
 def read_pdb(PDB_PATH: str, d:Dict) -> pd.DataFrame:
-    """
-    Populates a pandas dataframe with the information in the pdb (x_coord, y_coord, z_coordi, resname, atom type) indexed by atom id
+    """ 
+    Populates a pandas dataframe with the information in the pdb
+    (x_coord, y_coord, z_coordi, resname, atom type) indexed by atom id
 
     Parameters
     ----------
@@ -40,9 +41,10 @@ def read_pdb(PDB_PATH: str, d:Dict) -> pd.DataFrame:
                 df.loc[l[6:11].strip(), 'AT_LABEL'] = l[66:87].strip() 
     return df
 
-def read_mol2(MOL2_PATH:str, m:Dict) -> pd.DataFrame: 
-    """
-    Populates a pandas dataframe with the information in the mol2 (x_coord, y_coord, z_coordi, resname, atom type) indexed by atom id
+def read_mol2(MOL2_PATH:str, m:Dict) -> pd.DataFrame:
+    """ 
+    Populates a pandas dataframe with the information in the mol2
+    (x_coord, y_coord, z_coordi, resname, atom type) indexed by atom id
 
     Parameters
     ----------
@@ -78,8 +80,9 @@ def read_mol2(MOL2_PATH:str, m:Dict) -> pd.DataFrame:
     return df        
 
 def combine(pdb_df:pd.DataFrame, mol2_df:pd.DataFrame) -> pd.DataFrame:
-    """
-    combines information from a dataframe from the pdb with a dataframe from the mol2 based on matching the coordinates
+    """ 
+    combines information from a pdb dataframe with a
+    mol2 dataframe based on matching the coordinates
 
     Parameters
     ----------
@@ -106,7 +109,7 @@ def combine(pdb_df:pd.DataFrame, mol2_df:pd.DataFrame) -> pd.DataFrame:
                 pdb_df.loc[idx,'MOL2_AT'] = mol2_df.loc[mol2_idx,'MOL2_AT']
                 pdb_df.loc[idx,'MOL2_RES'] = mol2_df.loc[mol2_idx,'MOL2_RES']
                 pdb_df.loc[idx,'q'] = mol2_df.loc[mol2_idx,'q']
-        # insert fourth point of water
+        # insert fourth point of water, if present in mol2
         if 'HOH' in pdb_df.loc[idx, 'PDB_RES'] and pdb_df.loc[idx, 'PDB_AT'] == 'O':
             EPW_idx = str(int(mol2_idx)+3)
             if EPW_idx in mol2_df.index and 'EP' in mol2_df.loc[EPW_idx, 'MOL2_AT']:
@@ -121,8 +124,9 @@ def combine(pdb_df:pd.DataFrame, mol2_df:pd.DataFrame) -> pd.DataFrame:
     return pdb_df
 
 def read_cx_pdb(CX_PDB_PATH:str, d:Dict) -> pd.DataFrame:
-    """
-    Populates a pandas dataframe with the information in the pdb (x_coord, y_coord, z_coordi, resname, atom type) indexed by atom id
+    """ 
+    Populates a pandas dataframe with the information in the pdb
+    (x_coord, y_coord, z_coordi, resname, atom type) indexed by atom id
 
     Parameters
     ----------
@@ -156,7 +160,8 @@ def read_cx_pdb(CX_PDB_PATH:str, d:Dict) -> pd.DataFrame:
 
 def combine2(pdb_df:pd.DataFrame, cx_pdb_df:pd.DataFrame) -> pd.DataFrame:
     """
-    combines information from a dataframe from the proteinpdb with a dataframe from the cx pdb based on matching the coordinates
+    combines information from a dataframe from the protein pdb with a
+    dataframe from the cx pdb based on matching the coordinates
 
     Parameters
     ----------
@@ -220,7 +225,9 @@ def change_water_charges(df: pd.DataFrame, o: str, h: str, ep:str = None) -> pd.
 
 def combine_data(o_charge:str = None, h_charge:str = None, ep_charge:str = None) -> None:
     """
-    Creates a dataframe from the provided protein pdb, complex pdb, and mol2 information and then updates it with the desired water atom charges
+    Creates a dataframe from the provided protein pdb, complex pdb,
+    and mol2 information and then updates it with the desired water
+    atom charges
 
     Parameters
     ----------

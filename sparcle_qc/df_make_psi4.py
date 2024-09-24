@@ -7,7 +7,7 @@ from typing import List, Dict, Tuple
 
 def qm_ligand(LIGAND_PDB_PATH: str) -> List[str]:
     """
-    This functions converts a pdb into a list of lines in the pdb
+    This functions converts a pdb into a list of atom/hetatm lines in the pdb
 
     Parameters
     ----------
@@ -31,7 +31,7 @@ def qm_ligand(LIGAND_PDB_PATH: str) -> List[str]:
 
 def pdb_to_xyz(PDB_lines: List[str]) -> List[str]:
     """
-    This functions converts a list pdb lines into a list of xyzs with atom types
+    This functions converts a list of pdb lines into a list of xyzs with element names
 
     Parameters
     ----------
@@ -41,7 +41,7 @@ def pdb_to_xyz(PDB_lines: List[str]) -> List[str]:
     Returns
     -------
     xyz: List[str]
-        list of the atom types along with xyz coords
+        list of the element names along with xyz coords
     """
     # translates PDB lines to XYZ lines
     xyz = []
@@ -60,7 +60,7 @@ def pdb_to_xyz(PDB_lines: List[str]) -> List[str]:
 
 def atoms_to_pdb_lines(CAPPED_PDB_PATH:str, atoms:List[str]) -> List[str]:
     """
-    This functions converts a set of atoms in a PDB into List of information from those specified atoms in the PDB
+    This function gets lines of a PDB file for specific atom IDs
 
     Parameters
     ----------
@@ -87,7 +87,7 @@ def atoms_to_pdb_lines(CAPPED_PDB_PATH:str, atoms:List[str]) -> List[str]:
 
 def write_pdb(CAPPED_PDB_PATH:str, atoms:List[str], CAPPED_QM_PATH:str, LIGAND_PATH:str) -> None:
     """
-    This functions converts a set of atoms in a PDB into a new PDB
+    This functions writes the PDB capped with hydrogens
 
     Parameters
     ----------
@@ -125,7 +125,8 @@ def write_pdb(CAPPED_PDB_PATH:str, atoms:List[str], CAPPED_QM_PATH:str, LIGAND_P
 def MM_xyz_to_charge_array(MM_lines_c: List[str], MM_lines_0: List[str], MOL2_PATH:str, MM_for_array: List[str]) -> List[str]:
     #TODO should we always just initialize MM_for_array to be empty at the start of this function instead of passing it as a parameter
     """
-    Given an array of MM coordinates, this function returns the array of coordinates and charges needed for the QM input file 
+    Given an array of MM coordinates, this function returns the array of 
+    coordinates and charges needed for the QM input file 
 
     Parameters
     ----------
@@ -247,7 +248,7 @@ def SEE(MOL2_PATH:str, CAPPED_PDB_PATH: str, with_HL: Dict[str,List[int]], num_b
 
 def Z1_atoms_zero(num_bonds_broken: int, with_HL: Dict[str,List[int]]) -> List[int]:
     """
-    returns the M1 atoms that need to be zeroed
+    returns M1 atoms only
 
     Parameters
     ----------
@@ -292,7 +293,7 @@ def Z1_atoms_charge(num_bonds_broken:int, with_HL: Dict[str,List[int]]) -> List[
 
 def Z1(df:pd.DataFrame, with_HL:Dict[str,List[int]], num_bonds_broken: int) -> List[str]:
     """
-    zeroes the M1 atoms
+    creates array of all MM charges with M1 atoms zeroed
 
     Parameters
     ----------
@@ -332,7 +333,7 @@ def Z1(df:pd.DataFrame, with_HL:Dict[str,List[int]], num_bonds_broken: int) -> L
 
 def DZn(k:int, df:pd.DataFrame, with_HL:Dict[str,List[int]], num_bonds_broken:int) -> List[str]:
     """
-    zeros the ___ atoms and redistributes that charge into the ___ atoms
+    makes external charge array for DZ1, DZ2, and DZ3
 
     Parameters
     ----------
@@ -430,7 +431,7 @@ def DZn(k:int, df:pd.DataFrame, with_HL:Dict[str,List[int]], num_bonds_broken:in
 
 def Z2_atoms_zero(num_bonds_broken:int, with_HL:Dict[str,List[int]]) -> List[int]:
     """
-    returns the M1  and M2 atoms that need to be zeroed
+    returns the M1 and M2 atoms that need to be zeroed
 
     Parameters
     ----------
@@ -454,7 +455,7 @@ def Z2_atoms_zero(num_bonds_broken:int, with_HL:Dict[str,List[int]]) -> List[int
 
 def Z2_atoms_charge(num_bonds_broken:int, with_HL:Dict[str,List[int]]) -> List[str]:
     """
-    returns the and M3 atoms 
+    returns the M3 atoms 
 
     Parameters
     ----------
@@ -476,7 +477,7 @@ def Z2_atoms_charge(num_bonds_broken:int, with_HL:Dict[str,List[int]]) -> List[s
 
 def Z2(df:pd.DataFrame, with_HL:Dict[str,List[int]], num_bonds_broken:int) -> List[str]:
     """
-    zeroes the M1  and M2 atoms
+    returns array of external charges, zeroes the M1 and M2 atoms
 
     Parameters
     ----------
@@ -542,7 +543,7 @@ def Z3_atoms_zero(num_bonds_broken:int, with_HL:Dict[str,List[int]]) -> List[int
 
 def Z3(with_HL:Dict[str,List[int]], num_bonds_broken:int) -> List[str]:
     """
-    zeroes the M1 and M2  and M3 atoms
+    returns external charge array, zeroes the M1 and M2 and M3 atoms
 
     Parameters
     ----------
@@ -582,7 +583,7 @@ def Z3(with_HL:Dict[str,List[int]], num_bonds_broken:int) -> List[str]:
 
 def get_charge_residue(MOL2_PATH:str, MM_line:str) -> Tuple[float, str]: # get charge for one MM PDB line
     """
-    returns the charge of a specified MM atom based on coordinates
+    returns the charge and residue of a specified MM atom based on coordinates
 
     Parameters
     ----------
@@ -684,7 +685,9 @@ def redist_charges(num_bonds_broken:int, MM_for_array:List[str], MOL2_PATH:str, 
 
 def bal_redist_charges(num_bonds_broken:int, MM_for_array:List[str], MM_atoms:List[str], charge_method:str, df:pd.DataFrame, with_HL:Dict[str,List[int]]) -> List[str]:
     """
-    TODO Insert description
+    Takes in charge array without redistributed charges, 
+    Redistibutes charges, 
+    Creates external charge array for BRC, BRCD, and BRC2
 
     Parameters
     ----------
@@ -716,33 +719,24 @@ def bal_redist_charges(num_bonds_broken:int, MM_for_array:List[str], MM_atoms:Li
             # get original integer charge of residue
             MM_group_charges = np.where(df['PDB_RES'] == str(M1atom_residue), df[['q']].sum(axis=1),0)
             MM_group_charge = np.sum(MM_group_charges)
-            #print('MM group charge (int):', MM_group_charge)
             # sum the charges on atoms in that residue and also in MM
             MMdf = df.loc[df.index.isin(MM_atoms)]
             MM_resi_charges = np.where(MMdf['PDB_RES'] == str(M1atom_residue), MMdf[['q']].sum(axis=1),0)
             MM_resi_charge = np.sum(MM_resi_charges)
-            #print('MM_resi_charge:',MM_resi_charge)
             q_purple = MM_group_charge - MM_resi_charge
-            #print('q_purple:', q_purple)
             M1_bal_charge = M1atom_charge + q_purple
-            #print('New charge:', M1_bal_charge + MM_resi_charge)
         elif df.at[M1_atom[0], 'PDB_AT'] == 'C':
-            #print('M1 atom type is C')
             # get original integer charge of residue
             QM_group_charges = np.where(df['PDB_RES'] == str(M1atom_residue), df[['q']].sum(axis=1),0)
             QM_group_charge = np.sum(QM_group_charges)
-            #print('QM group charge (int):', QM_group_charge)
             # sum the charges on atoms in that residue and also in MM
             MMdf = df.loc[df.index.isin(MM_atoms)]
             MM_resi_charges = np.where(MMdf['PDB_RES'] == str(M1atom_residue), MMdf[['q']].sum(axis=1),0)
             q_purple = np.sum(MM_resi_charges)
-            #print('q_purple:',q_purple)
             M1_bal_charge = M1atom_charge - q_purple
-        #print('M1_bal_charge:', M1_bal_charge)
         M2_atoms = with_HL[f'M2_{bond}']
         num_M2 = len(M2_atoms)
         redist_charge = float(M1_bal_charge) / float(num_M2)
-        #print('Redist charge:', redist_charge)
         for atom in M2_atoms:
             midpoint_xyz = []
             M2atom_charge = df.at[atom, 'q']
@@ -777,7 +771,7 @@ def bal_redist_charges(num_bonds_broken:int, MM_for_array:List[str], MM_atoms:Li
 
 def balanced_RC(charge_method:str, df:pd.DataFrame, with_HL:Dict[str,List[int]], num_bonds_broken:int) -> List[str]:
     """
-    TODO Insert description
+    Create external charge array for BRC, BRCD, BRC2
 
     Parameters
     ----------
@@ -848,13 +842,7 @@ def write_extern_xyz(filepath:str, mm_env:List[str]) -> None:
 
 def write_QM(charge_method:str, c_ligand:str, basis_set:str, method:str, PSI4_FILE_PATH:str, do_fsapt: bool = None) -> None:
     """
-    creates psi4 python input files for different charge schemes:
-    SEE: no changes to point charges (M1 charge does not change)
-    Z1: M1 charge is zeroed-out
-    Z2: M1 and M2 charges are zeroed-out
-    Z3: M1, M2, and M3 charges are zeroed-out
-    RC: M1 charge is evenly redistributed to the midpoints of M1-M2 bonds
-    RCD: same as RC, but M1-M2 bond dipoles are preserved
+    creates psi4 python input files for different charge schemes
 
     Parameters
     ----------

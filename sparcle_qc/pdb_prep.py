@@ -31,7 +31,8 @@ def get_coords(pdb_file1: str, atom_id1: str) -> Tuple[str, str, str]:
 
 def match_coords(x:str, y:str, z:str, pdb_file2:str) -> str:
     """
-    returns the atom number that corresponds to the specified x,y,z coordinates in the specified pdb_file
+    returns the atom number that corresponds to the specified x,y,z
+    coordinates in the specified pdb_file
 
     Parameters
     ----------
@@ -55,7 +56,8 @@ def match_coords(x:str, y:str, z:str, pdb_file2:str) -> str:
 
 def convert_atom_id(seed: str, seed_file:str, new_pdb:str ='cx_autocap_fixed.pdb') -> str:
     """
-    finds the atom the corresponds to atom number = seed in seed_file pdb and then maps this to the newly created complex pdb
+    finds the atom the corresponds to atom number = seed in seed_file
+    pdb and then maps this to the newly created complex pdb
 
     Parameters
     ----------
@@ -77,7 +79,8 @@ def convert_atom_id(seed: str, seed_file:str, new_pdb:str ='cx_autocap_fixed.pdb
 
 def check_resi_charges(mol2_file: str) -> Tuple[int, str]:
     """
-    checks the sum of the point charges for each residue listed in the mol2 and ensures that it sums to an integer
+    checks the sum of the point charges for each residue listed in the
+    mol2 and ensures that it sums to an integer
 
     Parameters
     ----------
@@ -87,12 +90,16 @@ def check_resi_charges(mol2_file: str) -> Tuple[int, str]:
     Returns
     -------
     error_message: Tuple[int, str]
-        tuple where the first entry is an integer. 0 = at least one residue is not integer charge. 1 = all residues are integer charge.
-        the second entry is a string containing information about which residue is not integer charge and the corresponding fractional charge
+        tuple where the first entry is an integer. 
+        0 = at least one residue is not integer charge. 
+        1 = all residues are integer charge.
+        The second entry is a string containing information about which 
+        residue is not integer charge and the corresponding fractional charge.
     """
     total_charge = 0
     #tolerance is how far away a residue can be from an integer without throwing an error
-    #this was determined because amber lists charge to 3 decimal places, so anything different to the fourth decimal place or further is insignificant
+    #this was determined because amber lists charge to 3 decimal places, 
+    #so anything different to the fourth decimal place or further is insignificant
     tolerance = 0.0001
     with open(mol2_file, 'r') as file:
         all_lines = file.readlines()
@@ -119,7 +126,8 @@ def check_resi_charges(mol2_file: str) -> Tuple[int, str]:
 
 def check_df_charges() -> Tuple[int, str]:
     """
-    checks the sum of the point charges for each residue listed in the dataframe and ensures that it sums to an integer
+    checks the sum of the point charges for each residue listed in the
+    dataframe and ensures that it sums to an integer
 
     Parameters
     ----------
@@ -128,8 +136,11 @@ def check_df_charges() -> Tuple[int, str]:
     Returns
     -------
     return_message: Tuple[int, str]
-        tuple where the first entry is an integer. 0 = at least one residue is not integer charge. 1 = all residues are integer charge.
-        the second entry is a string containing information about which residue is not integer charge and the corresponding fractional charge
+        tuple where the first entry is an integer. 
+        0 = at least one residue is not integer charge. 
+        1 = all residues are integer charge.
+        The second entry is a string containing information about which 
+        residue is not integer charge and the corresponding fractional charge.
     """
     
     total_charge = 0
