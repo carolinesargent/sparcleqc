@@ -62,10 +62,14 @@ def get_atom_types(Q1_coords:Tuple[str,str,str], M1_coords:Tuple[str,str,str], M
         try:
             QH_bond = f'CT2-HB2'
             QH_bond_perm = f"HB2-CT2"
+            atom1 = QH_bond.split('-')[0].strip()
+            atom2 = QH_bond.split('-')[1].strip()
             test = params.bond_types[(atom1, atom2)].req
         except:
             QH_bond = f'CT2-HB'
             QH_bond_perm = f"HB-CT2"
+            atom1 = QH_bond.split('-')[0].strip()
+            atom2 = QH_bond.split('-')[1].strip()
             test = params.bond_types[(atom1, atom2)].req
     out.close()
     return QM_bond, QM_bond_perm, QH_bond, QH_bond_perm
