@@ -390,7 +390,7 @@ def DZn(k:int, df:pd.DataFrame, with_HL:Dict[str,List[int]], num_bonds_broken:in
             q_to_dist = -(group_charge - QM_res_charge)
         #q_to_dist = 0
         for x in zeroed:
-            print('q',df.loc[x,'q'])
+            #print('q',df.loc[x,'q'])
             q_to_dist += df.loc[x, 'q']
         dist_df = dist_df[['q', 'X', 'Y', 'Z']]
         if round(q_to_dist, 5) != 0:
@@ -845,7 +845,7 @@ def write_extern_xyz(filepath:str, mm_env:List[str]) -> None:
 
 #def write_psi4_file(PSI4_FILE_PATH):
 
-def write_QM(charge_method:str, c_ligand:str, basis_set:str, method:str) -> None:
+def write_QM(charge_method:str, c_ligand:str, basis_set:str, method:str, PSI4_FILE_PATH:str, do_fsapt: bool = None) -> None:
     """
     creates psi4 python input files for different charge schemes:
     SEE: no changes to point charges (M1 charge does not change)
@@ -865,13 +865,16 @@ def write_QM(charge_method:str, c_ligand:str, basis_set:str, method:str) -> None
         basis set for the QM computation
     method: str
         method for QM energy 
+    PSI4_FILE_PATH: STR
+        name for created psi4 file
+    do_fsapt: boolean or None
+        if fsapt needs to be turned off in the psi4 input file, this option will be false
 
     Returns
     -------
     None
     """
     CAPPED_PDB_PATH = 'CAPPED-prot_autocap_fixed.pdb'
-    PSI4_FILE_PATH = f"psi4_input_file.py"
     LIGAND_PDB_PATH = 'ligand.pdb'
     CAPPED_QM_PDB_PATH = 'CAPPED_qm.pdb'
     MOL2_PATH = 'prot_autocap_fixed.mol2'
@@ -924,11 +927,12 @@ def write_QM(charge_method:str, c_ligand:str, basis_set:str, method:str) -> None
           mm_env = balanced_RC(charge_method, df, with_HL, num_bonds_broken)
     else:
         print('incorrect charge scheme')
+        sys.exit()
     
     #write_extern_xyz(f'{charge_method}/extern.xyz', mm_env)
     #dump_pkl()
     #write_psi4_file(PSI4_FILE_PATH, lig_charge)
-    with open(PSI4_FILE_PATH, 'w+') as inpfile:
+    with open(PSI4_FILE_PATH, 'a') as inpfile:
         inpfile.write("""
 import psi4
 import numpy as np
@@ -939,7 +943,7 @@ start = time.time()
 
 psi4.set_memory('70 GB')
 psi4.core.set_num_threads(10)
-psi4.core.set_output_file('psi4_output.out', False)\n
+psi4.core.set_output_file('""" + f"{inp_filename[:-3]}.out'" + """, False)\n
 
 dimer =psi4.geometry('''\n""" + c_ligand + ' 1\n'
 + ' '.join(qm_lig) + '--\n' + c_QM + ' 1\n '
@@ -957,8 +961,10 @@ psi4.set_options({
 'basis': '""" + basis_set +"""',\n"""+
 """'freeze_core': 'True',
 'scf_type': 'df',
-'mp2_type': 'df'
-})\n
+'mp2_type': 'df'\n""")
+        if do_fsapt == False:
+            inpfile.write("'do_fsapt': 'False'\n")
+        inpfile.write("""})\n
 e = psi4.energy('"""+method+"""', external_potentials={'B':Chargefield_B})\n
 
 end=time.time()
@@ -975,49 +981,73 @@ def dump_pkl():
         out.write(json.dumps(results))
 '''
 
-def check_QM_file() -> None:
+def write_input(inputfile, psi4file):
+    """
+    Writes the Sparcle-QC input file to the top of the psi4file
+
+    Parameters
+    ----------
+    inputfile: str
+        name of the Sparcle-QC input file
+    psi4file: str
+        name of created psi4 input file
+
+    Returns
+    -------
+    None
+    """
+    with open(inputfile) as inp:
+        with open(psi4file, 'w') as psi4file:
+            psi4file.write('"""\nThis Psi4 file was created using Sparcle-QC with the following specifications:\n')
+            for line in inp:
+                psi4file.write(line)
+            psi4file.write('"""\n\n')
+
+def check_QM_file(psi4file: str) -> None:
     """
     Checks that the charge of the QM region in the created input file is integer
     prints the charge, along with the number of atoms in the QM and MM region
 
     Parameters
     ----------
-    None
+    psi4file: str
+        name of created psi4 input file
 
     Returns
     -------
     None
     """
     out = open(glob('*.out')[0], 'a')
-    psi4files =[x for x in os.listdir() if 'psi4_input_file.py' in x]
-    out.write('----------------------------------------------------------------------------------------------------\n')
-    out.write('make_QM_input_file'.center(100)+'\n')
-    out.write('----------------------------------------------------------------------------------------------------\n')
-    for psi4file in psi4files:
-        with open(psi4file, 'r') as pfile:
-            lines = pfile.readlines()
-            extern_idx = []
-            dimer_idx = []
-            prot_idx = []
-            for n,l in enumerate(lines):
-                if 'Chargefield' in l:
-                    extern_idx.append(n)
-                elif 'dimer' in l:
-                    dimer_idx.append(n)
-                elif '--' in l:
-                    prot_idx.append(n)
-                elif 'unit' in l:
-                    dimer_idx.append(n)
-            array = lines[extern_idx[0]+1:extern_idx[1]]
-            charge = float(array[0].split(',')[0])
-            num_atoms = dimer_idx[1] - dimer_idx[0] - 4 + 1
-            num_prot_atoms = dimer_idx[1] - prot_idx[0] - 2
-            for l in array[1:]:
-                charge += float(l.split(',')[1])
-                num_atoms += 1
-            out.write(f'Psi4 filename: {psi4file}\n')
-            out.write(f'Total charge of MM region: {charge:.2f}\n')
-            out.write(f'Number of point charges in MM region: {num_atoms}\n')
-            out.write(f'Number of non-ligand atoms in QM region: {num_prot_atoms}')
+
+    with open(psi4file, 'r') as pfile:
+        lines = pfile.readlines()
+        extern_idx = []
+        dimer_idx = []
+        prot_idx = []
+        for n,l in enumerate(lines):
+            if 'Chargefield' in l:
+                extern_idx.append(n)
+            elif 'dimer' in l:
+                dimer_idx.append(n)
+            elif '--' in l:
+                prot_idx.append(n)
+            elif 'unit' in l:
+                dimer_idx.append(n)
+        array = lines[extern_idx[0]+1:extern_idx[1]]
+        charge = float(array[0].split(',')[0])
+        num_atoms = dimer_idx[1] - dimer_idx[0] - 4 + 1
+        num_prot_atoms = dimer_idx[1] - prot_idx[0] - 2
+        for l in array[1:]:
+            charge += float(l.split(',')[1])
+            num_atoms += 1
+        
+        out.write('\n----------------------------------------------------------------------------------------------------\n')
+        out.write('check_psi4_file'.center(100)+'\n')
+        out.write('----------------------------------------------------------------------------------------------------\n')
+
+        out.write(f'Psi4 filename: {psi4file}\n')
+        out.write(f'Total charge of MM region: {charge:.2f}\n')
+        out.write(f'Number of point charges in MM region: {num_atoms}\n')
+        out.write(f'Number of non-ligand atoms in QM region: {num_prot_atoms}')
     
     out.close()
