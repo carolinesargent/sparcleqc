@@ -111,6 +111,11 @@ def input_parser(filename:str) -> Dict:
                     if value!= 'true' and value!='false':
                         print("Error: Invalid input file. fisapt_partition is not true or false")
                         sys.exit()
+                if key_word == 'do_fsapt':
+                    value = value.lower()
+                    if value != 'true' and value != 'false':
+                        print("Error: Invalid input file. do_fsapt is not true or false")
+                        sys.exit()
                 if key_word == 'amber_ff':
                     #potentially check if the ff is in amber
                     pass
@@ -205,6 +210,8 @@ def input_parser(filename:str) -> Dict:
         except KeyError:
             print('Error: Invalid input file. Both Oxygen and Hydrogen charges are not provided for water')
             sys.exit()
+    if 'fisapt_partition' not in keywords.keys():
+        keywords['fisapt_partition'] = 'false'
     if 'do_fsapt' not in keywords.keys():
         keywords['do_fsapt'] = 'false'
     if 'ep_charge' in keywords.keys():
@@ -369,7 +376,7 @@ def run(input_file) -> None:
                 write_QM(keywords['charge_scheme'], keywords['ligand_charge'], keywords['basis_set'], keywords['method'], f'{new_dir}_psi4_file.py')
 
             #check the charges and number of atoms in the written QM input file
-            check_QM_file()
+            check_QM_file(f'{new_dir}_psi4_file.py')
         #write fsapt files
         if keywords['fisapt_partition'] == 'true':
             partition('CAPPED_qm.pdb')
