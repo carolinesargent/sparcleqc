@@ -845,6 +845,7 @@ def write_extern_xyz(filepath:str, mm_env:List[str]) -> None:
 
 #def write_psi4_file(PSI4_FILE_PATH):
 
+
 def write_QM(charge_method:str, c_ligand:str, basis_set:str, method:str, PSI4_FILE_PATH:str, do_fsapt: bool = None) -> None:
     """
     creates psi4 python input files for different charge schemes:
@@ -865,10 +866,11 @@ def write_QM(charge_method:str, c_ligand:str, basis_set:str, method:str, PSI4_FI
         basis set for the QM computation
     method: str
         method for QM energy 
-    PSI4_FILE_PATH: STR
+    PSI4_FILE_PATH: str
         name for created psi4 file
     do_fsapt: boolean or None
-        if fsapt needs to be turned off in the psi4 input file, this option will be false
+        if fsapt needs to be turned off in the psi4 input file this option will be False
+
 
     Returns
     -------
@@ -926,6 +928,7 @@ def write_QM(charge_method:str, c_ligand:str, basis_set:str, method:str, PSI4_FI
     elif charge_method == 'BRCD':
           mm_env = balanced_RC(charge_method, df, with_HL, num_bonds_broken)
     else:
+        #we check for this in the input file so this else shouldn't ever be reached
         print('incorrect charge scheme')
         sys.exit()
     
@@ -943,7 +946,9 @@ start = time.time()
 
 psi4.set_memory('70 GB')
 psi4.core.set_num_threads(10)
+
 psi4.core.set_output_file('""" + f"{inp_filename[:-3]}.out'" + """, False)\n
+
 
 dimer =psi4.geometry('''\n""" + c_ligand + ' 1\n'
 + ' '.join(qm_lig) + '--\n' + c_QM + ' 1\n '
@@ -1003,7 +1008,9 @@ def write_input(inputfile, psi4file):
                 psi4file.write(line)
             psi4file.write('"""\n\n')
 
+
 def check_QM_file(psi4file: str) -> None:
+
     """
     Checks that the charge of the QM region in the created input file is integer
     prints the charge, along with the number of atoms in the QM and MM region
