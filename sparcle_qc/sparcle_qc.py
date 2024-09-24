@@ -228,8 +228,12 @@ def input_parser(filename:str) -> Dict:
 
 
 def run(input_file) -> None:
-    """
-    given an input file, parses the specified parameters into a dictionary of keywords and runs the necessary sparcle_qc functions to create an input file to be run with a quantum chemistry software by preparing pdbs, obtaining mol2s, carving out the QM region, capping the Q1 bonds with hydrogens, and finally writing an input file
+    """ 
+    given an input file, parses the specified parameters into a
+    dictionary of keywords and runs the necessary sparcle_qc functions to
+    create a quantum chemistry software input file. Steps include
+    preparing pdbs, obtaining mol2s, carving out the QM region, capping
+    the Q1 bonds with hydrogens, and finally writing an input file
 
     Parameters
     ----------
@@ -307,7 +311,7 @@ def run(input_file) -> None:
         else:
             seed = convert_atom_id(keywords['seed'], keywords['seed_file'])
         
-        #if forcefield is amber, writing and running tleap
+        #if forcefield is amber, writing and running tleap to create mol2
         if 'amber_ff' in keywords:
             write_tleap(keywords['amber_ff'], keywords['water_model'])
             result = subprocess.run(['tleap -f tleap.in'], text = True, shell = True, capture_output = True)
@@ -320,13 +324,13 @@ def run(input_file) -> None:
             psf_to_mol2(keywords['pdb_file'])
             shutil.copy(keywords['pdb_file'], 'prot_autocap_fixed.pdb')
         
-        #checking for integer charge in the mol2
+        #checking for residue integer charges in the mol2
         resi_output = check_resi_charges('prot_autocap_fixed.mol2')
         if resi_output[0] == 0:
             print(resi_output[1])
             sys.exit()
         #combining information from the cx pdb, protein pdb, and mol2 into a dataframe for easy handling
-        #updating water charges if needed
+        #updating water charges if specified by user
         if 'ep_charge' in keywords:
             combine_data(keywords['o_charge'], keywords['h_charge'], keywords['ep_charge'])
         elif 'h_charge' in keywords:
@@ -334,7 +338,7 @@ def run(input_file) -> None:
         else:
             combine_data()
 
-        #checking created dataframe for integer charges
+        #checking created dataframe for residue integer charges
         df_output = check_df_charges()
         if df_output[0] ==0:
             print(df_output[1])
@@ -347,7 +351,7 @@ def run(input_file) -> None:
             dictionary_nocut()
             #shutil.move('dictionary.dat', new_dir)
             shutil.copy(keywords['pdb_file'], f'{new_dir}/external.pdb')
-        #elif the a template path has been specified, mapping the QM region to the QM region of the template
+        #elif the a template path has been specified, mapping the QM region from the QM region of the template
         elif 'template_path' in keywords:
             convert_dictionary(keywords['cutoff'], keywords['template_path'])
         #if there is no template specified then cutting the protein
@@ -355,7 +359,7 @@ def run(input_file) -> None:
             run_cut_protein('cx_autocap_fixed.pdb', seed, keywords['cutoff'])
             os.mkdir(f'data')
             shutil.move('QM.pdb', f'data/QM-sub-cut-protein-fragment-ligand.pdb')
-            #if the protein was cut then move M3 atoms that are in different residues than the M2 atoms into the MM region
+            #for each cut, ensure frontier MM atoms are part of one unique residue
             move_m3s()
             #shutil.move('external.pdb', new_dir)
             #shutil.move('pre-dictionary.dat', new_dir)

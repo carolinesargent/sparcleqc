@@ -9,8 +9,12 @@ from typing import Dict, List, Tuple
 
 def get_atom_types(Q1_coords:Tuple[str,str,str], M1_coords:Tuple[str,str,str], MOL2_PATH:str, ff_type:str, params:CharmmParameterSet = None) -> Tuple[str,str,str,str]: 
     """
-    Given the coordinates of two atoms that were in a bond (the Q1 atom and M1 atom of a bond that is cut) returns that atom types in the old bond as well as atom types for the new Q1-capping H bond
-    this is necessary because the indexing of the mol2 and pdb do not match
+    Given the coordinates of the two atoms in the fronteir bond (the
+    Q1 atom and M1 atom), returns the atom types in the fronteir bond
+    as well as atom types for the new Q1-capping H bond
+
+    This is necessary because the indexing of the mol2 and pdb do
+    not match
 
     Parameters
     ----------
@@ -32,7 +36,8 @@ def get_atom_types(Q1_coords:Tuple[str,str,str], M1_coords:Tuple[str,str,str], M
     Returns
     -------
     QM_bond, QM_bond_perm, QH_bond, QH_bond_perm: Tuple[str,str,str,str]
-        bond information for the old bond containing the Q1 atom and M1 atom, a permutation of that bond, the new Q1-capping H bond, and a permutation of that bond
+        bond information for the old bond containing the Q1 atom and M1 atom, 
+        a permutation of that bond, the new Q1-capping H bond, and a permutation of that bond
 
     """
     out = open(glob('*.out')[0], 'a')
@@ -77,18 +82,22 @@ def get_atom_types(Q1_coords:Tuple[str,str,str], M1_coords:Tuple[str,str,str], M
 
 def calc_C_HL(QM_bond:str, QM_bond_perm:str, QH_bond:str, QH_bond_perm:str, ff_type:str, params:CharmmParameterSet = None, PARM_PATH:str= None, FRCMOD_PATH:str = None) -> float:
     """
-    this function returns the scaling factor for a given cut bond based on the lengths of the old Q1-M1 bond and the new Q1-capping H bond
+    This function returns the scaling factor for a given cut bond based
+    on the forcefield bond sretch parameters of the Q1-M1 bond and the
+    new Q1-capping H bond
 
     Parameters
     ----------
     QM_bond:str
-        atoms in the old bond that was cut with one atom in the QM region and one atom in the MM region
+        atoms in the old bond that was cut with one atom in the QM region 
+        and one atom in the MM region
 
     QM_bond_perm:str
         permutation of QM_bond
 
     QH_bond:str
-        atoms in the new bond that is being capped with one atom in QM region and one atom is the new capping hydrogen 
+        atoms in the new bond that is being capped with one atom in QM region 
+        and one atom is the new capping hydrogen 
 
     QH_bond_perm:str
         permutation of QH_bond
@@ -200,12 +209,6 @@ def cap(no_HL:Dict[str,List[int]], num_broken_bonds:int, PDB_PATH:str, MOL2_PATH
                 if line[6:11].strip() == str(M1_atom[0]):
                     M1_coords = [x_coord, y_coord, z_coord]
                     M1_pdb_atom_type = line[11:16].strip()
-        #Q1_coords = lines[Q1_atom[0]].split()[6:9]  # if ligand is at bottom of file
-        #Q1_coords = lines[Q1_atom[0]-26].split()[6:9]  # if ligand is at top of file, subtract num of ligand atoms
-        #M1_coords = lines[M1_atom[0]-26].split()[6:9] # if ligand is at top of file, subtract num of ligand atoms
-        #M1_coords = lines[M1_atom[0]].split()[6:9] # if ligand is at bottom of file
-        #print(Q1_coords)
-        #print(M1_coords)
         out.write(f'Q1 atom type: {Q1_pdb_atom_type}\n')
         out.write(f'M1 atom type: {M1_pdb_atom_type}\n')
         Q1_coords = [float(x) for x in Q1_coords]
@@ -214,9 +217,8 @@ def cap(no_HL:Dict[str,List[int]], num_broken_bonds:int, PDB_PATH:str, MOL2_PATH
         a,b,c,d = get_atom_types(Q1_coords, M1_coords, MOL2_PATH, ff_type = ff_type, params = params)
         out.close()
         out = open(glob('*.out')[0], 'a')
-        #out.write(f'QM_bond: {a}\n')
         if ff_type =='amber':
-            C_HL = calc_C_HL(a,b,c,d, ff_type, PARM_PATH = PARM_PATH, FRCMOD_PATH = FRCMOD_PATH)                             # doi:10.1021/jp0446332 eqn (4)
+            C_HL = calc_C_HL(a,b,c,d, ff_type, PARM_PATH = PARM_PATH, FRCMOD_PATH = FRCMOD_PATH) #doi:10.1021/jp0446332 eqn (4)
         else:
             C_HL = calc_C_HL(a,b,c,d, ff_type, params = params)                             # doi:10.1021/jp0446332 eqn (4)
         out.write(f'C_HL: {C_HL:.4f}\n')

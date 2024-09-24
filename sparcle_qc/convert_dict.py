@@ -11,12 +11,22 @@ from typing import Dict
 
 def match_resi(Me_PDB_lines: List[List[str]], Cl_PDB_lines: List[List[str]]) -> Dict[str,str]:
     """
-    this function will use the 'neighborhood' of a given Me residue to match it to the residue in the cl pdb 
-    inputs are the PDB lines from both
-    this is necessary if the QM region is desired to be the same but there are small differences between protonation states or resnums are different
-    output will be a dictionary that has the cl residue as the key and the me residue as the value
-    'residue' is considered 3 letter code + resnum (eg LEU251) 
-    because the resnum may not be the same between the pdbs, we need a list of basically just the sequence to match the neighborhoods
+    This function will use the 'neighborhood' of a given residue
+    in one PDB (called Me) to match it to the residue in another
+    PDB (called Cl).  
+
+    Inputs are the PDB lines from both.  
+
+    Because the resnum may not be the same between the pdbs, we consider
+    the protein sequence to match the neighborhoods of the residues.
+    This is necessary if the QM region is desired to be the same between
+    two similar protein:ligand complexes, but there are small differences
+    between protonation states or residue numbers are different.
+
+    Output will be a dictionary that has the cl residue as the key and
+    the corresponding me residue as the value, where 'residue' is the
+    3 letter code + residue number (eg LEU251).  
+
     Parameters
     ----------
     Me_PDB_Lines: List(List(str))
@@ -55,15 +65,19 @@ def match_resi(Me_PDB_lines: List[List[str]], Cl_PDB_lines: List[List[str]]) -> 
 
 def check_resi_me(Me_d: Dict[str,str],Me_PDB_lines: List[List[str]]) -> None:
     """
-    this function checks to see how much of a given residue is in the QM region in the reference PDB to take the same amount of that residue later from the current PDB
-    will return f for full residue, c for only the carbonyl or xc for everything except the carbonyl or n for none of the residue 
-    
-    Parameters
-    ----------
-    Me_D: Dict[str,str]
-        Dictionary containing the atoms from the reference PDB and which region they belong to
+    This function checks to see how much of a given residue is in the QM
+    region in the reference PDB to take the same amount of that residue
+    later from the current PDB.  
+
+    Will return f for full residue, c for only the carbonyl or xc for
+    everything except the carbonyl or n for none of the residue.
+
+    Parameters ---------- Me_D: Dict[str,str]
+        Dictionary containing the atoms from the reference PDB and
+        which region they belong to
     Me_PDB_Lines: List(List(str))
-        List containing the lines of the reference PDB where each line is another list containing each category from the PDB
+        List containing the lines of the reference PDB where each line
+        is another list containing each category from the PDB
 
     Returns
     -------
@@ -102,15 +116,19 @@ def check_resi_me(Me_d: Dict[str,str],Me_PDB_lines: List[List[str]]) -> None:
 
 
 
-def convert_dictionary(cutoff: str,template_path:str) -> None:     
-    """
-    this function will take the dictionary for the template and find the corresponding residues in the current pdb and put the same amount of each residue in the QM region
-    if there are residues, waters, or anything else that is in the current PDB but not in the template PDB, whether it is QM or MM will be determined by the cutoff radius
+def convert_dictionary(cutoff: str,template_path:str) -> None:
+    """ 
+    This function will take the dictionary for the template and find
+    the corresponding residues in the current pdb and put the same amount
+    of each residue in the QM region.  If there are residues, waters,
+    or anything else that is in the current PDB but not in the template
+    PDB, whether it is QM or MM will be determined by the cutoff radius.
 
     Parameters
     ----------
     cutoff: str
-        cutoff in angstroms to determine the radius of the QM region for residues that are in the current PDB but not in the reference PDB and for waters
+        cutoff in angstroms to determine the radius of the QM region for residues 
+        that are in the current PDB but not in the reference PDB and for waters
     template_path: str
          path to the reference PDB
 
