@@ -213,7 +213,7 @@ def input_parser(filename:str) -> Dict:
     if 'fisapt_partition' not in keywords.keys():
         keywords['fisapt_partition'] = 'false'
     if 'do_fsapt' not in keywords.keys():
-        keywords['do_fsapt'] = 'false'
+        keywords['do_fsapt'] = 'none'
     if 'ep_charge' in keywords.keys():
         try:
             o_charge = keywords['o_charge']
@@ -376,6 +376,9 @@ def run(input_file) -> None:
             if 'do_fsapt' in keywords:
                 if keywords['do_fsapt'] == 'false':
                     write_QM(keywords['charge_scheme'], keywords['ligand_charge'], keywords['basis_set'], keywords['method'], f'{new_dir}_psi4_file.py', False)
+                else:
+                    write_QM(keywords['charge_scheme'], keywords['ligand_charge'], keywords['basis_set'], keywords['method'], f'{new_dir}_psi4_file.py')
+
             else:
                 write_QM(keywords['charge_scheme'], keywords['ligand_charge'], keywords['basis_set'], keywords['method'], f'{new_dir}_psi4_file.py')
 
@@ -392,3 +395,15 @@ def run(input_file) -> None:
     
     # Wait for the flashing thread to finish
         flashing_thread.join()
+
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: sparcle_qc <input_file>")
+        sys.exit(1)
+
+    input_file = sys.argv[1]
+    # Your main script logic here
+    run(input_file)
+
+if __name__ == "__main__":
+    main()
