@@ -62,7 +62,7 @@ where = ["."]
 # Ref https://setuptools.pypa.io/en/latest/userguide/datafiles.html#package-data
 [tool.setuptools.package-data]
 sparcle_qc = [
-    "sparcle_qc.py"
+    "data/cut_protein.py"
 ]
 
 [tool.versioningit]
