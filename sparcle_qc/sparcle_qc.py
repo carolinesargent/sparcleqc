@@ -14,7 +14,7 @@ from .combine_data import combine_data
 from .cut_protein import run_cut_protein 
 from .convert_dict import convert_dictionary 
 from .move_M3s import move_m3s
-from .df_make_psi4 import write_QM, check_QM_file, write_input 
+from .df_make_psi4 import make_regions, check_QM_file, write_input, write_psi4_file
 from .cap import run_cap
 from .make_partition import partition 
 
@@ -372,18 +372,28 @@ def run(input_file) -> None:
             else:
                 run_cap(ff_type = 'charmm', rtf = keywords['charmm_rtf'], prm = keywords['charmm_prm'])
             #redistribute charge based on charge scheme and write QM input file
-            write_input(input_file, f'{new_dir}_psi4_file.py')
-            if 'do_fsapt' in keywords:
-                if keywords['do_fsapt'] == 'false':
-                    write_QM(keywords['charge_scheme'], keywords['ligand_charge'], keywords['basis_set'], keywords['method'], f'{new_dir}_psi4_file.py', False)
+            qm_lig, c_QM, qm_pro, mm_env = make_regions(keywords['charge_scheme'])
+            if 'sapt' in keywords['method'].lower():
+                write_input(input_file, f'{new_dir}_psi4_file.py')
+                if 'do_fsapt' in keywords:
+                    if keywords['do_fsapt'] == 'false':
+                        write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, f'{new_dir}_psi4_file.py', keywords['ligand_charge'], keywords['method'], keywords['basis_set'], False)
+                    else:
+                        write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, f'{new_dir}_psi4_file.py', keywords['ligand_charge'], keywords['method'], keywords['basis_set'])
                 else:
-                    write_QM(keywords['charge_scheme'], keywords['ligand_charge'], keywords['basis_set'], keywords['method'], f'{new_dir}_psi4_file.py')
-
+                    write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, f'{new_dir}_psi4_file.py', keywords['ligand_charge'], keywords['method'], keywords['basis_set'])
+                #check the charges and number of atoms in the written QM input file
+                check_QM_file(f'{new_dir}_psi4_file.py')
             else:
-                write_QM(keywords['charge_scheme'], keywords['ligand_charge'], keywords['basis_set'], keywords['method'], f'{new_dir}_psi4_file.py')
+                write_input(input_file, f'{new_dir}_psi4_file_lig.py')
+                write_psi4_file(qm_lig, None, None, None, f'{new_dir}_psi4_file_lig.py', keywords['ligand_charge'], keywords['method'], keywords['basis_set'])
+                write_input(input_file, f'{new_dir}_psi4_file_pro.py')
+                write_psi4_file(None, c_QM, qm_pro, mm_env, f'{new_dir}_psi4_file_pro.py', None, keywords['method'], keywords['basis_set'])
+                write_input(input_file, f'{new_dir}_psi4_file_cx.py')
+                write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, f'{new_dir}_psi4_file_cx.py', keywords['ligand_charge'], keywords['method'], keywords['basis_set'])
+                check_QM_file(f'{new_dir}_psi4_file_pro.py')
+                check_QM_file(f'{new_dir}_psi4_file_cx.py')
 
-            #check the charges and number of atoms in the written QM input file
-            check_QM_file(f'{new_dir}_psi4_file.py')
         #write fsapt files
         if keywords['fisapt_partition'] == 'true':
             partition('CAPPED_qm.pdb')

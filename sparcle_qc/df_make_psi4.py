@@ -837,27 +837,14 @@ def write_extern_xyz(filepath:str, mm_env:List[str]) -> None:
     with open(filepath, 'w') as wfile:
         wfile.write(' '.join(mm_env)[:-1])
 
-#def write_psi4_file(PSI4_FILE_PATH):
-
-
-def write_QM(charge_method:str, c_ligand:str, basis_set:str, method:str, PSI4_FILE_PATH:str, do_fsapt: bool = None) -> None:
+def make_regions(charge_method:str) -> None:
     """
-    creates psi4 python input files for different charge schemes
+    creates XYZs for QM and MM regions; gets charge of QM protein region
 
     Parameters
     ----------
     charge_method: str
         redistribution scheme
-    c_ligand: str
-        charge of the ligand
-    basis_set: str
-        basis set for the QM computation
-    method: str
-        method for QM energy 
-    PSI4_FILE_PATH: str
-        name for created psi4 file
-    do_fsapt: boolean or None
-        if fsapt needs to be turned off in the psi4 input file this option will be False
 
 
     Returns
@@ -881,7 +868,6 @@ def write_QM(charge_method:str, c_ligand:str, basis_set:str, method:str, PSI4_FI
     c_QM = str(int(c_QM))
 
     #print('num_bonds_broken:', num_bonds_broken)
-    inp_filename = PSI4_FILE_PATH.split('/')[-1]
     MM_for_array = []
     # get QM XYZ
     QM_atoms = with_HL['QM']
@@ -919,10 +905,39 @@ def write_QM(charge_method:str, c_ligand:str, basis_set:str, method:str, PSI4_FI
         #we check for this in the input file so this else shouldn't ever be reached
         print('incorrect charge scheme')
         sys.exit()
-    
-    #write_extern_xyz(f'{charge_method}/extern.xyz', mm_env)
-    #dump_pkl()
-    #write_psi4_file(PSI4_FILE_PATH, lig_charge)
+    return qm_lig, c_QM, qm_pro, mm_env
+
+def write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, do_fsapt: bool = None):
+    """
+    writes Psi4 file
+
+    Parameters
+    ----------
+    c_ligand: str
+        charge of the ligand
+    basis_set: str
+        basis set for the QM computation
+    method: str
+        method for QM energy 
+    PSI4_FILE_PATH: str
+        name for created psi4 file
+    do_fsapt: boolean or None
+        if fsapt needs to be turned off in the psi4 input file this option will be False
+
+    Returns
+    -------
+    None
+    """
+    if qm_pro is None or mm_env is None:
+        c_molecule = c_ligand
+        qm_molecule = qm_lig
+    elif qm_lig is None:
+        c_molecule = c_QM
+        qm_molecule = qm_pro
+    else:
+        c_molecule = str(int(c_ligand) + int(c_QM))
+        qm_molecule = qm_lig + qm_pro
+    inp_filename = PSI4_FILE_PATH.split('/')[-1]
     with open(PSI4_FILE_PATH, 'a') as inpfile:
         inpfile.write("""
 import psi4
@@ -935,31 +950,38 @@ start = time.time()
 psi4.set_memory('70 GB')
 psi4.core.set_num_threads(10)
 
-psi4.core.set_output_file('""" + f"{inp_filename[:-3]}.out'" + """, False)\n
+psi4.core.set_output_file('""" + f"{inp_filename[:-3]}.out'" + """, False)\n""")
 
-
-dimer =psi4.geometry('''\n""" + c_ligand + ' 1\n'
+        if 'sapt' in method.lower():
+            inpfile.write("""dimer =psi4.geometry('''\n""" + c_ligand + ' 1\n'
 + ' '.join(qm_lig) + '--\n' + c_QM + ' 1\n '
-+ ' '.join(qm_pro) + 
-"""units angstrom
++ ' '.join(qm_pro)+"""""")  
+        else:
+            inpfile.write("""mol =psi4.geometry('''\n""" + c_molecule + ' 1\n'
++ ' '.join(qm_molecule) +"""""")  
+        inpfile.write("""units angstrom
 symmetry c1
 no_com
 no_reorient
-''')\n
-Chargefield_B = np.array([\n"""+ 
+''')\n""")
+        if mm_env is not None:
+            inpfile.write("""\nChargefield_B = np.array([\n"""+ 
 ','.join(mm_env)[:-1] +
 """]).reshape((-1,4))\n""" +
-"""Chargefield_B[:,[1,2,3]] /= qcel.constants.bohr2angstroms\n
-psi4.set_options({
-'basis': '""" + basis_set +"""',\n"""+
+"""Chargefield_B[:,[1,2,3]] /= qcel.constants.bohr2angstroms\n""")
+        inpfile.write("""\npsi4.set_options({
+'basis': '""" + basis_set +"""',"""+
 """'freeze_core': 'True',
 'scf_type': 'df',
 'mp2_type': 'df'\n""")
         if do_fsapt == False:
             inpfile.write("'do_fsapt': 'False'\n")
-        inpfile.write("""})\n
-e = psi4.energy('"""+method+"""', external_potentials={'B':Chargefield_B})\n
-
+        inpfile.write("""})\n""")
+        if mm_env is not None:
+            inpfile.write("""\ne = psi4.energy('"""+method+"""', external_potentials={'B':Chargefield_B})\n""")
+        else:
+            inpfile.write("""\ne = psi4.energy('"""+method+"""')\n""")
+        inpfile.write("""
 end=time.time()
 wall_time = '{:.2f}'.format(float(end-start))
 with open ('"""+inp_filename[:-3]+""".out', 'a') as output:
@@ -1022,7 +1044,7 @@ def check_QM_file(psi4file: str) -> None:
         for n,l in enumerate(lines):
             if 'Chargefield' in l:
                 extern_idx.append(n)
-            elif 'dimer' in l:
+            elif 'dimer' in l or 'molecule' in l:
                 dimer_idx.append(n)
             elif '--' in l:
                 prot_idx.append(n)
