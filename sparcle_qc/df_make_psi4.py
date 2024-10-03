@@ -996,6 +996,11 @@ def dump_pkl():
         out.write(json.dumps(results))
 '''
 
+def write_file(software, qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, do_fsapt: bool = None):
+    if software.lower() == 'psi4':
+        write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, do_fsapt)
+
+
 def write_input(inputfile, psi4file):
     """
     Writes the Sparcle-QC input file to the top of the psi4file
