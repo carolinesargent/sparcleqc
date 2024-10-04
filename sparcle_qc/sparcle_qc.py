@@ -14,7 +14,7 @@ from .combine_data import combine_data
 from .cut_protein import run_cut_protein 
 from .convert_dict import convert_dictionary 
 from .move_M3s import move_m3s
-from .df_make_psi4 import write_QM, check_QM_file, write_input 
+from .df_make_psi4 import make_regions, check_QM_file, write_input, write_file
 from .cap import run_cap
 from .make_partition import partition 
 
@@ -162,8 +162,15 @@ def input_parser(filename:str) -> Dict:
                     if value != 'true' and value != 'false':
                         print("Error: Invalid input file. do_fsapt is not true or false")
                         sys.exit()
+                if key_word == 'software':
+                    value = value.lower()
+                    if value not in ['psi4','nwchem', 'q-chem']:
+                        print("Error: Software not supported. Choose psi4, nwchem, or q-chem.")
+                        sys.exit()
                 keywords[key_word]=value
-            
+    if 'software' not in keywords.keys():
+        print('Error: Software not specified. Choose psi4, nwchem, or q-chem.')
+        sys.exit()
     if 'cutoff' not in keywords.keys():
         print('Error: Invalid input file. No cutoff is provided')
         sys.exit()
@@ -372,18 +379,33 @@ def run(input_file) -> None:
             else:
                 run_cap(ff_type = 'charmm', rtf = keywords['charmm_rtf'], prm = keywords['charmm_prm'])
             #redistribute charge based on charge scheme and write QM input file
-            write_input(input_file, f'{new_dir}_psi4_file.py')
-            if 'do_fsapt' in keywords:
-                if keywords['do_fsapt'] == 'false':
-                    write_QM(keywords['charge_scheme'], keywords['ligand_charge'], keywords['basis_set'], keywords['method'], f'{new_dir}_psi4_file.py', False)
+            qm_lig, c_QM, qm_pro, mm_env = make_regions(keywords['charge_scheme'])
+            ext = {'psi4':'.py', 'nwchem':'.in', 'q-chem':'.in'}
+            sapt_inp_filename = f'{new_dir}_' + keywords['software'] + '_file' + ext[keywords['software']]
+            if 'sapt' in keywords['method'].lower():
+                write_input(input_file, sapt_inp_filename)
+                if 'do_fsapt' in keywords:
+                    if keywords['do_fsapt'] == 'false':
+                        write_file(keywords['software'], qm_lig, c_QM, qm_pro, mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], False)
+                    else:
+                        write_file(keywords['software'], qm_lig, c_QM, qm_pro, mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'])
                 else:
-                    write_QM(keywords['charge_scheme'], keywords['ligand_charge'], keywords['basis_set'], keywords['method'], f'{new_dir}_psi4_file.py')
-
+                    write_file(keywords['software'], qm_lig, c_QM, qm_pro, mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'])
+                #check the charges and number of atoms in the written QM input file
+                check_QM_file(sapt_inp_filename)
             else:
-                write_QM(keywords['charge_scheme'], keywords['ligand_charge'], keywords['basis_set'], keywords['method'], f'{new_dir}_psi4_file.py')
+                lig_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_lig' + ext[keywords['software']]
+                write_input(input_file, lig_inp_filename)
+                write_file(keywords['software'], qm_lig, None, None, None, lig_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'])
+                prot_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_prot' + ext[keywords['software']]
+                write_input(input_file, prot_inp_filename)
+                write_file(keywords['software'], None, c_QM, qm_pro, mm_env, prot_inp_filename, None, keywords['method'], keywords['basis_set'])
+                cx_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_cx' + ext[keywords['software']]
+                write_input(input_file, cx_inp_filename)
+                write_file(keywords['software'], qm_lig, c_QM, qm_pro, mm_env, cx_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'])
+                check_QM_file(prot_inp_filename)
+                check_QM_file(cx_inp_filename)
 
-            #check the charges and number of atoms in the written QM input file
-            check_QM_file(f'{new_dir}_psi4_file.py')
         #write fsapt files
         if keywords['fisapt_partition'] == 'true':
             partition('CAPPED_qm.pdb')
