@@ -907,7 +907,7 @@ def make_regions(charge_method:str) -> None:
         sys.exit()
     return qm_lig, c_QM, qm_pro, mm_env
 
-def write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, do_fsapt: bool = None):
+def write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: bool = None):
     """
     writes Psi4 file
 
@@ -921,6 +921,10 @@ def write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:s
         method for QM energy 
     PSI4_FILE_PATH: str
         name for created psi4 file
+    mem: str
+        memory
+    nthreads: str
+        number of threads
     do_fsapt: boolean or None
         if fsapt needs to be turned off in the psi4 input file this option will be False
 
@@ -928,7 +932,9 @@ def write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:s
     -------
     None
     """
-    if qm_pro is None or mm_env is None:
+    print('QM_PRO in write_psi4:\n')
+    print(qm_pro)
+    if qm_pro is None:
         c_molecule = c_ligand
         qm_molecule = qm_lig
     elif qm_lig is None:
@@ -937,6 +943,8 @@ def write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:s
     else:
         c_molecule = str(int(c_ligand) + int(c_QM))
         qm_molecule = qm_lig + qm_pro
+    print('QM_MOLECULE in write_psi4:\n')
+    print(qm_molecule)
     inp_filename = PSI4_FILE_PATH.split('/')[-1]
     with open(PSI4_FILE_PATH, 'a') as inpfile:
         inpfile.write("""
@@ -947,8 +955,8 @@ import time
 
 start = time.time()
 
-psi4.set_memory('70 GB')
-psi4.core.set_num_threads(10)
+psi4.set_memory('""" + mem + """')
+psi4.core.set_num_threads(""" + nthreads + """)
 
 psi4.core.set_output_file('""" + f"{inp_filename[:-3]}.out'" + """, False)\n""")
 
@@ -996,9 +1004,12 @@ def dump_pkl():
         out.write(json.dumps(results))
 '''
 
-def write_file(software, qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, do_fsapt: bool = None):
+def write_file(software, qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: bool = None):
+    """
+    calls appropriate function for writing specific software's input file
+    """
     if software.lower() == 'psi4':
-        write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, do_fsapt)
+        write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, do_fsapt)
 
 
 def write_input(inputfile, psi4file):
@@ -1023,6 +1034,14 @@ def write_input(inputfile, psi4file):
                 psi4file.write(line)
             psi4file.write('"""\n\n')
 
+def ghost(mol):
+    ghost_mol = []
+    for n, i in enumerate(mol):
+        if n%4 == 0:
+            ghost_mol.append('Gh(' + str(i) + ')')
+        else:
+            ghost_mol.append(i)
+    return ghost_mol
 
 def check_QM_file(psi4file: str) -> None:
 
