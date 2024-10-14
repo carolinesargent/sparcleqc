@@ -5,6 +5,7 @@ import os
 import threading
 import itertools
 import time
+import ast
 from typing import Dict
 
 from .amber_prep import write_cpptraj, write_cpptraj_skip_autocap, write_tleap, autocap, skip_autocap, fix_numbers_amber
@@ -63,7 +64,7 @@ def input_parser(filename:str) -> Dict:
             line = line.split('#')[0]
 
             if line not in ["", '\n']:
-                split_line = line.split(':')
+                split_line = line.split(':', 1)
                 key_word = split_line[0].strip()
                 try:
                     value = split_line[1].strip()
@@ -239,6 +240,24 @@ def input_parser(filename:str) -> Dict:
         keywords['nthreads'] = '1'
     if 'cp' not in keywords.keys():
         keywords['cp'] = 'true'
+    if 'nwchem_scratch' not in keywords.keys():
+        keywords['nwchem_scratch'] = None
+    if 'nwchem_perm' not in keywords.keys():
+        keywords['nwchem_perm'] = None
+    if 'nwchem_scf' in keywords.keys():
+        keywords['nwchem_scf'] = ast.literal_eval(keywords['nwchem_scf'])
+        if isinstance(keywords['nwchem_scf'], dict) is False:
+            print('nwchem_scf is not a dictionary')
+            sys.exit()
+    else:
+        keywords['nwchem_scf'] = None
+    if 'nwchem_dft' in keywords.keys():
+        keywords['nwchem_dft'] = ast.literal_eval(keywords['nwchem_dft'])
+        if isinstance(keywords['nwchem_dft'], dict) is False:
+            print('nwchem_dft is not a dictionary')
+            sys.exit()
+    else:
+        keywords['nwchem_dft'] = None
 
     print(f"\u2728Sparcle-QC is sparkling\u2728\nBeginning file preparation for an embedded QM calculation of {keywords['pdb_file']} ")
     
@@ -406,22 +425,23 @@ def run(input_file) -> None:
                 check_QM_file(sapt_inp_filename)
             else:
                 if keywords['cp'] == 'true':
-                    ghost_lig = ghost(qm_lig)
-                    ghost_pro = ghost(qm_pro)
+                    ghost_lig, lig_uniq_elements = ghost(qm_lig, keywords['software'])
+                    ghost_pro, prot_uniq_elements = ghost(qm_pro, keywords['software'])
                     ghost_charge = 0
                 else:
                     ghost_lig = None
                     ghost_pro = None
                     ghost_charge = None
+                print('sparcle nwchem_dft:', keywords['nwchem_dft'])
                 lig_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_lig' + ext[keywords['software']]
                 write_input(input_file, lig_inp_filename)
-                write_file(keywords['software'], qm_lig, ghost_charge, ghost_pro, None, lig_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'])
+                write_file(keywords['software'], qm_lig, ghost_charge, ghost_pro, None, lig_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'])
                 prot_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_prot' + ext[keywords['software']]
                 write_input(input_file, prot_inp_filename)
-                write_file(keywords['software'], ghost_lig, c_QM, qm_pro, mm_env, prot_inp_filename, ghost_charge, keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'])
+                write_file(keywords['software'], ghost_lig, c_QM, qm_pro, mm_env, prot_inp_filename, ghost_charge, keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'])
                 cx_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_cx' + ext[keywords['software']]
                 write_input(input_file, cx_inp_filename)
-                write_file(keywords['software'], qm_lig, c_QM, qm_pro, mm_env, cx_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'])
+                write_file(keywords['software'], qm_lig, c_QM, qm_pro, mm_env, cx_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'])
                 check_QM_file(prot_inp_filename)
                 check_QM_file(cx_inp_filename)
 

@@ -1070,7 +1070,80 @@ def qchem_mm_format(mm):
             qchem_mm.append(str(mm[n])+'\n')
     return qchem_mm
 
-def write_file(software, qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: bool = None):
+def write_nwchem_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: bool = None, nwchem_scratch:str = None, nwchem_perm:str = None, nwchem_scf:dict = None, nwchem_dft:dict = None):
+    print('write_nwchem nwchem_scf:', nwchem_scf)
+    print('write_nwchem nwchem_dft:', nwchem_dft)
+
+    """
+    writes NWChem file
+
+    Parameters
+    ----------
+    c_ligand: str
+        charge of the ligand
+    basis_set: str
+        basis set for the QM computation
+    method: str
+        method for QM energy 
+    PSI4_FILE_PATH: str
+        name for created psi4 file
+    mem: str
+        memory
+    nthreads: str
+        number of threads
+    do_fsapt: boolean or None
+        if fsapt needs to be turned off in the psi4 input file this option will be False
+
+    Returns
+    -------
+    None
+    """
+    if qm_pro is None:
+        c_molecule = c_ligand
+        qm_molecule = qm_lig
+    elif qm_lig is None:
+        c_molecule = c_QM
+        qm_molecule = qm_pro
+    else:
+        c_molecule = str(int(c_ligand) + int(c_QM))
+        qm_molecule = qm_lig + qm_pro
+    print('QM_MOLECULE in write_psi4:\n')
+    print(qm_molecule)
+    inp_filename = PSI4_FILE_PATH.split('/')[-1]
+    with open(PSI4_FILE_PATH, 'a') as inpfile:
+        inpfile.write("""START
+SCRATCH_DIR """ + nwchem_scratch +
+"""\nPERMANENT_DIR """ + nwchem_perm +
+"""\nMEMORY """ + mem + 
+"""\n\ngeometry\n""")
+        if 'sapt' in method.lower():
+            inpfile.write("""dimer =psi4.geometry('''\n""" + c_ligand + ' 1\n'
++ ' '.join(qm_lig) + '--\n' + c_QM + ' 1\n '
++ ' '.join(qm_pro)+"""""")  
+        else:
+            inpfile.write(c_molecule + ' 1\n'
++ ' '.join(qm_molecule) + 'end\n')  
+        if mm_env is not None:
+            inpfile.write("""\nbq\n    """+ 
+'    '.join(mm_env) +
+"""end\n""")
+        inpfile.write("""\nbasis
+* library """ + basis_set +
+"""\nend\n""")
+        if nwchem_scf is not None:
+            inpfile.write("""\nSCF\n""")
+            for k, v in nwchem_scf.items():
+                inpfile.write(f'{k} {v}\n')
+            inpfile.write("""END\n""")
+        if nwchem_dft is not None:
+            inpfile.write("""\nDFT\n""")
+            for k, v in nwchem_dft.items():
+                inpfile.write(f'{k} {v}\n')
+            inpfile.write("""END\n""")
+        inpfile.write("""\ntask """ + method +""" energy""")
+
+
+def write_file(software, qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: bool = None, nwchem_scratch = None, nwchem_perm = None, nwchem_scf = None, nwchem_dft = None):
     """
     calls appropriate function for writing specific software's input file
     """
@@ -1082,6 +1155,14 @@ def write_file(software, qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_lig
         else:
             qchem_mm_env = None
         write_qchem_file(qm_lig, c_QM, qm_pro, qchem_mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, do_fsapt)
+    if software.lower() == 'nwchem':
+        print('write_file nwchem_scf:', nwchem_scf)
+        print('write_file nwchem_dft:', nwchem_dft)
+        if mm_env is not None:
+            qchem_mm_env = qchem_mm_format(mm_env)
+        else:
+            qchem_mm_env = None
+        write_nwchem_file(qm_lig, c_QM, qm_pro, qchem_mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, do_fsapt, nwchem_scratch, nwchem_perm, nwchem_scf, nwchem_dft)
 
 
 def write_input(inputfile, psi4file):
@@ -1106,17 +1187,26 @@ def write_input(inputfile, psi4file):
                 psi4file.write(line)
             psi4file.write('"""\n\n')
 
-def ghost(mol):
+def ghost(mol, software):
     """
     Makes atoms ghost for Psi4 and Q-Chem
     """
     ghost_mol = []
+    elements = []
     for n, i in enumerate(mol):
         if n%4 == 0:
-            ghost_mol.append('@' + str(i))
+            if software != 'nwchem':
+                ghost_mol.append('@' + str(i))
+            else:
+                ghost_mol.append('bq' + str(i))
+                elements.append(i)
         else:
             ghost_mol.append(i)
-    return ghost_mol
+    if software == 'nwchem':
+        uniq_elements = list(set(elements))
+    else:
+        uniq_elements = None
+    return ghost_mol, uniq_elements
 
 def check_QM_file(psi4file: str) -> None:
 
