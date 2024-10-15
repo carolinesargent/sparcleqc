@@ -243,6 +243,8 @@ def input_parser(filename:str) -> Dict:
     if 'nwchem_scratch' not in keywords.keys() and keywords['software'].lower() == 'nwchem':
         print('Error: nwchem_scratch not provided.')
         sys.exit()
+    if 'nwchem_scratch' not in keywords.keys():
+        keywords['nwchem_scratch'] = None
     if 'nwchem_perm' not in keywords.keys() and keywords['software'].lower() == 'nwchem':
         print('Error: nwchem_perm not provided')
         sys.exit()
@@ -469,7 +471,6 @@ def run(input_file) -> None:
                     else:
                         write_file(keywords['software'], qm_lig, c_QM, qm_pro, '', mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], True, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'], keywords['qchem_sapt'])
                 else:
-                    print('else 2')
                     write_file(keywords['software'], qm_lig, c_QM, qm_pro, '', mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'], keywords['qchem_sapt'])
                 #check the charges and number of atoms in the written QM input file
                 check_QM_file(sapt_inp_filename)
