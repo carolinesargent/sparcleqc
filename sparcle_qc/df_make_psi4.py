@@ -1070,7 +1070,7 @@ def qchem_mm_format(mm):
             qchem_mm.append(str(mm[n])+'\n')
     return qchem_mm
 
-def write_nwchem_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: bool = None, nwchem_scratch:str = None, nwchem_perm:str = None, nwchem_scf:dict = None, nwchem_dft:dict = None):
+def write_nwchem_file(qm_lig, c_QM, qm_pro, uniq_elements, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: bool = None, nwchem_scratch:str = None, nwchem_perm:str = None, nwchem_scf:dict = None, nwchem_dft:dict = None):
     print('write_nwchem nwchem_scf:', nwchem_scf)
     print('write_nwchem nwchem_dft:', nwchem_dft)
 
@@ -1128,8 +1128,11 @@ SCRATCH_DIR """ + nwchem_scratch +
 '    '.join(mm_env) +
 """end\n""")
         inpfile.write("""\nbasis
-* library """ + basis_set +
-"""\nend\n""")
+* library """ + basis_set + '\n')
+        if uniq_elements is not None:
+            for x in uniq_elements:
+                inpfile.write(f'bq{x} library {x} {basis_set}\n')
+        inpfile.write("end\n")
         if nwchem_scf is not None:
             inpfile.write("""\nSCF\n""")
             for k, v in nwchem_scf.items():
@@ -1143,7 +1146,7 @@ SCRATCH_DIR """ + nwchem_scratch +
         inpfile.write("""\ntask """ + method +""" energy""")
 
 
-def write_file(software, qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: bool = None, nwchem_scratch = None, nwchem_perm = None, nwchem_scf = None, nwchem_dft = None):
+def write_file(software, qm_lig, c_QM, qm_pro, uniq_gh_elements, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: bool = None, nwchem_scratch = None, nwchem_perm = None, nwchem_scf = None, nwchem_dft = None):
     """
     calls appropriate function for writing specific software's input file
     """
@@ -1162,7 +1165,7 @@ def write_file(software, qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_lig
             qchem_mm_env = qchem_mm_format(mm_env)
         else:
             qchem_mm_env = None
-        write_nwchem_file(qm_lig, c_QM, qm_pro, qchem_mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, do_fsapt, nwchem_scratch, nwchem_perm, nwchem_scf, nwchem_dft)
+        write_nwchem_file(qm_lig, c_QM, qm_pro, uniq_gh_elements, qchem_mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, do_fsapt, nwchem_scratch, nwchem_perm, nwchem_scf, nwchem_dft)
 
 
 def write_input(inputfile, psi4file):
