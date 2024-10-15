@@ -906,7 +906,7 @@ def make_regions(charge_method:str) -> None:
         sys.exit()
     return qm_lig, c_QM, qm_pro, mm_env
 
-def write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, psi4_options, do_fsapt: bool = None):
+def write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, psi4_options, do_fsapt:str = None):
     """
     writes Psi4 file
 
@@ -924,7 +924,7 @@ def write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:s
         memory
     nthreads: str
         number of threads
-    do_fsapt: boolean or None
+    do_fsapt: false or None
         if fsapt needs to be turned off in the psi4 input file this option will be False
 
     Returns
@@ -974,10 +974,14 @@ no_reorient
 """Chargefield_B[:,[1,2,3]] /= qcel.constants.bohr2angstroms\n""")
         inpfile.write("""\npsi4.set_options({
 'basis': '""" + basis_set +"""',\n""")
-        for k,v in psi4_options.items():
-            inpfile.write(f"""'{k}':'{v}',\n""")
-        if do_fsapt == False:
-            inpfile.write("'do_fsapt': 'False'\n")
+        if do_fsapt is not None:
+            if do_fsapt.lower() == 'false':
+                inpfile.write("'do_fsapt': 'false',\n")
+        for ind, (k,v) in enumerate(psi4_options.items()):
+            if ind < len(psi4_options) - 1:
+                inpfile.write(f"""'{k}':'{v}',\n""")
+            else:
+                inpfile.write(f"""'{k}':'{v}'\n""")
         inpfile.write("""})\n""")
         if mm_env is not None:
             inpfile.write("""\ne = psi4.energy('"""+method+"""', external_potentials={'B':Chargefield_B})\n""")
@@ -1073,7 +1077,7 @@ def qchem_mm_format(mm):
             qchem_mm.append(str(mm[n])+'\n')
     return qchem_mm
 
-def write_nwchem_file(qm_lig, c_QM, qm_pro, uniq_elements, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: bool = None, nwchem_scratch:str = None, nwchem_perm:str = None, nwchem_scf:dict = None, nwchem_dft:dict = None):
+def write_nwchem_file(qm_lig, c_QM, qm_pro, uniq_elements, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, nwchem_scratch:str = None, nwchem_perm:str = None, nwchem_scf:dict = None, nwchem_dft:dict = None):
     print('write_nwchem nwchem_scf:', nwchem_scf)
     print('write_nwchem nwchem_dft:', nwchem_dft)
 
@@ -1094,7 +1098,7 @@ def write_nwchem_file(qm_lig, c_QM, qm_pro, uniq_elements, mm_env, PSI4_FILE_PAT
         memory
     nthreads: str
         number of threads
-    do_fsapt: boolean or None
+    do_fsapt: str or None
         if fsapt needs to be turned off in the psi4 input file this option will be False
 
     Returns
@@ -1142,7 +1146,7 @@ SCRATCH_DIR """ + nwchem_scratch +
         inpfile.write("""\ntask """ + method +""" energy""")
 
 
-def write_file(software, qm_lig, c_QM, qm_pro, uniq_gh_elements, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: bool = None, nwchem_scratch = None, nwchem_perm = None, nwchem_scf = None, nwchem_dft = None, psi4_options = None, qchem_options = None, qchem_sapt = None):
+def write_file(software, qm_lig, c_QM, qm_pro, uniq_gh_elements, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: str = None, nwchem_scratch = None, nwchem_perm = None, nwchem_scf = None, nwchem_dft = None, psi4_options = None, qchem_options = None, qchem_sapt = None):
     """
     calls appropriate function for writing specific software's input file
     """
@@ -1162,7 +1166,7 @@ def write_file(software, qm_lig, c_QM, qm_pro, uniq_gh_elements, mm_env, PSI4_FI
             qchem_mm_env = qchem_mm_format(mm_env)
         else:
             qchem_mm_env = None
-        write_nwchem_file(qm_lig, c_QM, qm_pro, uniq_gh_elements, qchem_mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, do_fsapt, nwchem_scratch, nwchem_perm, nwchem_scf, nwchem_dft)
+        write_nwchem_file(qm_lig, c_QM, qm_pro, uniq_gh_elements, qchem_mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, nwchem_scratch, nwchem_perm, nwchem_scf, nwchem_dft)
 
 
 def write_input(inputfile, psi4file):

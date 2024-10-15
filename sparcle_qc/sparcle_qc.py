@@ -158,11 +158,6 @@ def input_parser(filename:str) -> Dict:
                     if os.path.isfile(value) == False:
                         print('Error: Invalid input file. Path to template PDB does not exist')
                         sys.exit()
-                if key_word == 'do_fsapt':
-                    value = value.lower()
-                    if value != 'true' and value != 'false':
-                        print("Error: Invalid input file. do_fsapt is not true or false")
-                        sys.exit()
                 if key_word == 'software':
                     value = value.lower()
                     if value not in ['psi4','nwchem', 'q-chem']:
@@ -225,8 +220,8 @@ def input_parser(filename:str) -> Dict:
             sys.exit()
     if 'fisapt_partition' not in keywords.keys():
         keywords['fisapt_partition'] = 'false'
-    #if 'do_fsapt' not in keywords.keys():
-    #    keywords['do_fsapt'] = 'none'
+    if 'do_fsapt' not in keywords.keys():
+        keywords['do_fsapt'] = None
     if 'ep_charge' in keywords.keys():
         try:
             o_charge = keywords['o_charge']
@@ -465,14 +460,8 @@ def run(input_file) -> None:
             sapt_inp_filename = f'{new_dir}_' + keywords['software'] + '_file' + ext[keywords['software']]
             if 'sapt' in keywords['method'].lower():
                 write_input(input_file, sapt_inp_filename)
-                if 'do_fsapt' in keywords:
-                    if keywords['do_fsapt'] == 'false':
-                        write_file(keywords['software'], qm_lig, c_QM, qm_pro, '', mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], False, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'], keywords['qchem_sapt'])
-                    else:
-                        write_file(keywords['software'], qm_lig, c_QM, qm_pro, '', mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], True, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'], keywords['qchem_sapt'])
-                else:
-                    write_file(keywords['software'], qm_lig, c_QM, qm_pro, '', mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'], keywords['qchem_sapt'])
-                #check the charges and number of atoms in the written QM input file
+                write_file(keywords['software'], qm_lig, c_QM, qm_pro, '', mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], keywords['do_fsapt'], keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'], keywords['qchem_sapt'])
+#                #check the charges and number of atoms in the written QM input file
                 check_QM_file(sapt_inp_filename)
             else:
                 if keywords['cp'] == 'true':
