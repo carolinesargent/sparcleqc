@@ -906,7 +906,7 @@ def make_regions(charge_method:str) -> None:
         sys.exit()
     return qm_lig, c_QM, qm_pro, mm_env
 
-def write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: bool = None):
+def write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, psi4_options, do_fsapt: bool = None):
     """
     writes Psi4 file
 
@@ -977,10 +977,9 @@ no_reorient
 """]).reshape((-1,4))\n""" +
 """Chargefield_B[:,[1,2,3]] /= qcel.constants.bohr2angstroms\n""")
         inpfile.write("""\npsi4.set_options({
-'basis': '""" + basis_set +"""',"""+
-"""'freeze_core': 'True',
-'scf_type': 'df',
-'mp2_type': 'df'\n""")
+'basis': '""" + basis_set +"""',\n""")
+        for k,v in psi4_options.items():
+            inpfile.write(f"""'{k}':'{v}',\n""")
         if do_fsapt == False:
             inpfile.write("'do_fsapt': 'False'\n")
         inpfile.write("""})\n""")
@@ -1003,7 +1002,7 @@ def dump_pkl():
         out.write(json.dumps(results))
 '''
 
-def write_qchem_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: bool = None):
+def write_qchem_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, qchem_options):
     """
     writes Q-Chem file
 
@@ -1057,8 +1056,11 @@ def write_qchem_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:
         inpfile.write("""\n$rem
 JOB_TYPE sp
 METHOD """ + method +
-"""\nBASIS """ + basis_set + 
-"""\n$end\n""")
+"""\nBASIS """ + basis_set + '\n')
+        if qchem_options is not None:
+            for k, v in qchem_options.items():
+                inpfile.write(f'{k} {v}\n')
+        inpfile.write("$end\n")
 
 def qchem_mm_format(mm):
     qchem_mm = []
@@ -1115,7 +1117,7 @@ def write_nwchem_file(qm_lig, c_QM, qm_pro, uniq_elements, mm_env, PSI4_FILE_PAT
 SCRATCH_DIR """ + nwchem_scratch +
 """\nPERMANENT_DIR """ + nwchem_perm +
 """\nMEMORY """ + mem + 
-"""\n\ngeometry\n""")
+"""\n\ngeometry nocenter noautoz noautosym\n""")
         if 'sapt' in method.lower():
             inpfile.write("""dimer =psi4.geometry('''\n""" + c_ligand + ' 1\n'
 + ' '.join(qm_lig) + '--\n' + c_QM + ' 1\n '
@@ -1146,18 +1148,18 @@ SCRATCH_DIR """ + nwchem_scratch +
         inpfile.write("""\ntask """ + method +""" energy""")
 
 
-def write_file(software, qm_lig, c_QM, qm_pro, uniq_gh_elements, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: bool = None, nwchem_scratch = None, nwchem_perm = None, nwchem_scf = None, nwchem_dft = None):
+def write_file(software, qm_lig, c_QM, qm_pro, uniq_gh_elements, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: bool = None, nwchem_scratch = None, nwchem_perm = None, nwchem_scf = None, nwchem_dft = None, psi4_options = None, qchem_options = None):
     """
     calls appropriate function for writing specific software's input file
     """
     if software.lower() == 'psi4':
-        write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, do_fsapt)
+        write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, psi4_options, do_fsapt)
     if software.lower() == 'q-chem':
         if mm_env is not None:
             qchem_mm_env = qchem_mm_format(mm_env)
         else:
             qchem_mm_env = None
-        write_qchem_file(qm_lig, c_QM, qm_pro, qchem_mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, do_fsapt)
+        write_qchem_file(qm_lig, c_QM, qm_pro, qchem_mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, qchem_options)
     if software.lower() == 'nwchem':
         print('write_file nwchem_scf:', nwchem_scf)
         print('write_file nwchem_dft:', nwchem_dft)

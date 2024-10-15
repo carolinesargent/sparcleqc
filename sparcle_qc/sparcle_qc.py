@@ -240,25 +240,49 @@ def input_parser(filename:str) -> Dict:
         keywords['nthreads'] = '1'
     if 'cp' not in keywords.keys():
         keywords['cp'] = 'true'
-    if 'nwchem_scratch' not in keywords.keys():
-        keywords['nwchem_scratch'] = None
+    if 'nwchem_scratch' not in keywords.keys() and keywords['software'].lower() == 'nwchem':
+        print('Error: nwchem_scratch not provided.')
+        sys.exit()
+    if 'nwchem_perm' not in keywords.keys() and keywords['software'].lower() == 'nwchem':
+        print('Error: nwchem_perm not provided')
+        sys.exit()
     if 'nwchem_perm' not in keywords.keys():
         keywords['nwchem_perm'] = None
     if 'nwchem_scf' in keywords.keys():
         keywords['nwchem_scf'] = ast.literal_eval(keywords['nwchem_scf'])
         if isinstance(keywords['nwchem_scf'], dict) is False:
-            print('nwchem_scf is not a dictionary')
+            print('Error: nwchem_scf is not a dictionary')
             sys.exit()
     else:
         keywords['nwchem_scf'] = None
     if 'nwchem_dft' in keywords.keys():
         keywords['nwchem_dft'] = ast.literal_eval(keywords['nwchem_dft'])
         if isinstance(keywords['nwchem_dft'], dict) is False:
-            print('nwchem_dft is not a dictionary')
+            print('Error: nwchem_dft is not a dictionary')
             sys.exit()
     else:
-        keywords['nwchem_dft'] = None
-
+        if keywords['method'].lower() == 'dft':
+            keywords['nwchem_dft'] = {'xc':'b3lyp'}
+        else:
+            keywords['nwchem_dft'] = None
+    if 'psi4_options' in keywords.keys():
+        keywords['psi4_options'] = ast.literal_eval(keywords['psi4_options'])
+        if isinstance (keywords['psi4_options'], dict) is False:
+            print('Error: psi4_options is not a dictionary')
+            sys.exit()
+    else:
+        keywords['psi4_options'] = {}
+    if 'freeze_core' not in (key.lower() for key in keywords['psi4_options'].keys()):
+        keywords['psi4_options']['freeze_core'] = 'true'
+    if 'scf_type' not in (key.lower() for key in keywords['psi4_options'].keys()):
+        keywords['psi4_options']['scf_type'] = 'df'
+    if 'qchem_options' in keywords.keys():
+        keywords['qchem_options'] = ast.literal_eval(keywords['qchem_options'])
+        if isinstance (keywords['qchem_options'], dict) is False:
+            print('Error: qchem_options is not a dictionary')
+            sys.exit()
+    else:
+        keywords['qchem_options'] = None
     print(f"\u2728Sparcle-QC is sparkling\u2728\nBeginning file preparation for an embedded QM calculation of {keywords['pdb_file']} ")
     
     return keywords
@@ -437,13 +461,13 @@ def run(input_file) -> None:
                 print('sparcle nwchem_dft:', keywords['nwchem_dft'])
                 lig_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_lig' + ext[keywords['software']]
                 write_input(input_file, lig_inp_filename)
-                write_file(keywords['software'], qm_lig, ghost_charge, ghost_pro, prot_uniq_elements, None, lig_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'])
+                write_file(keywords['software'], qm_lig, ghost_charge, ghost_pro, prot_uniq_elements, None, lig_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
                 prot_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_prot' + ext[keywords['software']]
                 write_input(input_file, prot_inp_filename)
-                write_file(keywords['software'], ghost_lig, c_QM, qm_pro, lig_uniq_elements, mm_env, prot_inp_filename, ghost_charge, keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'])
+                write_file(keywords['software'], ghost_lig, c_QM, qm_pro, lig_uniq_elements, mm_env, prot_inp_filename, ghost_charge, keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
                 cx_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_cx' + ext[keywords['software']]
                 write_input(input_file, cx_inp_filename)
-                write_file(keywords['software'], qm_lig, c_QM, qm_pro, None, mm_env, cx_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'])
+                write_file(keywords['software'], qm_lig, c_QM, qm_pro, None, mm_env, cx_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
                 check_QM_file(prot_inp_filename)
                 check_QM_file(cx_inp_filename)
 
