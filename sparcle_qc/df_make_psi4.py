@@ -976,7 +976,7 @@ no_reorient
 'basis': '""" + basis_set +"""',\n""")
         if do_fsapt is not None:
             if do_fsapt.lower() == 'false':
-                inpfile.write("'do_fsapt': 'false',\n")
+                inpfile.write("'fisapt_do_fsapt': 'false',\n")
         for ind, (k,v) in enumerate(psi4_options.items()):
             if ind < len(psi4_options) - 1:
                 inpfile.write(f"""'{k}':'{v}',\n""")
