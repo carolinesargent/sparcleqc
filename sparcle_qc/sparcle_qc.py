@@ -225,8 +225,8 @@ def input_parser(filename:str) -> Dict:
             sys.exit()
     if 'fisapt_partition' not in keywords.keys():
         keywords['fisapt_partition'] = 'false'
-    if 'do_fsapt' not in keywords.keys():
-        keywords['do_fsapt'] = 'none'
+    #if 'do_fsapt' not in keywords.keys():
+    #    keywords['do_fsapt'] = 'none'
     if 'ep_charge' in keywords.keys():
         try:
             o_charge = keywords['o_charge']
@@ -281,8 +281,33 @@ def input_parser(filename:str) -> Dict:
         if isinstance (keywords['qchem_options'], dict) is False:
             print('Error: qchem_options is not a dictionary')
             sys.exit()
+    elif keywords['software'].lower() == 'q-chem':
+        keywords['qchem_options'] = {}
+        if 'jobtype' not in (key.lower() for key in keywords['qchem_options'].keys()):
+            if 'sapt' in keywords['method']:
+                keywords['qchem_options']['JOBTYPE'] = 'xsapt'
+            else:
+                keywords['qchem_options']['JOBTYPE'] = 'sp'
     else:
         keywords['qchem_options'] = None
+    print(keywords['qchem_options'])
+    if 'qchem_sapt' in keywords.keys():
+        keywords['qchem_sapt'] = ast.literal_eval(keywords['qchem_sapt'])
+        if isinstance (keywords['qchem_sapt'], dict) is False:
+            print('Error: qchem_sapt is not a dictionary')
+            sys.exit()
+    else:
+        keywords['qchem_sapt'] = {}
+    if keywords['method'].lower() == 'sapt0' and keywords['software'] == 'q-chem':
+        if 'algorithm' not in (key.lower() for key in keywords['qchem_sapt'].keys()):
+            keywords['qchem_sapt']['algorithm'] = 'ri-mo'
+        if 'basis' not in (key.lower() for key in keywords['qchem_sapt'].keys()):
+            keywords['qchem_sapt']['basis'] = 'dimer'
+    else:
+        keywords['qchem_sapt'] = None
+    if keywords['software'] == 'nwchem' and 'sapt' in keywords['method']:
+        print('Error: SAPT is not available in NWChem. Choose a different method.')
+        sys.exit()
     print(f"\u2728Sparcle-QC is sparkling\u2728\nBeginning file preparation for an embedded QM calculation of {keywords['pdb_file']} ")
     
     return keywords
@@ -440,11 +465,12 @@ def run(input_file) -> None:
                 write_input(input_file, sapt_inp_filename)
                 if 'do_fsapt' in keywords:
                     if keywords['do_fsapt'] == 'false':
-                        write_file(keywords['software'], qm_lig, c_QM, qm_pro, mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], False)
+                        write_file(keywords['software'], qm_lig, c_QM, qm_pro, '', mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], False, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'], keywords['qchem_sapt'])
                     else:
-                        write_file(keywords['software'], qm_lig, c_QM, qm_pro, mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'])
+                        write_file(keywords['software'], qm_lig, c_QM, qm_pro, '', mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], True, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'], keywords['qchem_sapt'])
                 else:
-                    write_file(keywords['software'], qm_lig, c_QM, qm_pro, mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'])
+                    print('else 2')
+                    write_file(keywords['software'], qm_lig, c_QM, qm_pro, '', mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'], keywords['qchem_sapt'])
                 #check the charges and number of atoms in the written QM input file
                 check_QM_file(sapt_inp_filename)
             else:
@@ -461,7 +487,7 @@ def run(input_file) -> None:
                 print('sparcle nwchem_dft:', keywords['nwchem_dft'])
                 lig_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_lig' + ext[keywords['software']]
                 write_input(input_file, lig_inp_filename)
-                write_file(keywords['software'], qm_lig, ghost_charge, ghost_pro, prot_uniq_elements, None, lig_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
+                write_file(keywords['software'], qm_lig, ghost_charge, ghost_pro, prot_uniq_elements, None, lig_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], False, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
                 prot_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_prot' + ext[keywords['software']]
                 write_input(input_file, prot_inp_filename)
                 write_file(keywords['software'], ghost_lig, c_QM, qm_pro, lig_uniq_elements, mm_env, prot_inp_filename, ghost_charge, keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])

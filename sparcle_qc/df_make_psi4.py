@@ -931,19 +931,15 @@ def write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:s
     -------
     None
     """
-    print('QM_PRO in write_psi4:\n')
-    print(qm_pro)
     if qm_pro is None:
         c_molecule = c_ligand
         qm_molecule = qm_lig
     elif qm_lig is None:
         c_molecule = c_QM
         qm_molecule = qm_pro
-    else:
+    elif 'sapt' not in method.lower():
         c_molecule = str(int(c_ligand) + int(c_QM))
         qm_molecule = qm_lig + qm_pro
-    print('QM_MOLECULE in write_psi4:\n')
-    print(qm_molecule)
     inp_filename = PSI4_FILE_PATH.split('/')[-1]
     with open(PSI4_FILE_PATH, 'a') as inpfile:
         inpfile.write("""
@@ -1002,7 +998,8 @@ def dump_pkl():
         out.write(json.dumps(results))
 '''
 
-def write_qchem_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, qchem_options):
+def write_qchem_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, qchem_options, qchem_sapt):
+    print('start write_qchem')
     """
     writes Q-Chem file
 
@@ -1033,19 +1030,16 @@ def write_qchem_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:
     elif qm_lig is None:
         c_molecule = c_QM
         qm_molecule = qm_pro
-    else:
+    elif 'sapt' not in method.lower():
         c_molecule = str(int(c_ligand) + int(c_QM))
         qm_molecule = qm_lig + qm_pro
-    print('QM_MOLECULE in write_psi4:\n')
-    print(qm_molecule)
     inp_filename = PSI4_FILE_PATH.split('/')[-1]
     with open(PSI4_FILE_PATH, 'a') as inpfile:
         inpfile.write("""$molcule\n""")
-
         if 'sapt' in method.lower():
-            inpfile.write("""dimer =psi4.geometry('''\n""" + c_ligand + ' 1\n'
+            inpfile.write(c_ligand + ' 1\n'
 + ' '.join(qm_lig) + '--\n' + c_QM + ' 1\n '
-+ ' '.join(qm_pro)+"""""")  
++ ' '.join(qm_pro)+'$end\n')  
         else:
             inpfile.write(c_molecule + ' 1\n'
 + ' '.join(qm_molecule) + '$end\n')  
@@ -1053,14 +1047,21 @@ def write_qchem_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:
             inpfile.write("""\n$external_charges\n    """+ 
 '    '.join(mm_env) +
 """$end\n""")
+    if 'sapt' in method.lower():
+        method = 'hf'
+    with open(PSI4_FILE_PATH, 'a') as inpfile:
         inpfile.write("""\n$rem
-JOB_TYPE sp
 METHOD """ + method +
 """\nBASIS """ + basis_set + '\n')
         if qchem_options is not None:
             for k, v in qchem_options.items():
                 inpfile.write(f'{k} {v}\n')
         inpfile.write("$end\n")
+        if qchem_sapt is not None:
+            inpfile.write("\n$sapt\n")
+            for k, v in qchem_sapt.items():
+                inpfile.write(f'{k} {v}\n')
+            inpfile.write("$end\n")
 
 def qchem_mm_format(mm):
     qchem_mm = []
@@ -1106,11 +1107,9 @@ def write_nwchem_file(qm_lig, c_QM, qm_pro, uniq_elements, mm_env, PSI4_FILE_PAT
     elif qm_lig is None:
         c_molecule = c_QM
         qm_molecule = qm_pro
-    else:
+    elif 'sapt' not in method.lower():
         c_molecule = str(int(c_ligand) + int(c_QM))
         qm_molecule = qm_lig + qm_pro
-    print('QM_MOLECULE in write_psi4:\n')
-    print(qm_molecule)
     inp_filename = PSI4_FILE_PATH.split('/')[-1]
     with open(PSI4_FILE_PATH, 'a') as inpfile:
         inpfile.write("""START
@@ -1118,12 +1117,7 @@ SCRATCH_DIR """ + nwchem_scratch +
 """\nPERMANENT_DIR """ + nwchem_perm +
 """\nMEMORY """ + mem + 
 """\n\ngeometry nocenter noautoz noautosym\n""")
-        if 'sapt' in method.lower():
-            inpfile.write("""dimer =psi4.geometry('''\n""" + c_ligand + ' 1\n'
-+ ' '.join(qm_lig) + '--\n' + c_QM + ' 1\n '
-+ ' '.join(qm_pro)+"""""")  
-        else:
-            inpfile.write(c_molecule + ' 1\n'
+        inpfile.write(c_molecule + ' 1\n'
 + ' '.join(qm_molecule) + 'end\n')  
         if mm_env is not None:
             inpfile.write("""\nbq\n    """+ 
@@ -1148,7 +1142,7 @@ SCRATCH_DIR """ + nwchem_scratch +
         inpfile.write("""\ntask """ + method +""" energy""")
 
 
-def write_file(software, qm_lig, c_QM, qm_pro, uniq_gh_elements, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: bool = None, nwchem_scratch = None, nwchem_perm = None, nwchem_scf = None, nwchem_dft = None, psi4_options = None, qchem_options = None):
+def write_file(software, qm_lig, c_QM, qm_pro, uniq_gh_elements, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: bool = None, nwchem_scratch = None, nwchem_perm = None, nwchem_scf = None, nwchem_dft = None, psi4_options = None, qchem_options = None, qchem_sapt = None):
     """
     calls appropriate function for writing specific software's input file
     """
@@ -1159,7 +1153,8 @@ def write_file(software, qm_lig, c_QM, qm_pro, uniq_gh_elements, mm_env, PSI4_FI
             qchem_mm_env = qchem_mm_format(mm_env)
         else:
             qchem_mm_env = None
-        write_qchem_file(qm_lig, c_QM, qm_pro, qchem_mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, qchem_options)
+        print('in write_file')
+        write_qchem_file(qm_lig, c_QM, qm_pro, qchem_mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, qchem_options, qchem_sapt)
     if software.lower() == 'nwchem':
         print('write_file nwchem_scf:', nwchem_scf)
         print('write_file nwchem_dft:', nwchem_dft)
