@@ -287,7 +287,6 @@ def input_parser(filename:str) -> Dict:
                 keywords['qchem_options']['JOBTYPE'] = 'sp'
     else:
         keywords['qchem_options'] = None
-    print(keywords['qchem_options'])
     if 'qchem_sapt' in keywords.keys():
         keywords['qchem_sapt'] = ast.literal_eval(keywords['qchem_sapt'])
         if isinstance (keywords['qchem_sapt'], dict) is False:
@@ -474,7 +473,6 @@ def run(input_file) -> None:
                     lig_uniq_elements = None
                     prot_uniq_elements = None
                     ghost_charge = None
-                print('sparcle nwchem_dft:', keywords['nwchem_dft'])
                 lig_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_lig' + ext[keywords['software']]
                 write_input(input_file, lig_inp_filename)
                 write_file(keywords['software'], qm_lig, ghost_charge, ghost_pro, prot_uniq_elements, None, lig_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], False, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])

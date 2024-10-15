@@ -1160,8 +1160,6 @@ def write_file(software, qm_lig, c_QM, qm_pro, uniq_gh_elements, mm_env, PSI4_FI
         print('in write_file')
         write_qchem_file(qm_lig, c_QM, qm_pro, qchem_mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, qchem_options, qchem_sapt)
     if software.lower() == 'nwchem':
-        print('write_file nwchem_scf:', nwchem_scf)
-        print('write_file nwchem_dft:', nwchem_dft)
         if mm_env is not None:
             qchem_mm_env = qchem_mm_format(mm_env)
         else:
