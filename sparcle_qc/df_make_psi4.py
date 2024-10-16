@@ -975,7 +975,7 @@ no_reorient
         inpfile.write("""\npsi4.set_options({
 'basis': '""" + basis_set +"""',\n""")
         if do_fsapt is not None:
-            if do_fsapt.lower() == 'false':
+            if do_fsapt == False:
                 inpfile.write("'fisapt_do_fsapt': 'false',\n")
         for ind, (k,v) in enumerate(psi4_options.items()):
             if ind < len(psi4_options) - 1:
@@ -1003,7 +1003,6 @@ def dump_pkl():
 '''
 
 def write_qchem_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, qchem_options, qchem_sapt):
-    print('start write_qchem')
     """
     writes Q-Chem file
 
@@ -1039,7 +1038,7 @@ def write_qchem_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:
         qm_molecule = qm_lig + qm_pro
     inp_filename = PSI4_FILE_PATH.split('/')[-1]
     with open(PSI4_FILE_PATH, 'a') as inpfile:
-        inpfile.write("""$molcule\n""")
+        inpfile.write("""$molecule\n""")
         if 'sapt' in method.lower():
             inpfile.write(c_ligand + ' 1\n'
 + ' '.join(qm_lig) + '--\n' + c_QM + ' 1\n '
@@ -1078,8 +1077,6 @@ def qchem_mm_format(mm):
     return qchem_mm
 
 def write_nwchem_file(qm_lig, c_QM, qm_pro, uniq_elements, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, nwchem_scratch:str = None, nwchem_perm:str = None, nwchem_scf:dict = None, nwchem_dft:dict = None):
-    print('write_nwchem nwchem_scf:', nwchem_scf)
-    print('write_nwchem nwchem_dft:', nwchem_dft)
 
     """
     writes NWChem file
@@ -1157,7 +1154,6 @@ def write_file(software, qm_lig, c_QM, qm_pro, uniq_gh_elements, mm_env, PSI4_FI
             qchem_mm_env = qchem_mm_format(mm_env)
         else:
             qchem_mm_env = None
-        print('in write_file')
         write_qchem_file(qm_lig, c_QM, qm_pro, qchem_mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, qchem_options, qchem_sapt)
     if software.lower() == 'nwchem':
         if mm_env is not None:
@@ -1226,36 +1222,81 @@ def check_QM_file(psi4file: str) -> None:
     None
     """
     out = open(glob('*.out')[0], 'a')
-
+    
     with open(psi4file, 'r') as pfile:
         lines = pfile.readlines()
-        extern_idx = []
-        dimer_idx = []
-        prot_idx = []
-        for n,l in enumerate(lines):
-            if 'Chargefield' in l:
-                extern_idx.append(n)
-            elif 'dimer' in l or 'molecule' in l:
-                dimer_idx.append(n)
-            elif '--' in l:
-                prot_idx.append(n)
-            elif 'unit' in l:
-                dimer_idx.append(n)
-        array = lines[extern_idx[0]+1:extern_idx[1]]
-        charge = float(array[0].split(',')[0])
-        num_atoms = dimer_idx[1] - dimer_idx[0] - 4 + 1
-        num_prot_atoms = dimer_idx[1] - prot_idx[0] - 2
-        for l in array[1:]:
-            charge += float(l.split(',')[1])
-            num_atoms += 1
+        num_qm_atoms = 0
+        for n, line in enumerate(lines):
+            if 'software' in line:
+                software = line.split(':')[1].strip()
+            if 'geometry' in line or 'molecule' in line:
+                n_start = n
+            if 'end' in line or 'unit' in line:
+                n_end = n
+                break
+        mol = lines[n_start+1:n_end]
+        for at in mol:
+            if len(at.split()) == 4 and '@' not in at and 'bq' not in at:
+                num_qm_atoms += 1
+        if software.lower() == 'psi4':
+            num_mm_atoms = 1
+            extern_idx = []
+            for n,l in enumerate(lines):
+                if 'Chargefield' in l:
+                    extern_idx.append(n)
+            if len(extern_idx) > 0:
+                array = lines[extern_idx[0]+1:extern_idx[1]]
+                charge = float(array[0].split(',')[0])
+                for l in array[1:]:
+                    charge += float(l.split(',')[1])
+                    num_mm_atoms += 1
+            else:
+                num_mm_atoms = 0
+        if software.lower() == 'q-chem':
+            num_mm_atoms = 0
+            extern_idx = None
+            for n,l in enumerate(lines):
+                if 'external_charges' in l:
+                    extern_idx = n
+                if extern_idx is not None and 'end' in l and n > extern_idx:
+                    end_idx = n
+                    break
+            try:
+                extern_idx
+                ext = lines[extern_idx+1:end_idx]
+                charge = 0
+                for l in ext:
+                    charge += float(l.split()[-1])
+                    num_mm_atoms += 1
+            except:
+                num_mm_atoms = 0
+        if software.lower() == 'nwchem':
+            num_mm_atoms = 0
+            extern_idx = None
+            for n,l in enumerate(lines):
+                if 'bq' in l and len(l.split()) == 1:
+                    extern_idx = n
+                if extern_idx is not None and 'end' in l and n > extern_idx:
+                    end_idx = n
+                    break
+            try:
+                extern_idx
+                ext = lines[extern_idx+1:end_idx]
+                charge = 0
+                for l in ext:
+                    charge += float(l.split()[-1])
+                    num_mm_atoms += 1
+            except:
+                num_mm_atoms = 0
         
         out.write('\n----------------------------------------------------------------------------------------------------\n')
-        out.write('check_psi4_file'.center(100)+'\n')
+        out.write('check_QM_file'.center(100)+'\n')
         out.write('----------------------------------------------------------------------------------------------------\n')
 
-        out.write(f'Psi4 filename: {psi4file}\n')
-        out.write(f'Total charge of MM region: {charge:.2f}\n')
-        out.write(f'Number of point charges in MM region: {num_atoms}\n')
-        out.write(f'Number of non-ligand atoms in QM region: {num_prot_atoms}')
+        out.write(f'{software} filename: {psi4file}\n')
+        if num_mm_atoms != 0:
+            out.write(f'Total charge of MM region: {charge:.2f}\n')
+        out.write(f'Number of point charges in MM region: {num_mm_atoms}\n')
+        out.write(f'Number of atoms in QM region: {num_qm_atoms}')
     
     out.close()
