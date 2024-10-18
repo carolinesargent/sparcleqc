@@ -14,7 +14,7 @@ from .combine_data import combine_data
 from .cut_protein import run_cut_protein 
 from .convert_dict import convert_dictionary 
 from .move_M3s import move_m3s
-from .df_make_psi4 import make_regions, check_QM_file, write_input, write_file
+from .df_make_psi4 import make_regions, check_QM_file, write_input, write_file, ghost
 from .cap import run_cap
 from .make_partition import partition 
 
@@ -167,6 +167,11 @@ def input_parser(filename:str) -> Dict:
                     if value not in ['psi4','nwchem', 'q-chem']:
                         print("Error: Software not supported. Choose psi4, nwchem, or q-chem.")
                         sys.exit()
+                if key_word == 'cp':
+                    value = value.lower()
+                    if value != 'true' and value != 'false':
+                        print("Error: Invalid input file. cp is not true or false")
+                        sys.exit()
                 keywords[key_word]=value
     if 'software' not in keywords.keys():
         print('Error: Software not specified. Choose psi4, nwchem, or q-chem.')
@@ -228,6 +233,12 @@ def input_parser(filename:str) -> Dict:
         except KeyError:
             print('Error: Invalid input file. Oxygen and/or Hydrogen charges are not provided for water')
             sys.exit()
+    if 'mem' not in keywords.keys():
+        keywords['mem'] = '32 GB'
+    if 'nthreads' not in keywords.keys():
+        keywords['nthreads'] = '1'
+    if 'cp' not in keywords.keys():
+        keywords['cp'] = 'true'
 
     print(f"\u2728Sparcle-QC is sparkling\u2728\nBeginning file preparation for an embedded QM calculation of {keywords['pdb_file']} ")
     
@@ -386,23 +397,31 @@ def run(input_file) -> None:
                 write_input(input_file, sapt_inp_filename)
                 if 'do_fsapt' in keywords:
                     if keywords['do_fsapt'] == 'false':
-                        write_file(keywords['software'], qm_lig, c_QM, qm_pro, mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], False)
+                        write_file(keywords['software'], qm_lig, c_QM, qm_pro, mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], False)
                     else:
-                        write_file(keywords['software'], qm_lig, c_QM, qm_pro, mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'])
+                        write_file(keywords['software'], qm_lig, c_QM, qm_pro, mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'])
                 else:
-                    write_file(keywords['software'], qm_lig, c_QM, qm_pro, mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'])
+                    write_file(keywords['software'], qm_lig, c_QM, qm_pro, mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'])
                 #check the charges and number of atoms in the written QM input file
                 check_QM_file(sapt_inp_filename)
             else:
+                if keywords['cp'] == 'true':
+                    ghost_lig = ghost(qm_lig)
+                    ghost_pro = ghost(qm_pro)
+                    ghost_charge = 0
+                else:
+                    ghost_lig = None
+                    ghost_pro = None
+                    ghost_charge = None
                 lig_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_lig' + ext[keywords['software']]
                 write_input(input_file, lig_inp_filename)
-                write_file(keywords['software'], qm_lig, None, None, None, lig_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'])
+                write_file(keywords['software'], qm_lig, ghost_charge, ghost_pro, None, lig_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'])
                 prot_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_prot' + ext[keywords['software']]
                 write_input(input_file, prot_inp_filename)
-                write_file(keywords['software'], None, c_QM, qm_pro, mm_env, prot_inp_filename, None, keywords['method'], keywords['basis_set'])
+                write_file(keywords['software'], ghost_lig, c_QM, qm_pro, mm_env, prot_inp_filename, ghost_charge, keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'])
                 cx_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_cx' + ext[keywords['software']]
                 write_input(input_file, cx_inp_filename)
-                write_file(keywords['software'], qm_lig, c_QM, qm_pro, mm_env, cx_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'])
+                write_file(keywords['software'], qm_lig, c_QM, qm_pro, mm_env, cx_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'])
                 check_QM_file(prot_inp_filename)
                 check_QM_file(cx_inp_filename)
 
