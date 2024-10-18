@@ -818,7 +818,6 @@ def balanced_RC(charge_method:str, df:pd.DataFrame, with_HL:Dict[str,List[int]],
     #print(mm_env)
     return mm_env
 
-#TODO do we want to keep this method
 def write_extern_xyz(filepath:str, mm_env:List[str]) -> None:
     """
     Given a list of point charges and the coordinates to place those charges, writes an xyz 
@@ -907,7 +906,7 @@ def make_regions(charge_method:str) -> None:
         sys.exit()
     return qm_lig, c_QM, qm_pro, mm_env
 
-def write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: bool = None):
+def write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, psi4_options, do_fsapt:str = None):
     """
     writes Psi4 file
 
@@ -925,26 +924,22 @@ def write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:s
         memory
     nthreads: str
         number of threads
-    do_fsapt: boolean or None
+    do_fsapt: false or None
         if fsapt needs to be turned off in the psi4 input file this option will be False
 
     Returns
     -------
     None
     """
-    print('QM_PRO in write_psi4:\n')
-    print(qm_pro)
     if qm_pro is None:
         c_molecule = c_ligand
         qm_molecule = qm_lig
     elif qm_lig is None:
         c_molecule = c_QM
         qm_molecule = qm_pro
-    else:
+    elif 'sapt' not in method.lower():
         c_molecule = str(int(c_ligand) + int(c_QM))
         qm_molecule = qm_lig + qm_pro
-    print('QM_MOLECULE in write_psi4:\n')
-    print(qm_molecule)
     inp_filename = PSI4_FILE_PATH.split('/')[-1]
     with open(PSI4_FILE_PATH, 'a') as inpfile:
         inpfile.write("""
@@ -978,12 +973,15 @@ no_reorient
 """]).reshape((-1,4))\n""" +
 """Chargefield_B[:,[1,2,3]] /= qcel.constants.bohr2angstroms\n""")
         inpfile.write("""\npsi4.set_options({
-'basis': '""" + basis_set +"""',"""+
-"""'freeze_core': 'True',
-'scf_type': 'df',
-'mp2_type': 'df'\n""")
-        if do_fsapt == False:
-            inpfile.write("'do_fsapt': 'False'\n")
+'basis': '""" + basis_set +"""',\n""")
+        if do_fsapt is not None:
+            if do_fsapt.lower() == 'false':
+                inpfile.write("'fisapt_do_fsapt': 'false',\n")
+        for ind, (k,v) in enumerate(psi4_options.items()):
+            if ind < len(psi4_options) - 1:
+                inpfile.write(f"""'{k}':'{v}',\n""")
+            else:
+                inpfile.write(f"""'{k}':'{v}'\n""")
         inpfile.write("""})\n""")
         if mm_env is not None:
             inpfile.write("""\ne = psi4.energy('"""+method+"""', external_potentials={'B':Chargefield_B})\n""")
@@ -1004,12 +1002,169 @@ def dump_pkl():
         out.write(json.dumps(results))
 '''
 
-def write_file(software, qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: bool = None):
+def write_qchem_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, qchem_options, qchem_sapt):
+    print('start write_qchem')
+    """
+    writes Q-Chem file
+
+    Parameters
+    ----------
+    c_ligand: str
+        charge of the ligand
+    basis_set: str
+        basis set for the QM computation
+    method: str
+        method for QM energy 
+    PSI4_FILE_PATH: str
+        name for created psi4 file
+    mem: str
+        memory
+    nthreads: str
+        number of threads
+    do_fsapt: boolean or None
+        if fsapt needs to be turned off in the psi4 input file this option will be False
+
+    Returns
+    -------
+    None
+    """
+    if qm_pro is None:
+        c_molecule = c_ligand
+        qm_molecule = qm_lig
+    elif qm_lig is None:
+        c_molecule = c_QM
+        qm_molecule = qm_pro
+    elif 'sapt' not in method.lower():
+        c_molecule = str(int(c_ligand) + int(c_QM))
+        qm_molecule = qm_lig + qm_pro
+    inp_filename = PSI4_FILE_PATH.split('/')[-1]
+    with open(PSI4_FILE_PATH, 'a') as inpfile:
+        inpfile.write("""$molcule\n""")
+        if 'sapt' in method.lower():
+            inpfile.write(c_ligand + ' 1\n'
++ ' '.join(qm_lig) + '--\n' + c_QM + ' 1\n '
++ ' '.join(qm_pro)+'$end\n')  
+        else:
+            inpfile.write(c_molecule + ' 1\n'
++ ' '.join(qm_molecule) + '$end\n')  
+        if mm_env is not None:
+            inpfile.write("""\n$external_charges\n    """+ 
+'    '.join(mm_env) +
+"""$end\n""")
+    if 'sapt' in method.lower():
+        method = 'hf'
+    with open(PSI4_FILE_PATH, 'a') as inpfile:
+        inpfile.write("""\n$rem
+METHOD """ + method +
+"""\nBASIS """ + basis_set + '\n')
+        if qchem_options is not None:
+            for k, v in qchem_options.items():
+                inpfile.write(f'{k} {v}\n')
+        inpfile.write("$end\n")
+        if qchem_sapt is not None:
+            inpfile.write("\n$sapt\n")
+            for k, v in qchem_sapt.items():
+                inpfile.write(f'{k} {v}\n')
+            inpfile.write("$end\n")
+
+def qchem_mm_format(mm):
+    qchem_mm = []
+    for n,x in enumerate(mm):
+        if n%4 == 0:
+            for x in mm[n+1:n+3]:
+                qchem_mm.append(x)
+            qchem_mm.append(str(mm[n+3]).strip())
+            qchem_mm.append(str(mm[n])+'\n')
+    return qchem_mm
+
+def write_nwchem_file(qm_lig, c_QM, qm_pro, uniq_elements, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, nwchem_scratch:str = None, nwchem_perm:str = None, nwchem_scf:dict = None, nwchem_dft:dict = None):
+    print('write_nwchem nwchem_scf:', nwchem_scf)
+    print('write_nwchem nwchem_dft:', nwchem_dft)
+
+    """
+    writes NWChem file
+
+    Parameters
+    ----------
+    c_ligand: str
+        charge of the ligand
+    basis_set: str
+        basis set for the QM computation
+    method: str
+        method for QM energy 
+    PSI4_FILE_PATH: str
+        name for created psi4 file
+    mem: str
+        memory
+    nthreads: str
+        number of threads
+    do_fsapt: str or None
+        if fsapt needs to be turned off in the psi4 input file this option will be False
+
+    Returns
+    -------
+    None
+    """
+    if qm_pro is None:
+        c_molecule = c_ligand
+        qm_molecule = qm_lig
+    elif qm_lig is None:
+        c_molecule = c_QM
+        qm_molecule = qm_pro
+    elif 'sapt' not in method.lower():
+        c_molecule = str(int(c_ligand) + int(c_QM))
+        qm_molecule = qm_lig + qm_pro
+    inp_filename = PSI4_FILE_PATH.split('/')[-1]
+    with open(PSI4_FILE_PATH, 'a') as inpfile:
+        inpfile.write("""START
+SCRATCH_DIR """ + nwchem_scratch +
+"""\nPERMANENT_DIR """ + nwchem_perm +
+"""\nMEMORY """ + mem + 
+"""\n\ngeometry nocenter noautoz noautosym\n""")
+        inpfile.write(c_molecule + ' 1\n'
++ ' '.join(qm_molecule) + 'end\n')  
+        if mm_env is not None:
+            inpfile.write("""\nbq\n    """+ 
+'    '.join(mm_env) +
+"""end\n""")
+        inpfile.write("""\nbasis
+* library """ + basis_set + '\n')
+        if uniq_elements is not None:
+            for x in uniq_elements:
+                inpfile.write(f'bq{x} library {x} {basis_set}\n')
+        inpfile.write("end\n")
+        if nwchem_scf is not None:
+            inpfile.write("""\nSCF\n""")
+            for k, v in nwchem_scf.items():
+                inpfile.write(f'{k} {v}\n')
+            inpfile.write("""END\n""")
+        if nwchem_dft is not None:
+            inpfile.write("""\nDFT\n""")
+            for k, v in nwchem_dft.items():
+                inpfile.write(f'{k} {v}\n')
+            inpfile.write("""END\n""")
+        inpfile.write("""\ntask """ + method +""" energy""")
+
+
+def write_file(software, qm_lig, c_QM, qm_pro, uniq_gh_elements, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: str = None, nwchem_scratch = None, nwchem_perm = None, nwchem_scf = None, nwchem_dft = None, psi4_options = None, qchem_options = None, qchem_sapt = None):
     """
     calls appropriate function for writing specific software's input file
     """
     if software.lower() == 'psi4':
-        write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, do_fsapt)
+        write_psi4_file(qm_lig, c_QM, qm_pro, mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, psi4_options, do_fsapt)
+    if software.lower() == 'q-chem':
+        if mm_env is not None:
+            qchem_mm_env = qchem_mm_format(mm_env)
+        else:
+            qchem_mm_env = None
+        print('in write_file')
+        write_qchem_file(qm_lig, c_QM, qm_pro, qchem_mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, qchem_options, qchem_sapt)
+    if software.lower() == 'nwchem':
+        if mm_env is not None:
+            qchem_mm_env = qchem_mm_format(mm_env)
+        else:
+            qchem_mm_env = None
+        write_nwchem_file(qm_lig, c_QM, qm_pro, uniq_gh_elements, qchem_mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, nwchem_scratch, nwchem_perm, nwchem_scf, nwchem_dft)
 
 
 def write_input(inputfile, psi4file):
@@ -1034,14 +1189,26 @@ def write_input(inputfile, psi4file):
                 psi4file.write(line)
             psi4file.write('"""\n\n')
 
-def ghost(mol):
+def ghost(mol, software):
+    """
+    Makes atoms ghost for Psi4 and Q-Chem
+    """
     ghost_mol = []
+    elements = []
     for n, i in enumerate(mol):
         if n%4 == 0:
-            ghost_mol.append('Gh(' + str(i) + ')')
+            if software != 'nwchem':
+                ghost_mol.append('@' + str(i))
+            else:
+                ghost_mol.append('bq' + str(i))
+                elements.append(i)
         else:
             ghost_mol.append(i)
-    return ghost_mol
+    if software == 'nwchem':
+        uniq_elements = list(set(elements))
+    else:
+        uniq_elements = None
+    return ghost_mol, uniq_elements
 
 def check_QM_file(psi4file: str) -> None:
 
