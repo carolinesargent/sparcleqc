@@ -482,6 +482,7 @@ def run(input_file) -> None:
                 cx_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_cx' + ext[keywords['software']]
                 write_input(input_file, cx_inp_filename)
                 write_file(keywords['software'], qm_lig, c_QM, qm_pro, None, mm_env, cx_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
+                check_QM_file(lig_inp_filename)
                 check_QM_file(prot_inp_filename)
                 check_QM_file(cx_inp_filename)
 
