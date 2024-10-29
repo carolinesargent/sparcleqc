@@ -1219,7 +1219,8 @@ def check_QM_file(psi4file: str) -> None:
 
     Returns
     -------
-    None
+    num_qm_atoms: int
+        number of atoms in the qm region
     """
     out = open(glob('*.out')[0], 'a')
     
@@ -1231,9 +1232,16 @@ def check_QM_file(psi4file: str) -> None:
                 software = line.split(':')[1].strip()
             if 'geometry' in line or 'molecule' in line:
                 n_start = n
+            if '--' in line:
+                mon_split = n
             if 'end' in line or 'unit' in line:
                 n_end = n
                 break
+        try:
+            qm_charge = int(lines[n_start+1].split()[0])+ int(lines[mon_split+1].split()[0])
+        except:
+            qm_charge = int(lines[n_start+1].split()[0])
+
         mol = lines[n_start+1:n_end]
         for at in mol:
             if len(at.split()) == 4 and '@' not in at and 'bq' not in at:
@@ -1246,9 +1254,9 @@ def check_QM_file(psi4file: str) -> None:
                     extern_idx.append(n)
             if len(extern_idx) > 0:
                 array = lines[extern_idx[0]+1:extern_idx[1]]
-                charge = float(array[0].split(',')[0])
+                mm_charge = float(array[0].split(',')[0])
                 for l in array[1:]:
-                    charge += float(l.split(',')[1])
+                    mm_charge += float(l.split(',')[1])
                     num_mm_atoms += 1
             else:
                 num_mm_atoms = 0
@@ -1264,9 +1272,9 @@ def check_QM_file(psi4file: str) -> None:
             try:
                 extern_idx
                 ext = lines[extern_idx+1:end_idx]
-                charge = 0
+                mm_charge = 0
                 for l in ext:
-                    charge += float(l.split()[-1])
+                    mm_charge += float(l.split()[-1])
                     num_mm_atoms += 1
             except:
                 num_mm_atoms = 0
@@ -1282,9 +1290,9 @@ def check_QM_file(psi4file: str) -> None:
             try:
                 extern_idx
                 ext = lines[extern_idx+1:end_idx]
-                charge = 0
+                mm_charge = 0
                 for l in ext:
-                    charge += float(l.split()[-1])
+                    mm_charge += float(l.split()[-1])
                     num_mm_atoms += 1
             except:
                 num_mm_atoms = 0
@@ -1295,8 +1303,17 @@ def check_QM_file(psi4file: str) -> None:
 
         out.write(f'{software} filename: {psi4file}\n')
         if num_mm_atoms != 0:
-            out.write(f'Total charge of MM region: {charge:.2f}\n')
+            out.write(f'Total charge of MM region: {mm_charge:.2f}\n')
+        else:
+            mm_charge = 0
         out.write(f'Number of point charges in MM region: {num_mm_atoms}\n')
         out.write(f'Number of atoms in QM region: {num_qm_atoms}')
     
     out.close()
+    print(f'{software} filename: {psi4file}')
+    if num_mm_atoms != 0:
+        print(f'Total charge of MM region: {mm_charge:.2f}')
+    print(f'Number of point charges in MM region: {num_mm_atoms}')
+    print(f'Number of atoms in QM region: {num_qm_atoms}')
+    return int(num_qm_atoms), int(num_mm_atoms), round(float(qm_charge),2), round(float(mm_charge),2)
+    

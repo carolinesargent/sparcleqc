@@ -309,7 +309,7 @@ def input_parser(filename:str) -> Dict:
     return keywords
 
 
-def run(input_file) -> None:
+def run(input_file= None, user_options = None) -> None:
     """ 
     given an input file, parses the specified parameters into a
     dictionary of keywords and runs the necessary sparcle_qc functions to
@@ -321,6 +321,8 @@ def run(input_file) -> None:
     ----------
     input_file: str
         path to input file
+    user_options: Dict
+        User provided dictionary with sparcle_qc parameters instead of providing an input file
 
     Returns
     -------
@@ -332,9 +334,33 @@ def run(input_file) -> None:
     flashing_thread.start()
     try:
         #parsing input file into dictionary
+        if input_file == None and user_options == None:
+            print("Error: Input file or Dictionary not provided")
+            sys.exit()
+        if input_file != None and user_options != None:
+            print("Error: Input file and Dictionary provided. Choose one.")
+            sys.exit()
+        if user_options != None:
+            if 'input_filename' not in user_options: 
+                print("Error: Input file name not provided")
+                sys.exit()
+            if '.' not in user_options['input_filename']: 
+                print("Error: Input file extension not provided")
+                sys.exit()
+            try:
+                str(user_options['input_filename'])
+            except:
+                print("Error: Input file not a string")
+                sys.exit()
+            with open(user_options['input_filename'], 'w') as inp:
+                for key in user_options:
+                    if key != 'input_filename':
+                        inp.write(f'{key}: {user_options[key]}\n')
+            input_file = user_options['input_filename']
+
         keywords = input_parser(input_file)
         #creating new directory for the created files, changing working directories, and copying necessary files into the new directory
-        new_dir = input_file[:-3]
+        new_dir = input_file.split('.')[0]
         os.mkdir(new_dir)
         if 'charmm_rtf' in keywords:
             shutil.copy(keywords['pdb_file'], new_dir)
@@ -461,7 +487,7 @@ def run(input_file) -> None:
                 write_input(input_file, sapt_inp_filename)
                 write_file(keywords['software'], qm_lig, c_QM, qm_pro, '', mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], keywords['do_fsapt'], keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'], keywords['qchem_sapt'])
 #                #check the charges and number of atoms in the written QM input file
-                check_QM_file(sapt_inp_filename)
+                qm_atoms, mm_atoms, qm_charge, mm_charge = check_QM_file(sapt_inp_filename)
             else:
                 if keywords['cp'] == 'true':
                     ghost_lig, lig_uniq_elements = ghost(qm_lig, keywords['software'])
@@ -482,9 +508,9 @@ def run(input_file) -> None:
                 cx_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_cx' + ext[keywords['software']]
                 write_input(input_file, cx_inp_filename)
                 write_file(keywords['software'], qm_lig, c_QM, qm_pro, None, mm_env, cx_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
-                check_QM_file(lig_inp_filename)
-                check_QM_file(prot_inp_filename)
-                check_QM_file(cx_inp_filename)
+                qm_atoms_lig, mm_atoms_lig, qm_charge_lig, mm_charge_lig = check_QM_file(lig_inp_filename)
+                qm_atoms_pro, mm_atoms_pro, qm_charge_pro, mm_charge_pro = check_QM_file(prot_inp_filename)
+                qm_atoms_cx, mm_atoms_cx, qm_charge_cx, mm_charge_cx = check_QM_file(cx_inp_filename)
 
         #write fsapt files
         if keywords['fisapt_partition'] == 'true':
@@ -497,7 +523,12 @@ def run(input_file) -> None:
     
     # Wait for the flashing thread to finish
         flashing_thread.join()
-
+    
+    if 'sapt' in keywords['method'].lower():
+        return qm_atoms, mm_atoms, qm_charge, mm_charge
+    else:
+        return {'Complex':[qm_atoms_cx, mm_atoms_cx, qm_charge_cx, mm_charge_cx], 'Ligand':[qm_atoms_lig, mm_atoms_lig, qm_charge_lig, mm_charge_lig], 'Protein':[qm_atoms_pro, mm_atoms_pro, qm_charge_pro, mm_charge_pro]}
+    
 def main():
     if len(sys.argv) != 2:
         print("Usage: sparcle_qc <input_file>")
