@@ -32,7 +32,10 @@ def fix_numbers_charmm(pdb_file: str) -> None:
     atom_list = charmmsys.atoms
     with open('ligand.pdb') as lig:
         lig_lines = lig.readlines()
-    lig_name = lig_lines[3][16:20].strip()
+    for line in lig_lines:
+        if line[0:6].strip() =='ATOM' or line[0:6].strip() =='HETATM':
+            lig_name = line[16:20].strip()
+            break
     
     out = open(f'{pdb_file[:-4]}_fixed.pdb', 'w') 
     with open(pdb_file) as w:
