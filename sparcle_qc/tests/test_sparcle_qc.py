@@ -295,7 +295,7 @@ def test_run_dz1():
     assert output_dictionary == true_dictionary
 def test_run_dz2():
     inputs = {
-    'input_filename': 'test11.in',
+    'input_filename': 'test12.in',
     'pdb_file': '3QXP_templated_amber.pdb',
     'cutoff': 5,
     'seed': 'ligand',
