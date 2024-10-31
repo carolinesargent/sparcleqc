@@ -1,4 +1,5 @@
 import sys
+import traceback
 import shutil
 import subprocess
 import os
@@ -517,13 +518,18 @@ def run(input_file= None, user_options = None) -> None:
             partition('CAPPED_qm.pdb')
         print(f"\u2728Sparcle-QC has sparkled\u2728")
     except Exception as e:
-        print(f'\n An error has occured: {e}')
+        error_type = type(e).__name__
+        error_message = str(e)
+        error_traceback = traceback.format_exc()
+
+        print(f'\nAn error has occurred:')
+        print(error_traceback)
     finally:
+        os.chdir('../')
         stop_flashing.set()
     
     # Wait for the flashing thread to finish
         flashing_thread.join()
-    
     if 'sapt' in keywords['method'].lower():
         return qm_atoms, mm_atoms, qm_charge, mm_charge
     else:

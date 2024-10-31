@@ -9,11 +9,10 @@ import pytest
 import os
 import sparcle_qc
 
-
-
-@pytest.fixture(autouse=True)
+'''
+@pytest.fixture(scope='session', autouse=True)
 def cleanup_directory():
-    directory_path = 'dictionary_test'
+    #directory_path = 'test'
 
     # Remove the directory if it exists
     if os.path.exists(directory_path):
@@ -24,7 +23,7 @@ def cleanup_directory():
     if os.path.exists(directory_path):
         print('removing files')
         shutil.rmtree(directory_path)
-
+'''
 @pytest.fixture(autouse = True)
 def dictionary_inputs():
     inputs = {
@@ -56,17 +55,21 @@ def test_sparcle_qc_imported():
     assert "sparcle_qc" in sys.modules
 
 def test_run_sapt_psi4_amber(dictionary_inputs):
+    dictionary_inputs['input_filename'] = 'test1.in'
     output_dictionary= sparcle_qc.run(user_options = dictionary_inputs)
     true_dictionary = (392, 3903, 0.0, -0.0)
     assert output_dictionary == true_dictionary
 def test_run_hf_psi4_amber(dictionary_inputs):
     dictionary_inputs['method'] = 'hf'
+    dictionary_inputs['input_filename'] = 'test2.in'
     output_dictionary= sparcle_qc.run(user_options = dictionary_inputs)
     true_dictionary = {'Complex': [392, 3903, 0.0, -0.0], 'Ligand': [19, 0, 0.0, 0.0], 'Protein': [373, 3903, 0.0, -0.0]}
     assert output_dictionary == true_dictionary
 def test_run_sapt_psi4_charmm(dictionary_inputs):
-    dictionary_inputs['input_filename'] = '3qxp.pdb'
+    dictionary_inputs['input_filename'] = 'test3.in'
+    dictionary_inputs['pdb_file'] = '3qxp.pdb'
     dictionary_inputs['seed'] = 'ligand'
+    dictionary_inputs['cutoff'] = 5
     dictionary_inputs.pop('pre-capped')
     dictionary_inputs.pop('seed_file')
     dictionary_inputs.pop('amber_ff')
