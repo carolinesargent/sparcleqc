@@ -269,3 +269,27 @@ def test_run_hf_nwchem_charmm():
     output_dictionary= sparcle_qc.run(user_options = inputs)
     true_dictionary = {'Complex': [542, 4845, 1.0, 2.0], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [501, 4845, 1.0, 2.0]}
     assert output_dictionary == true_dictionary
+def test_run_dz3():
+    inputs = {
+    'input_filename': 'test11.in',
+    'pdb_file': '3QXP_templated_amber.pdb',
+    'cutoff': 5,
+    'seed': 'ligand',
+    'charge_scheme': 'DZ1',
+    'ligand_charge': 0,
+    'method': 'sapt0',
+    'basis_set': 'aug-cc-pv(D+d)z',
+    'amber_ff': 'ff19SB',
+    'env_path': '/theoryfs2/ds/ipberry/miniconda3/envs/emb_sapt/',
+    'water_model': 'opc' ,
+    'o_charge': 0,
+    'h_charge': 0.6791,
+    'ep_charge': -1.3582,
+    'software': 'psi4',
+    'mem': '100 GB',
+    'nthreads': 16,
+    }
+    
+    output_dictionary= sparcle_qc.run(user_options = inputs)
+    true_dictionary = (586, 4330, 4.0, 2.0)
+    assert output_dictionary == true_dictionary

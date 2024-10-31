@@ -183,8 +183,8 @@ def input_parser(filename:str) -> Dict:
         if 'seed_file' not in keywords.keys():
             print('Error: Invalid input file. No seed file is provided for single atom seed')
             sys.exit()
-    if 'charge_scheme' not in keywords.keys():
-        print('Error: Invalid input file. No cutoff is provided')
+    if 'charge_scheme' not in keywords.keys() and keywords['cutoff'] != '0':
+        print('Error: Invalid input file. No charge scheme is provided')
         sys.exit()
     if 'method' not in keywords.keys():
         print('Error: Invalid input file. No cutoff is provided')
