@@ -1119,8 +1119,7 @@ SCRATCH_DIR """ + nwchem_scratch +
 """\nPERMANENT_DIR """ + nwchem_perm +
 """\nMEMORY """ + mem + 
 """\n\ngeometry nocenter noautoz noautosym\n""")
-        inpfile.write(c_molecule + ' 1\n'
-+ ' '.join(qm_molecule) + 'end\n')  
+        inpfile.write(' '.join(qm_molecule) + 'end\n'+f'charge {c_molecule}\n')  
         if mm_env is not None:
             inpfile.write("""\nbq\n    """+ 
 '    '.join(mm_env) +
@@ -1141,7 +1140,10 @@ SCRATCH_DIR """ + nwchem_scratch +
             for k, v in nwchem_dft.items():
                 inpfile.write(f'{k} {v}\n')
             inpfile.write("""END\n""")
-        inpfile.write("""\ntask """ + method +""" energy""")
+        if method.lower() == 'hf':
+            inpfile.write("""\ntask scf energy""")
+        else:
+            inpfile.write("""\ntask """ + method +""" energy""")
 
 
 def write_file(software, qm_lig, c_QM, qm_pro, uniq_gh_elements, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: str = None, nwchem_scratch = None, nwchem_perm = None, nwchem_scf = None, nwchem_dft = None, psi4_options = None, qchem_options = None, qchem_sapt = None):
@@ -1164,7 +1166,7 @@ def write_file(software, qm_lig, c_QM, qm_pro, uniq_gh_elements, mm_env, PSI4_FI
         write_nwchem_file(qm_lig, c_QM, qm_pro, uniq_gh_elements, qchem_mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, nwchem_scratch, nwchem_perm, nwchem_scf, nwchem_dft)
 
 
-def write_input(inputfile, psi4file):
+def write_input(inputfile, psi4file, software):
     """
     Writes the Sparcle-QC input file to the top of the psi4file
 
@@ -1181,10 +1183,21 @@ def write_input(inputfile, psi4file):
     """
     with open(inputfile) as inp:
         with open(psi4file, 'w') as psi4file:
-            psi4file.write('"""\nThis Psi4 file was created using Sparcle-QC with the following specifications:\n')
-            for line in inp:
-                psi4file.write(line)
-            psi4file.write('"""\n\n')
+            if software.lower() == 'psi4':
+                psi4file.write('"""\nThis Psi4 file was created using Sparcle-QC with the following specifications:\n')
+                for line in inp:
+                    psi4file.write(line)
+                psi4file.write('"""\n\n')
+            elif software.lower() == 'nwchem':
+                psi4file.write('#This NWChem file was created using Sparcle-QC with the following specifications:\n')
+                for line in inp:
+                    psi4file.write('#'+line)
+                psi4file.write('\n')
+            elif software.lower() == 'q-chem':
+                psi4file.write('$comment\nThis Q-Chem file was created using Sparcle-QC with the following specifications:\n')
+                for line in inp:
+                    psi4file.write(line)
+                psi4file.write('$end\n\n')
 
 def ghost(mol, software):
     """
@@ -1235,14 +1248,24 @@ def check_QM_file(psi4file: str) -> None:
                 n_start = n
             if '--' in line:
                 mon_split = n
-            if 'end' in line or 'unit' in line:
-                n_end = n
-                break
+            try:
+                n_start
+            except NameError:
+                pass
+            else:
+                if 'end' in line or 'unit' in line:
+                    n_end = n
+                if 'charge' in line:
+                    n_nwchem_charge = n
+                    break
         try:
-            qm_charge = int(lines[n_start+1].split()[0])+ int(lines[mon_split+1].split()[0])
+            qm_charge = int(lines[n_nwchem_charge].split()[1])
         except:
-            qm_charge = int(lines[n_start+1].split()[0])
-
+            try:
+                qm_charge = int(lines[n_start+1].split()[0])+ int(lines[mon_split+1].split()[0])
+            except:
+                qm_charge = int(lines[n_start+1].split()[0])
+    
         mol = lines[n_start+1:n_end]
         for at in mol:
             if len(at.split()) == 4 and '@' not in at and 'bq' not in at:
