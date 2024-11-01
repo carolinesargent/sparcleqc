@@ -237,12 +237,13 @@ def SEE(MOL2_PATH:str, CAPPED_PDB_PATH: str, with_HL: Dict[str,List[int]], num_b
 
     Returns
     -------
-    MM_for_array: List[str]
+    mm_env: List[str]
         list of the charges along with xyz coords
     """
     seeatoms = SEE_atoms(num_bonds_broken, with_HL) #get atoms from indexing
     seelines = atoms_to_pdb_lines(CAPPED_PDB_PATH, seeatoms) #get PDB lines from atoms list
     seexyz = pdb_to_xyz(seelines) # get XYZ lines from PDB lines
+    MM_for_array = []
     mm_env = MM_xyz_to_charge_array(seexyz, None, MOL2_PATH, MM_for_array) # get charges from XYZ lines
     return mm_env
 
@@ -541,7 +542,7 @@ def Z3_atoms_zero(num_bonds_broken:int, with_HL:Dict[str,List[int]]) -> List[int
             MM_atoms += with_HL[f'M3_{bond}']
     return MM_atoms
 
-def Z3(with_HL:Dict[str,List[int]], num_bonds_broken:int) -> List[str]:
+def Z3(df:pd.DataFrame,with_HL:Dict[str,List[int]], num_bonds_broken:int) -> List[str]:
     """
     returns external charge array, zeroes the M1 and M2 and M3 atoms
 
@@ -891,7 +892,7 @@ def make_regions(charge_method:str) -> None:
     elif charge_method == 'DZ2':
           mm_env = DZn(2, df, with_HL, num_bonds_broken)
     elif charge_method == 'Z3':
-          mm_env = Z3(with_HL, num_bonds_broken)
+          mm_env = Z3(df, with_HL, num_bonds_broken)
     elif charge_method == 'DZ3':
           mm_env = DZn(3, df, with_HL, num_bonds_broken)
     elif charge_method == 'BRC':
