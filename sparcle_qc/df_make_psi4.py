@@ -1245,9 +1245,14 @@ def check_QM_file(psi4file: str) -> None:
                 n_start = n
             if '--' in line:
                 mon_split = n
-            if 'end' in line or 'unit' in line:
-                n_end = n
-                break
+            try:
+                n_start
+            except NameError:
+                pass
+            else:
+                if 'end' in line or 'unit' in line:
+                    n_end = n
+                    break
         try:
             qm_charge = int(lines[n_start+1].split()[0])+ int(lines[mon_split+1].split()[0])
         except:
