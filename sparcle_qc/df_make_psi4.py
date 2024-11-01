@@ -1118,8 +1118,7 @@ SCRATCH_DIR """ + nwchem_scratch +
 """\nPERMANENT_DIR """ + nwchem_perm +
 """\nMEMORY """ + mem + 
 """\n\ngeometry nocenter noautoz noautosym\n""")
-        inpfile.write(c_molecule + ' 1\n'
-+ ' '.join(qm_molecule) + 'end\n')  
+        inpfile.write(' '.join(qm_molecule) + 'end\n'+f'charge {c_molecule}\n')  
         if mm_env is not None:
             inpfile.write("""\nbq\n    """+ 
 '    '.join(mm_env) +
@@ -1140,7 +1139,10 @@ SCRATCH_DIR """ + nwchem_scratch +
             for k, v in nwchem_dft.items():
                 inpfile.write(f'{k} {v}\n')
             inpfile.write("""END\n""")
-        inpfile.write("""\ntask """ + method +""" energy""")
+        if method.lower() == 'hf':
+            inpfile.write("""\ntask scf energy""")
+        else:
+            inpfile.write("""\ntask """ + method +""" energy""")
 
 
 def write_file(software, qm_lig, c_QM, qm_pro, uniq_gh_elements, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: str = None, nwchem_scratch = None, nwchem_perm = None, nwchem_scf = None, nwchem_dft = None, psi4_options = None, qchem_options = None, qchem_sapt = None):
@@ -1252,12 +1254,17 @@ def check_QM_file(psi4file: str) -> None:
             else:
                 if 'end' in line or 'unit' in line:
                     n_end = n
+                if 'charge' in line:
+                    n_nwchem_charge = n
                     break
         try:
-            qm_charge = int(lines[n_start+1].split()[0])+ int(lines[mon_split+1].split()[0])
+            qm_charge = int(lines[n_nwchem_charge].split()[1])
         except:
-            qm_charge = int(lines[n_start+1].split()[0])
-
+            try:
+                qm_charge = int(lines[n_start+1].split()[0])+ int(lines[mon_split+1].split()[0])
+            except:
+                qm_charge = int(lines[n_start+1].split()[0])
+    
         mol = lines[n_start+1:n_end]
         for at in mol:
             if len(at.split()) == 4 and '@' not in at and 'bq' not in at:
