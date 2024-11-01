@@ -10,7 +10,7 @@ import ast
 from typing import Dict
 
 from .amber_prep import write_cpptraj, write_cpptraj_skip_autocap, write_tleap, autocap, skip_autocap, fix_numbers_amber
-from .charmm_prep import dictionary_nocut, psf_to_mol2, combine_charmm, fix_numbers_charmm
+from .charmm_prep import psf_to_mol2, combine_charmm, fix_numbers_charmm
 from .pdb_prep import check_df_charges, check_resi_charges, convert_atom_id 
 from .combine_data import combine_data
 from .cut_protein import run_cut_protein 
@@ -84,8 +84,10 @@ def input_parser(filename:str) -> Dict:
                 if key_word == 'cutoff':
                     try:
                         cutoff = float(value)
-                    except ValueError:
-                        print("Error: Invalid input file. Cutoff radius is not a numerical value")
+                        if cutoff <= 0:
+                            raise ValueError("Error: Cutoff radius must be greater than zero")
+                    except ValueError as e:
+                        print(e)
                         sys.exit()
                 if key_word =='seed':
                     try:
@@ -183,14 +185,14 @@ def input_parser(filename:str) -> Dict:
         if 'seed_file' not in keywords.keys():
             print('Error: Invalid input file. No seed file is provided for single atom seed')
             sys.exit()
-    if 'charge_scheme' not in keywords.keys() and keywords['cutoff'] != '0':
+    if 'charge_scheme' not in keywords.keys():
         print('Error: Invalid input file. No charge scheme is provided')
         sys.exit()
     if 'method' not in keywords.keys():
-        print('Error: Invalid input file. No cutoff is provided')
+        print('Error: Invalid input file. No method is provided')
         sys.exit()
     if 'basis_set' not in keywords.keys():
-        print('Error: Invalid input file. No cutoff is provided')
+        print('Error: Invalid input file. No basis set is provided')
         sys.exit()
     if 'amber_ff' not in keywords.keys() and 'charmm_rtf' not in keywords.keys():
         print('Error: Invalid input file. CHARMM or Amber FF is not provided')
@@ -455,13 +457,8 @@ def run(input_file= None, user_options = None) -> None:
         output.close()
 
         
-        #if the cutoff is zero, creating dictionary with all atoms in the MM region
-        if keywords['cutoff'] =='0':
-            dictionary_nocut()
-            #shutil.move('dictionary.dat', new_dir)
-            shutil.copy(keywords['pdb_file'], f'{new_dir}/external.pdb')
-        #elif the a template path has been specified, mapping the QM region from the QM region of the template
-        elif 'template_path' in keywords:
+        #if the a template path has been specified, mapping the QM region from the QM region of the template
+        if 'template_path' in keywords:
             convert_dictionary(keywords['cutoff'], keywords['template_path'])
         #if there is no template specified then cutting the protein
         else:
@@ -474,44 +471,43 @@ def run(input_file= None, user_options = None) -> None:
             #shutil.move('pre-dictionary.dat', new_dir)
             #shutil.move('ligand.pdb', new_dir)
         
-        #if any cuts were made, cap the cut QM bonds with link hydrogens
-        if keywords['cutoff']!='0':
-            if 'amber_ff' in keywords:
-                run_cap(ff_type = 'amber', path_to_env = keywords['env_path'])
+        #cap the cut QM bonds with link hydrogens
+        if 'amber_ff' in keywords:
+            run_cap(ff_type = 'amber', path_to_env = keywords['env_path'])
+        else:
+            run_cap(ff_type = 'charmm', rtf = keywords['charmm_rtf'], prm = keywords['charmm_prm'])
+        #redistribute charge based on charge scheme and write QM input file
+        qm_lig, c_QM, qm_pro, mm_env = make_regions(keywords['charge_scheme'])
+        ext = {'psi4':'.py', 'nwchem':'.in', 'q-chem':'.in'}
+        sapt_inp_filename = f'{new_dir}_' + keywords['software'] + '_file' + ext[keywords['software']]
+        if 'sapt' in keywords['method'].lower():
+            write_input(input_file, sapt_inp_filename)
+            write_file(keywords['software'], qm_lig, c_QM, qm_pro, '', mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], keywords['do_fsapt'], keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'], keywords['qchem_sapt'])
+#            #check the charges and number of atoms in the written QM input file
+            qm_atoms, mm_atoms, qm_charge, mm_charge = check_QM_file(sapt_inp_filename)
+        else:
+            if keywords['cp'] == 'true':
+                ghost_lig, lig_uniq_elements = ghost(qm_lig, keywords['software'])
+                ghost_pro, prot_uniq_elements = ghost(qm_pro, keywords['software'])
+                ghost_charge = 0
             else:
-                run_cap(ff_type = 'charmm', rtf = keywords['charmm_rtf'], prm = keywords['charmm_prm'])
-            #redistribute charge based on charge scheme and write QM input file
-            qm_lig, c_QM, qm_pro, mm_env = make_regions(keywords['charge_scheme'])
-            ext = {'psi4':'.py', 'nwchem':'.in', 'q-chem':'.in'}
-            sapt_inp_filename = f'{new_dir}_' + keywords['software'] + '_file' + ext[keywords['software']]
-            if 'sapt' in keywords['method'].lower():
-                write_input(input_file, sapt_inp_filename)
-                write_file(keywords['software'], qm_lig, c_QM, qm_pro, '', mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], keywords['do_fsapt'], keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'], keywords['qchem_sapt'])
-#                #check the charges and number of atoms in the written QM input file
-                qm_atoms, mm_atoms, qm_charge, mm_charge = check_QM_file(sapt_inp_filename)
-            else:
-                if keywords['cp'] == 'true':
-                    ghost_lig, lig_uniq_elements = ghost(qm_lig, keywords['software'])
-                    ghost_pro, prot_uniq_elements = ghost(qm_pro, keywords['software'])
-                    ghost_charge = 0
-                else:
-                    ghost_lig = None
-                    ghost_pro = None
-                    lig_uniq_elements = None
-                    prot_uniq_elements = None
-                    ghost_charge = None
-                lig_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_lig' + ext[keywords['software']]
-                write_input(input_file, lig_inp_filename)
-                write_file(keywords['software'], qm_lig, ghost_charge, ghost_pro, prot_uniq_elements, None, lig_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], False, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
-                prot_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_prot' + ext[keywords['software']]
-                write_input(input_file, prot_inp_filename)
-                write_file(keywords['software'], ghost_lig, c_QM, qm_pro, lig_uniq_elements, mm_env, prot_inp_filename, ghost_charge, keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
-                cx_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_cx' + ext[keywords['software']]
-                write_input(input_file, cx_inp_filename)
-                write_file(keywords['software'], qm_lig, c_QM, qm_pro, None, mm_env, cx_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
-                qm_atoms_lig, mm_atoms_lig, qm_charge_lig, mm_charge_lig = check_QM_file(lig_inp_filename)
-                qm_atoms_pro, mm_atoms_pro, qm_charge_pro, mm_charge_pro = check_QM_file(prot_inp_filename)
-                qm_atoms_cx, mm_atoms_cx, qm_charge_cx, mm_charge_cx = check_QM_file(cx_inp_filename)
+                ghost_lig = None
+                ghost_pro = None
+                lig_uniq_elements = None
+                prot_uniq_elements = None
+                ghost_charge = None
+            lig_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_lig' + ext[keywords['software']]
+            write_input(input_file, lig_inp_filename)
+            write_file(keywords['software'], qm_lig, ghost_charge, ghost_pro, prot_uniq_elements, None, lig_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], False, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
+            prot_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_prot' + ext[keywords['software']]
+            write_input(input_file, prot_inp_filename)
+            write_file(keywords['software'], ghost_lig, c_QM, qm_pro, lig_uniq_elements, mm_env, prot_inp_filename, ghost_charge, keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
+            cx_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_cx' + ext[keywords['software']]
+            write_input(input_file, cx_inp_filename)
+            write_file(keywords['software'], qm_lig, c_QM, qm_pro, None, mm_env, cx_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
+            qm_atoms_lig, mm_atoms_lig, qm_charge_lig, mm_charge_lig = check_QM_file(lig_inp_filename)
+            qm_atoms_pro, mm_atoms_pro, qm_charge_pro, mm_charge_pro = check_QM_file(prot_inp_filename)
+            qm_atoms_cx, mm_atoms_cx, qm_charge_cx, mm_charge_cx = check_QM_file(cx_inp_filename)
 
         #write fsapt files
         if keywords['fisapt_partition'] == 'true':
