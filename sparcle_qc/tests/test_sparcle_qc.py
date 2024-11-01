@@ -295,7 +295,7 @@ def test_run_dz1():
     assert output_dictionary == true_dictionary
 def test_run_dz2():
     inputs = {
-    'input_filename': 'test11.in',
+    'input_filename': 'test12.in',
     'pdb_file': '3QXP_templated_amber.pdb',
     'cutoff': 5,
     'seed': 'ligand',
@@ -316,4 +316,148 @@ def test_run_dz2():
     
     output_dictionary= sparcle_qc.run(user_options = inputs)
     true_dictionary = (586, 4290, 4.0, 2.0)
+    assert output_dictionary == true_dictionary
+def test_run_z1():
+    inputs = {
+    'input_filename': 'test13.in',
+    'pdb_file': '3QXP_templated_amber.pdb',
+    'cutoff': 6,
+    'seed': 'ligand',
+    'charge_scheme': 'Z1',
+    'ligand_charge': 0,
+    'method': 'hf',
+    'basis_set': 'aug-cc-pv(D+d)z',
+    'amber_ff': 'ff19SB',
+    'env_path': '/theoryfs2/ds/ipberry/miniconda3/envs/emb_sapt/',
+    'water_model': 'opc' ,
+    'o_charge': 0,
+    'h_charge': 0.6791,
+    'ep_charge': -1.3582,
+    'software': 'psi4',
+    'mem': '100 GB',
+    'nthreads': 16,
+    }
+    
+    output_dictionary= sparcle_qc.run(user_options = inputs)
+    true_dictionary = {'Complex': [721, 4207, 2.0, -0.3], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4207, 2.0, -0.3]}
+    assert output_dictionary == true_dictionary
+def test_run_z2():
+    inputs = {
+    'input_filename': 'test14.in',
+    'pdb_file': '3QXP_templated_amber.pdb',
+    'cutoff': 6,
+    'seed': 'ligand',
+    'charge_scheme': 'Z2',
+    'ligand_charge': 0,
+    'method': 'hf',
+    'basis_set': 'aug-cc-pv(D+d)z',
+    'amber_ff': 'ff19SB',
+    'env_path': '/theoryfs2/ds/ipberry/miniconda3/envs/emb_sapt/',
+    'water_model': 'opc' ,
+    'o_charge': 0,
+    'h_charge': 0.6791,
+    'ep_charge': -1.3582,
+    'software': 'psi4',
+    'mem': '100 GB',
+    'nthreads': 16,
+    }
+    
+    output_dictionary= sparcle_qc.run(user_options = inputs)
+    true_dictionary = {'Complex': [721, 4207, 2.0, 6.97], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4207, 2.0, 6.97]}
+    assert output_dictionary == true_dictionary
+def test_run_z3():
+    inputs = {
+    'input_filename': 'test15.in',
+    'pdb_file': '3QXP_templated_amber.pdb',
+    'cutoff': 6,
+    'seed': 'ligand',
+    'charge_scheme': 'Z3',
+    'ligand_charge': 0,
+    'method': 'hf',
+    'basis_set': 'aug-cc-pv(D+d)z',
+    'amber_ff': 'ff19SB',
+    'env_path': '/theoryfs2/ds/ipberry/miniconda3/envs/emb_sapt/',
+    'water_model': 'opc' ,
+    'o_charge': 0,
+    'h_charge': 0.6791,
+    'ep_charge': -1.3582,
+    'software': 'psi4',
+    'mem': '100 GB',
+    'nthreads': 16,
+    }
+    
+    output_dictionary= sparcle_qc.run(user_options = inputs)
+    true_dictionary = {'Complex': [721, 4207, 2.0, 4.97], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4207, 2.0, 4.97]} 
+    assert output_dictionary == true_dictionary
+def test_run_brcd():
+    inputs = {
+    'input_filename': 'test16.in',
+    'pdb_file': '3QXP_templated_amber.pdb',
+    'cutoff': 6,
+    'seed': 'ligand',
+    'charge_scheme': 'BRCD',
+    'ligand_charge': 0,
+    'method': 'hf',
+    'basis_set': 'aug-cc-pv(D+d)z',
+    'amber_ff': 'ff19SB',
+    'env_path': '/theoryfs2/ds/ipberry/miniconda3/envs/emb_sapt/',
+    'water_model': 'opc' ,
+    'o_charge': 0,
+    'h_charge': 0.6791,
+    'ep_charge': -1.3582,
+    'software': 'psi4',
+    'mem': '100 GB',
+    'nthreads': 16,
+    }
+    
+    output_dictionary= sparcle_qc.run(user_options = inputs)
+    true_dictionary = {'Complex': [721, 4225, 2.0, 3.0], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4225, 2.0, 3.0]}
+    assert output_dictionary == true_dictionary
+def test_run_brc2():
+    inputs = {
+    'input_filename': 'test17.in',
+    'pdb_file': '3QXP_templated_amber.pdb',
+    'cutoff': 6,
+    'seed': 'ligand',
+    'charge_scheme': 'BRC2',
+    'ligand_charge': 0,
+    'method': 'hf',
+    'basis_set': 'aug-cc-pv(D+d)z',
+    'amber_ff': 'ff19SB',
+    'env_path': '/theoryfs2/ds/ipberry/miniconda3/envs/emb_sapt/',
+    'water_model': 'opc' ,
+    'o_charge': 0,
+    'h_charge': 0.6791,
+    'ep_charge': -1.3582,
+    'software': 'psi4',
+    'mem': '100 GB',
+    'nthreads': 16,
+    }
+    
+    output_dictionary= sparcle_qc.run(user_options = inputs)
+    true_dictionary = {'Complex': [721, 4195, 2.0, 3.0], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4195, 2.0, 3.0]}
+    assert output_dictionary == true_dictionary
+def test_run_see():
+    inputs = {
+    'input_filename': 'test18.in',
+    'pdb_file': '3QXP_templated_amber.pdb',
+    'cutoff': 6,
+    'seed': 'ligand',
+    'charge_scheme': 'SEE',
+    'ligand_charge': 0,
+    'method': 'hf',
+    'basis_set': 'aug-cc-pv(D+d)z',
+    'amber_ff': 'ff19SB',
+    'env_path': '/theoryfs2/ds/ipberry/miniconda3/envs/emb_sapt/',
+    'water_model': 'opc' ,
+    'o_charge': 0,
+    'h_charge': 0.6791,
+    'ep_charge': -1.3582,
+    'software': 'psi4',
+    'mem': '100 GB',
+    'nthreads': 16,
+    }
+    
+    output_dictionary= sparcle_qc.run(user_options = inputs)
+    true_dictionary = {'Complex': [721, 78, 2.0, -1.81], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 78, 2.0, -1.81]}
     assert output_dictionary == true_dictionary
