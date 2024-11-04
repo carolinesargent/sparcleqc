@@ -171,31 +171,3 @@ def psf_to_mol2(original_pdb: str) -> None:
     mol2_file.write('@<TRIPOS>BOND\n')
     mol2_file.close()
 
-def dictionary_nocut(cx_pdb:str = 'cx_autocap_fixed.pdb') -> None:
-    """ 
-    Note: this is not a charmm specific function, but is located
-    in this module because of its dependence on parmed
-
-    If the cutoff specified in the input file is 0 angstroms, then
-    the entirety of the protein should be located in the MM region.
-    This function uses parmed to loop through each atom in the complex
-    pdb and add into the MM list of atoms in dictionary.dat
-
-    Parameters
-    ----------
-    pdb_file: str
-        path to complex pdb
-
-    Returns
-    -------
-    None
-    """
-    lig = pmd.load_file('ligand.pdb')
-    lig_name = lig.residues[0].name
-    d = {'MM': []}
-    charmmprot = pmd.load_file(cx_pdb)
-    for atom in charmmprot.atoms:
-        if atom.residue.name != lig_name:
-            d['MM'].append(atom.idx+1)
-    with open('dictionary.dat', 'w+') as wfile:
-        json.dump(d, wfile)

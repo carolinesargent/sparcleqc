@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from typing import Tuple
-
+import parmed as pmd
 
 
 def get_coords(pdb_file1: str, atom_id1: str) -> Tuple[str, str, str]:
@@ -72,10 +72,13 @@ def convert_atom_id(seed: str, seed_file:str, new_pdb:str ='cx_autocap_fixed.pdb
     -------
     cx_id: str
         atom in new_pdb that corresponds to the atom seed in seed_file
+    coords: list
+        coordinates of seed atom
     """
     x1,y1,z1 = get_coords(seed_file, seed)
     cx_id = match_coords(x1, y1, z1, new_pdb)
-    return cx_id
+    coords = [float(x1),float(y1),float(z1)]
+    return cx_id, coords
 
 def check_resi_charges(mol2_file: str) -> Tuple[int, str]:
     """
@@ -216,3 +219,33 @@ def check_df_charges() -> Tuple[int, str]:
 
     return return_message
 
+def closest_contact(pdb1, pdb2):
+    """
+    Calculate the distance of the closest contact between two PDBs, or one PDB and one coordinate.
+    
+    Args:
+    pdb1 (np.ndarray): A PDB representing the first set of XYZ coordinates.
+    pdb2 (np.ndarray): A PDB representing the second set of XYZ coordinates or list of coords of one atom (seed).
+    
+    Returns:
+    float: The minimum distance between any two points from pdb1 and pdb2.
+    """
+    pmdpdb1 = pmd.load_file(pdb1)
+    coords1 = pmdpdb1.coordinates
+    if 'pdb' in pdb2:
+        pmdpdb2 = pmd.load_file(pdb2)
+        coords2 = pmdpdb2.coordinates
+    else:
+        coords2 = pdb2
+
+    # Ensure the input arrays are NumPy arrays
+    coords1 = np.array(coords1)
+    coords2 = np.array(coords2)
+
+    # Compute the distance matrix
+    distances = np.linalg.norm(coords1[:, np.newaxis] - coords2, axis=2)
+
+    # Find the minimum distance
+    min_distance = np.min(distances)
+
+    return min_distance
