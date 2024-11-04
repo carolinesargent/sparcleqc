@@ -11,7 +11,7 @@ from typing import Dict
 
 from .amber_prep import write_cpptraj, write_cpptraj_skip_autocap, write_tleap, autocap, skip_autocap, fix_numbers_amber
 from .charmm_prep import psf_to_mol2, combine_charmm, fix_numbers_charmm
-from .pdb_prep import check_df_charges, check_resi_charges, convert_atom_id 
+from .pdb_prep import check_df_charges, check_resi_charges, convert_atom_id, closest_contact
 from .combine_data import combine_data
 from .cut_protein import run_cut_protein 
 from .convert_dict import convert_dictionary 
@@ -386,6 +386,7 @@ def run(input_file= None, user_options = None) -> None:
                         |_|                                               * \\______/ 
                                                                         *    \n''')
         output.write('----------------------------------------------------------------------------------------------------\n\n\n')
+
         #if forcefield is amber, writing and running cpptraj files and dealing with capping residues
         if 'amber_ff' in keywords: 
             if 'pre-capped' in keywords:
@@ -419,9 +420,9 @@ def run(input_file= None, user_options = None) -> None:
         #obtaining seed containing information of which group to grow the QM region from
         if keywords['seed'] =='ligand':
             seed = 'ligand'
+            seed_coords = 'ligand.pdb'
         else:
-            seed = convert_atom_id(keywords['seed'], keywords['seed_file'])
-        
+            seed, seed_coords = convert_atom_id(keywords['seed'], keywords['seed_file'])
         #if forcefield is amber, writing and running tleap to create mol2
         if 'amber_ff' in keywords:
             write_tleap(keywords['amber_ff'], keywords['water_model'])
@@ -434,6 +435,10 @@ def run(input_file= None, user_options = None) -> None:
         else:
             psf_to_mol2(keywords['pdb_file'])
             shutil.copy(keywords['pdb_file'], 'prot_autocap_fixed.pdb')
+        min_dist = closest_contact('prot_autocap_fixed.pdb', seed_coords)
+        if float(keywords['cutoff']) < min_dist:
+            print(f'Error: Cutoff is less than the shortest intermolecular distance between the seed atom(s) and the protein. Please choose a value greater than {min_dist:.2f} Ang.')
+            sys.exit()
         
         #checking for residue integer charges in the mol2
         resi_output = check_resi_charges('prot_autocap_fixed.mol2')
