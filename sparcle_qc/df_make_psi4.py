@@ -1253,7 +1253,9 @@ def check_QM_file(psi4file: str) -> None:
             except NameError:
                 pass
             else:
-                if 'end' in line or 'unit' in line:
+                if 'unit' in line and software.lower() == 'psi4':
+                    n_end = n
+                if 'end' in line and software.lower() != 'psi4':
                     n_end = n
                 if 'charge' in line:
                     n_nwchem_charge = n
