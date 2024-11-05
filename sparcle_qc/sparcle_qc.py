@@ -486,7 +486,7 @@ def run(input_file= None, user_options = None) -> None:
         ext = {'psi4':'.py', 'nwchem':'.in', 'q-chem':'.in'}
         sapt_inp_filename = f'{new_dir}_' + keywords['software'] + '_file' + ext[keywords['software']]
         if 'sapt' in keywords['method'].lower():
-            write_input(input_file, sapt_inp_filename)
+            write_input(input_file, sapt_inp_filename, keywords['software'])
             write_file(keywords['software'], qm_lig, c_QM, qm_pro, '', mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], keywords['do_fsapt'], keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'], keywords['qchem_sapt'])
 #            #check the charges and number of atoms in the written QM input file
             qm_atoms, mm_atoms, qm_charge, mm_charge = check_QM_file(sapt_inp_filename)
@@ -502,13 +502,13 @@ def run(input_file= None, user_options = None) -> None:
                 prot_uniq_elements = None
                 ghost_charge = None
             lig_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_lig' + ext[keywords['software']]
-            write_input(input_file, lig_inp_filename)
+            write_input(input_file, lig_inp_filename, keywords['software'])
             write_file(keywords['software'], qm_lig, ghost_charge, ghost_pro, prot_uniq_elements, None, lig_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], False, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
             prot_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_prot' + ext[keywords['software']]
-            write_input(input_file, prot_inp_filename)
+            write_input(input_file, prot_inp_filename, keywords['software'])
             write_file(keywords['software'], ghost_lig, c_QM, qm_pro, lig_uniq_elements, mm_env, prot_inp_filename, ghost_charge, keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
             cx_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_cx' + ext[keywords['software']]
-            write_input(input_file, cx_inp_filename)
+            write_input(input_file, cx_inp_filename, keywords['software'])
             write_file(keywords['software'], qm_lig, c_QM, qm_pro, None, mm_env, cx_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
             qm_atoms_lig, mm_atoms_lig, qm_charge_lig, mm_charge_lig = check_QM_file(lig_inp_filename)
             qm_atoms_pro, mm_atoms_pro, qm_charge_pro, mm_charge_pro = check_QM_file(prot_inp_filename)
