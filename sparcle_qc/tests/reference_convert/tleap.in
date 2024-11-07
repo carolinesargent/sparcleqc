@@ -1,0 +1,5 @@
+source leaprc.protein.ff19SB
+source leaprc.water.opc
+mol = loadPdb "prot_autocap_fixed.pdb"
+savemol2 mol prot_autocap_fixed.mol2 1
+quit

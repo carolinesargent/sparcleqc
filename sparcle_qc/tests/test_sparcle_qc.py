@@ -9,22 +9,26 @@ import pytest
 import os
 import sparcle_qc
 
-'''
+def delete_test_files():
+    for file in os.listdir('.'):
+        if file.startswith('test') and file.endswith('.in'):
+            os.remove(file)
+            print(f"Removed file: {file}")
+
+def delete_test_dirs():
+    for dir_name in os.listdir('.'):
+        if dir_name.startswith('test') and os.path.isdir(dir_name):
+            shutil.rmtree(dir_name)
+            print(f"Removed directory: {dir_name}")
+
 @pytest.fixture(scope='session', autouse=True)
 def cleanup_directory():
-    #directory_path = 'test'
-
-    # Remove the directory if it exists
-    if os.path.exists(directory_path):
-        shutil.rmtree(directory_path)
-
     yield  # This allows the tests to run
     # Cleanup after tests
-    if os.path.exists(directory_path):
-        print('removing files')
-        shutil.rmtree(directory_path)
-'''
-       
+    delete_test_files()
+    delete_test_dirs()
+
+
 def test_sparcle_qc_imported():
     """Sample test, will always pass so long as import statement worked."""
     assert "sparcle_qc" in sys.modules
@@ -461,3 +465,123 @@ def test_run_see():
     output_dictionary= sparcle_qc.run(user_options = inputs)
     true_dictionary = {'Complex': [721, 78, 2.0, -1.81], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 78, 2.0, -1.81]}
     assert output_dictionary == true_dictionary
+def test_exit():
+    exits = []
+    true_exits = []
+    inputs = [{
+    'input_filename': 'test20.in',
+    'pdb_file': 'doesnt_exit.pdb',
+    'cutoff': 6,
+    'seed': 'ligand',
+    'charge_scheme': 'BRC',
+    'ligand_charge': 0,
+    'method': 'hf',
+    'basis_set': 'aug-cc-pv(D+d)z',
+    'amber_ff': 'ff19SB',
+    'env_path': '/theoryfs2/ds/ipberry/miniconda3/envs/emb_sapt/',
+    'water_model': 'opc' ,
+    'o_charge': 0,
+    'h_charge': 0.6791,
+    'ep_charge': -1.3582,
+    'software': 'psi4',
+    'mem': '100 GB',
+    'nthreads': 16,
+    },{'input_filename': 'test21.in',
+    'pdb_file': '3QXP_templated_amber.pdb',
+    'cutoff': 6,
+    'seed': 'ligand',
+    'charge_scheme': 'ABC',
+    'ligand_charge': 0,
+    'method': 'hf',
+    'basis_set': 'aug-cc-pv(D+d)z',
+    'amber_ff': 'ff19SB',
+    'env_path': '/theoryfs2/ds/ipberry/miniconda3/envs/emb_sapt/',
+    'water_model': 'opc' ,
+    'o_charge': 0,
+    'h_charge': 0.6791,
+    'ep_charge': -1.3582,
+    'software': 'psi4',
+    'mem': '100 GB',
+    'nthreads': 16,
+    },{'input_filename': 'test22.in',
+    'pdb_file': '3QXP_templated_amber.pdb',
+    'cutoff': 'six',
+    'seed': 'ligand',
+    'charge_scheme': 'BRC',
+    'ligand_charge': 0,
+    'method': 'hf',
+    'basis_set': 'aug-cc-pv(D+d)z',
+    'amber_ff': 'ff19SB',
+    'env_path': '/theoryfs2/ds/ipberry/miniconda3/envs/emb_sapt/',
+    'water_model': 'opc' ,
+    'o_charge': 0,
+    'h_charge': 0.6791,
+    'ep_charge': -1.3582,
+    'software': 'psi4',
+    'mem': '100 GB',
+    'nthreads': 16,
+    },{'input_filename': 'test23.in',
+    'pdb_file': '3QXP_templated_amber.pdb',
+    'cutoff': 6,
+    'seed': 'ligand',
+    'charge_scheme': 'BRC',
+    'ligand_charge': 0,
+    'method': 'hf',
+    'basis_set': 'aug-cc-pv(D+d)z',
+    'amber_ff': 'ff19SB',
+    'env_path': '/theoryfs2/ds/ipberry/miniconda3/envs/emb_sapt/',
+    'water_model': 'opc' ,
+    'o_charge': 0,
+    'ep_charge': -1.3582,
+    'software': 'psi4',
+    'mem': '100 GB',
+    'nthreads': 16,
+    },{'input_filename': 'test24.in',
+    'pdb_file': '3qxp.pdb',
+    'cutoff': '6',
+    'seed': 'ligand',
+    'charge_scheme': 'BRC',
+    'ligand_charge': 0,
+    'method': 'hf',
+    'basis_set': 'aug-cc-pv(D+d)z',
+    'charmm_rtf': 'top_all36_prot.rtf',
+    'env_path': '/theoryfs2/ds/ipberry/miniconda3/envs/emb_sapt/',
+    'water_model': 'tip3p' ,
+    'software': 'psi4',
+    'mem': '100 GB',
+    'nthreads': 16,
+    }]
+    for input_test in inputs:
+        with pytest.raises(SystemExit) as e: 
+            output_dictionary= sparcle_qc.run(user_options = input_test)
+        exits.append(e.type)
+        true_exits.append(SystemExit)
+        
+    assert exits == true_exits 
+
+def test_run_convert():
+    inputs = {
+    'input_filename': 'test19.in',
+    'pdb_file': '3QU0_templated_from_3QXP_amber.pdb',
+    'template_path': 'reference_convert/cx_autocap_fixed.pdb',
+    'cutoff': 6,
+    'seed': 'ligand',
+    'charge_scheme': 'BRC',
+    'ligand_charge': 0,
+    'method': 'hf',
+    'basis_set': 'aug-cc-pv(D+d)z',
+    'amber_ff': 'ff19SB',
+    'env_path': '/theoryfs2/ds/ipberry/miniconda3/envs/emb_sapt/',
+    'water_model': 'opc' ,
+    'o_charge': 0,
+    'h_charge': 0.6791,
+    'ep_charge': -1.3582,
+    'software': 'psi4',
+    'mem': '100 GB',
+    'nthreads': 16,
+    }
+
+    output_dictionary= sparcle_qc.run(user_options = inputs)
+    true_dictionary = {'Complex': [718, 4225, 2.0, 3.0], 'Ligand': [38, 0, 0.0, 0.0], 'Protein': [680, 4225, 2.0, 3.0]}
+    assert output_dictionary == true_dictionary
+

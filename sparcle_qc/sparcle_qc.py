@@ -517,7 +517,12 @@ def run(input_file= None, user_options = None) -> None:
         #write fsapt files
         if keywords['fisapt_partition'] == 'true':
             partition('CAPPED_qm.pdb')
+        
         print(f"\u2728Sparcle-QC has sparkled\u2728")
+        if 'sapt' in keywords['method'].lower():
+            return qm_atoms, mm_atoms, qm_charge, mm_charge
+        else:
+            return {'Complex':[qm_atoms_cx, mm_atoms_cx, qm_charge_cx, mm_charge_cx], 'Ligand':[qm_atoms_lig, mm_atoms_lig, qm_charge_lig, mm_charge_lig], 'Protein':[qm_atoms_pro, mm_atoms_pro, qm_charge_pro, mm_charge_pro]}
     except Exception as e:
         error_type = type(e).__name__
         error_message = str(e)
@@ -526,15 +531,17 @@ def run(input_file= None, user_options = None) -> None:
         print(f'\nAn error has occurred:')
         print(error_traceback)
     finally:
-        os.chdir('../')
+        cur_path = os.getcwd()
+        relative_dir = cur_path.split('/')[-1]
+        try:
+            if relative_dir==new_dir:
+                os.chdir('../')
+        except:
+            pass
         stop_flashing.set()
     
     # Wait for the flashing thread to finish
         flashing_thread.join()
-    if 'sapt' in keywords['method'].lower():
-        return qm_atoms, mm_atoms, qm_charge, mm_charge
-    else:
-        return {'Complex':[qm_atoms_cx, mm_atoms_cx, qm_charge_cx, mm_charge_cx], 'Ligand':[qm_atoms_lig, mm_atoms_lig, qm_charge_lig, mm_charge_lig], 'Protein':[qm_atoms_pro, mm_atoms_pro, qm_charge_pro, mm_charge_pro]}
     
 def main():
     if len(sys.argv) != 2:
