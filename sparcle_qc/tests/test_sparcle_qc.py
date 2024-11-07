@@ -9,22 +9,26 @@ import pytest
 import os
 import sparcle_qc
 
-'''
+def delete_test_files():
+    for file in os.listdir('.'):
+        if file.startswith('test') and file.endswith('.in'):
+            os.remove(file)
+            print(f"Removed file: {file}")
+
+def delete_test_dirs():
+    for dir_name in os.listdir('.'):
+        if dir_name.startswith('test') and os.path.isdir(dir_name):
+            shutil.rmtree(dir_name)
+            print(f"Removed directory: {dir_name}")
+
 @pytest.fixture(scope='session', autouse=True)
 def cleanup_directory():
-    #directory_path = 'test'
-
-    # Remove the directory if it exists
-    if os.path.exists(directory_path):
-        shutil.rmtree(directory_path)
-
     yield  # This allows the tests to run
     # Cleanup after tests
-    if os.path.exists(directory_path):
-        print('removing files')
-        shutil.rmtree(directory_path)
-'''
-       
+    delete_test_files()
+    delete_test_dirs()
+
+
 def test_sparcle_qc_imported():
     """Sample test, will always pass so long as import statement worked."""
     assert "sparcle_qc" in sys.modules
