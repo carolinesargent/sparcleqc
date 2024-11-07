@@ -1,0 +1,16 @@
+pdb_file: 3QXP_templated_amber.pdb
+cutoff: 6
+seed: ligand
+ligand_charge: 0
+method: hf
+charge_scheme: BRC
+basis_set: aug-cc-pv(D+d)z
+amber_ff: ff19SB
+env_path: /theoryfs2/ds/ipberry/miniconda3/envs/emb_sapt/
+water_model: opc
+o_charge: 0
+h_charge: 0.6791
+ep_charge: -1.3582
+software: psi4
+mem: 100 GB
+nthreads: 16

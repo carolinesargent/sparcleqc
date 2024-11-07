@@ -1,0 +1,3 @@
+parm 3QXP_templated_amber.pdb
+loadcrd 3QXP_templated_amber.pdb name tmp1
+prepareforleap crdset tmp1 name tmp2 pdbout uncapped.pdb nosugar

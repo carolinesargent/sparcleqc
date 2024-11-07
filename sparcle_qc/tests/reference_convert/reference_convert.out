@@ -1,0 +1,316 @@
+----------------------------------------------------------------------------------------------------
+                                                                                    QC 
+                                                                                    /
+                                                                                   /  *
+                   ____                       _             ___   ____      /‾‾‾‾‾‾\    *
+                  / ___| _ __   __ _ _ __ ___| | ___       / _ \ / ___|    /  ····  \ *       
+                  \___ \| '_ \ / _` | '__/ __| |/ _ \_____| | | | |       /  ·    ·  \        
+                   ___) | |_) | (_| | | | (__| |  __/_____| |_| | |___    \  ·    ·  /  
+                  |____/| .__/ \__,_|_|  \___|_|\___|      \__\_\\____| *  \  ····  /  
+                        |_|                                               * \______/ 
+                                                                        *    
+----------------------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------------
+                                              cpptraj                                               
+----------------------------------------------------------------------------------------------------
+
+CPPTRAJ: Trajectory Analysis. V6.18.1 (AmberTools)
+    ___  ___  ___  ___
+     | \/ | \/ | \/ | 
+    _|_/\_|_/\_|_/\_|_
+
+| Date/time: 11/01/24 14:47:00
+| Available memory: 246.688 GB
+
+INPUT: Reading input from 'cpptraj.in'
+  [parm 3QXP_templated_amber.pdb]
+	Reading '3QXP_templated_amber.pdb' as PDB File
+	Reading bond info from CONECT records.
+	Not reading bond info from LINK records.
+	Determining bond info from distances.
+Warning: Determining bond length parameters from element types for '3QXP_templated_amber.pdb'.
+  [loadcrd 3QXP_templated_amber.pdb name tmp1]
+	Reading '3QXP_templated_amber.pdb' as PDB
+	Loading trajectory '3QXP_templated_amber.pdb' as 'tmp1'
+----- 3QXP_templated_amber.pdb (1-1, 1) -----
+  [prepareforleap crdset tmp1 name tmp2 pdbout uncapped.pdb nosugar]
+	PREPAREFORLEAP:
+# Citation: Roe, D.R.; Bergonzo, C.; "PrepareForLeap: An Automated Tool for
+#           Fast PDB-to-Parameter Generation."
+#           J. Comp. Chem. (2022), V. 43, I. 13, pp 930-935.
+	Using frame 1 from COORDS set tmp1
+	Prepared system will be saved to COORDS set 'tmp2'
+	PDB will be written to uncapped.pdb
+	Using original TER cards where possible.
+	Using leap unit name: m
+	Solvent residue name: HOH
+	Will attempt to prepare sugars.
+Info: Parameter file path from AMBERHOME variable: '/theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/AmberTools/src/cpptraj/dat/PDB_ResidueNames.txt'
+	Reading PDB residue names from '/theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/AmberTools/src/cpptraj/dat/PDB_ResidueNames.txt'
+	38 PDB residue names recognized by Amber FFs.
+Info: Parameter file path from AMBERHOME variable: '/theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/AmberTools/src/cpptraj/dat/Carbohydrate_PDB_Glycam_Names.txt'
+	Reading PDB residue name -> Glycam name map from '/theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/AmberTools/src/cpptraj/dat/Carbohydrate_PDB_Glycam_Names.txt'
+	95 entries in PDB to glycam name map.
+	Will determine sugar anomer type/configuration by geometry.
+	Histidine protonation detection:
+		ND1 atom name                   : ND1
+		NE2 atom name                   : NE2
+		Histidine original residue name : HIS
+		Epsilon-protonated residue name : HIE
+		Delta-protonated residue name   : HID
+		Doubly-protonated residue name  : HIP
+	Attempting to determine histidine form from any existing H atoms.
+	Mask [:HIS] corresponds to 170 atoms.
+		HIS_60_A => HIE
+		HIS_71_A => HID
+		HIS_84_A => HID
+		HIS_119_A => HIE
+		HIS_121_A => HID
+		HIS_125_A => HIE
+		HIS_161_A => HID
+		HIS_268_A => HID
+		HIS_283_A => HIE
+		HIS_295_A => HID
+	10 histidine names were changed.
+	Will split off recognized sugar functional groups into separate residues.
+	Will search for missing bonds to sugar anomeric atoms.
+	Looking for sugars selected by ':0MK,32O,3MK,4GL,64K,A2G,A5C,ADA,AFD,AHR,ALL,ARA,ARB,ASG,AXR,BDF,BDP,BDR,BGC,BM3,BM7,BMA,BXX,BXY,FCA,FCB,FRU,FUB,FUC,FUL,G6D,GAL,GCU,GCV,GIV,GL0,GLA,GLC,GTR,GU4,GUP,GXL,GYE,GZL,HSY,HSZ,IDR,IDS,LDY,LFR,LXC,MAN,MGL,MXY,MXZ,NAG,NDG,NG6,NGA,NGZ,PSV,RAM,RIB,RIP,RM4,SDY,SEJ,SF6,SF9,SHD,SIA,SLB,SOE,T6T,TTV,UEA,VDS,VDV,WOO,XXR,XYP,XYS,XYZ,YYJ,YYK,YYM,YYQ,Z2D,Z4W,Z6H,Z6J,Z8H,Z8T,Z9N,ZEE'
+	Selected 0 sugar atoms.
+Warning: No sugar atoms selected by :0MK,32O,3MK,4GL,64K,A2G,A5C,ADA,AFD,AHR,ALL,ARA,ARB,ASG,AXR,BDF,BDP,BDR,BGC,BM3,BM7,BMA,BXX,BXY,FCA,FCB,FRU,FUB,FUC,FUL,G6D,GAL,GCU,GCV,GIV,GL0,GLA,GLC,GTR,GU4,GUP,GXL,GYE,GZL,HSY,HSZ,IDR,IDS,LDY,LFR,LXC,MAN,MGL,MXY,MXZ,NAG,NDG,NG6,NGA,NGZ,PSV,RAM,RIB,RIP,RM4,SDY,SEJ,SF6,SF9,SHD,SIA,SLB,SOE,T6T,TTV,UEA,VDS,VDV,WOO,XXR,XYP,XYS,XYZ,YYJ,YYK,YYM,YYQ,Z2D,Z4W,Z6H,Z6J,Z8H,Z8T,Z9N,ZEE
+	LEaP input containing 'loadpdb' and bond commands for disulfides,
+	  sugars, etc will be written to 'STDOUT'
+m = loadpdb uncapped.pdb
+	Cysteine residues involved in disulfide bonds will be changed to: CYX
+	Searching for disulfide bonds with a cutoff of 2.5 Ang.
+	Mask [:CYS@SG] corresponds to 3 atoms.
+	0 existing disulfide bonds.
+	3 sulfur atoms do not have a partner.
+	Detected 0 disulfide bonds.
+	0 sugar atoms selected in 0 residues.
+Warning: No sugar atoms selected by :0MK,32O,3MK,4GL,64K,A2G,A5C,ADA,AFD,AHR,ALL,ARA,ARB,ASG,AXR,BDF,BDP,BDR,BGC,BM3,BM7,BMA,BXX,BXY,FCA,FCB,FRU,FUB,FUC,FUL,G6D,GAL,GCU,GCV,GIV,GL0,GLA,GLC,GTR,GU4,GUP,GXL,GYE,GZL,HSY,HSZ,IDR,IDS,LDY,LFR,LXC,MAN,MGL,MXY,MXZ,NAG,NDG,NG6,NGA,NGZ,PSV,RAM,RIB,RIP,RM4,SDY,SEJ,SF6,SF9,SHD,SIA,SLB,SOE,T6T,TTV,UEA,VDS,VDV,WOO,XXR,XYP,XYS,XYZ,YYJ,YYK,YYM,YYQ,Z2D,Z4W,Z6H,Z6J,Z8H,Z8T,Z9N,ZEE
+	6 solvent residues.
+	Potential problem : X64_300_A is an unrecognized name and may not have parameters.
+	Writing 'uncapped.pdb' as PDB
+  'uncapped.pdb' (1 frames) is a PDB file, Parm 3QXP_templated_amber.pdb: Writing 1 frames (1-Last, 1)
+TIME: Total execution time: 0.0534 seconds.
+--------------------------------------------------------------------------------
+To cite CPPTRAJ use:
+Daniel R. Roe and Thomas E. Cheatham, III, "PTRAJ and CPPTRAJ: Software for
+  Processing and Analysis of Molecular Dynamics Trajectory Data". J. Chem.
+  Theory Comput., 2013, 9 (7), pp 3084-3095.
+
+----------------------------------------------------------------------------------------------------
+                                               tleap                                                
+----------------------------------------------------------------------------------------------------
+-I: Adding /theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/dat/leap/prep to search path.
+-I: Adding /theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/dat/leap/lib to search path.
+-I: Adding /theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/dat/leap/parm to search path.
+-I: Adding /theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/dat/leap/cmd to search path.
+-f: Source tleap.in.
+
+Welcome to LEaP!
+(no leaprc in search path)
+Sourcing: ./tleap.in
+----- Source: /theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/dat/leap/cmd/leaprc.protein.ff19SB
+----- Source of /theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/dat/leap/cmd/leaprc.protein.ff19SB done
+Log file: ./leap.log
+Loading parameters: /theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/dat/leap/parm/parm19.dat
+Reading title:
+PARM99 + frcmod.ff99SB + frcmod.parmbsc0 + OL3 for RNA + ff19SB
+Loading parameters: /theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/dat/leap/parm/frcmod.ff19SB
+Reading force field modification type file (frcmod)
+Reading title:
+ff19SB AA-specific backbone CMAPs for protein 07/25/2019
+Loading library: /theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/dat/leap/lib/amino19.lib
+Loading library: /theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/dat/leap/lib/aminoct12.lib
+Loading library: /theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/dat/leap/lib/aminont12.lib
+----- Source: /theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/dat/leap/cmd/leaprc.water.opc
+----- Source of /theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/dat/leap/cmd/leaprc.water.opc done
+Loading library: /theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/dat/leap/lib/atomic_ions.lib
+Loading library: /theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/dat/leap/lib/solvents.lib
+Loading parameters: /theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/dat/leap/parm/frcmod.opc
+Reading force field modification type file (frcmod)
+Reading title:
+Parameters for OPC water (JPCL, 2014, 5 (21), pp 3863-3871)
+Loading parameters: /theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/dat/leap/parm/frcmod.ionslm_126_opc
+Reading force field modification type file (frcmod)
+Reading title:
+Li/Merz ion parameters of atomic ions for the OPC water model (12-6 set)
+Loading PDB file: ./prot_autocap_fixed.pdb
+
+/theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/bin/teLeap: Warning!
+Name change in pdb file residue 300 ;
+this residue is split into NME and HOH.
+
+/theoryfs2/ds/ipberry/miniconda3/envs/sparcle_qc/bin/teLeap: Note.
+1 residues had naming warnings.
+Thus, there are split residues;
+residue sequence numbers will not correspond to those in the pdb.
+  total atoms in file: 4875
+  Leap added 6 missing atoms according to residue templates:
+       6 H / lone pairs
+Writing mol2 file: prot_autocap_fixed.mol2
+	Quit
+
+Exiting LEaP: Errors = 0; Warnings = 1; Notes = 1.
+----------------------------------------------------------------------------------------------------
+                                            cut_protein                                             
+----------------------------------------------------------------------------------------------------
+Making an initial cut:
+Number of atoms in QM protein: 600
+Extending the QM region to avoid having an MM residue surrounded by QM residues on each side:
+Number of atoms in new QM region: 622
+Extending the QM region to avoid having an MM residue surrounded by QM residues on each side:
+Number of atoms in new QM region: 638
+Extending the QM region to avoid having an MM residue surrounded by QM residues on each side:
+Number of atoms in new QM region: 654
+Extending the QM region to avoid having an MM residue surrounded by QM residues on each side:
+Number of atoms in new QM region: 668
+----------------------------------------------------------------------------------------------------
+                                                cap                                                 
+----------------------------------------------------------------------------------------------------
+Atom IDs refer to cx_autocap_fixed.pdb
+Capping Q1 atom of bond 1:
+Q1 atom ID: [114]
+M1 atom ID: [113]
+Q1 atom type: C
+M1 atom type: CA
+MM bond distance parameter (R0) for XC-H1 stretch: 1.09
+MM bond distance parameter (R0) for C -XC stretch: 1.522
+C_HL: 0.7162
+R_Q1HL(Å)=1.0953
+
+Capping Q1 atom of bond 2:
+Q1 atom ID: [309]
+M1 atom ID: [310]
+Q1 atom type: CA
+M1 atom type: C
+MM bond distance parameter (R0) for XC-H1 stretch: 1.09
+MM bond distance parameter (R0) for XC-C  stretch: 1.522
+C_HL: 0.7162
+R_Q1HL(Å)=1.0876
+
+Capping Q1 atom of bond 3:
+Q1 atom ID: [457]
+M1 atom ID: [456]
+Q1 atom type: C
+M1 atom type: CA
+MM bond distance parameter (R0) for XC-H1 stretch: 1.09
+MM bond distance parameter (R0) for C -XC stretch: 1.522
+C_HL: 0.7162
+R_Q1HL(Å)=1.0939
+
+Capping Q1 atom of bond 4:
+Q1 atom ID: [517]
+M1 atom ID: [518]
+Q1 atom type: CA
+M1 atom type: C
+MM bond distance parameter (R0) for XC-H1 stretch: 1.09
+MM bond distance parameter (R0) for XC-C  stretch: 1.522
+C_HL: 0.7162
+R_Q1HL(Å)=1.0960
+
+Capping Q1 atom of bond 5:
+Q1 atom ID: [1007]
+M1 atom ID: [1006]
+Q1 atom type: C
+M1 atom type: CA
+MM bond distance parameter (R0) for XC-H1 stretch: 1.09
+MM bond distance parameter (R0) for C -XC stretch: 1.522
+C_HL: 0.7162
+R_Q1HL(Å)=1.0993
+
+Capping Q1 atom of bond 6:
+Q1 atom ID: [1025]
+M1 atom ID: [1026]
+Q1 atom type: CA
+M1 atom type: C
+MM bond distance parameter (R0) for XC-H1 stretch: 1.09
+MM bond distance parameter (R0) for XC-C  stretch: 1.522
+C_HL: 0.7162
+R_Q1HL(Å)=1.0936
+
+Capping Q1 atom of bond 7:
+Q1 atom ID: [1250]
+M1 atom ID: [1249]
+Q1 atom type: C
+M1 atom type: CA
+MM bond distance parameter (R0) for XC-H1 stretch: 1.09
+MM bond distance parameter (R0) for C -XC stretch: 1.522
+C_HL: 0.7162
+R_Q1HL(Å)=1.0945
+
+Capping Q1 atom of bond 8:
+Q1 atom ID: [1488]
+M1 atom ID: [1489]
+Q1 atom type: CA
+M1 atom type: C
+MM bond distance parameter (R0) for XC-H1 stretch: 1.09
+MM bond distance parameter (R0) for XC-C  stretch: 1.522
+C_HL: 0.7162
+R_Q1HL(Å)=1.1021
+
+Capping Q1 atom of bond 9:
+Q1 atom ID: [2102]
+M1 atom ID: [2101]
+Q1 atom type: C
+M1 atom type: CA
+MM bond distance parameter (R0) for XC-H1 stretch: 1.09
+MM bond distance parameter (R0) for C -XC stretch: 1.522
+C_HL: 0.7162
+R_Q1HL(Å)=1.0964
+
+Capping Q1 atom of bond 10:
+Q1 atom ID: [2206]
+M1 atom ID: [2207]
+Q1 atom type: CA
+M1 atom type: C
+MM bond distance parameter (R0) for XC-H1 stretch: 1.09
+MM bond distance parameter (R0) for XC-C  stretch: 1.522
+C_HL: 0.7162
+R_Q1HL(Å)=1.0916
+
+Capping Q1 atom of bond 11:
+Q1 atom ID: [2346]
+M1 atom ID: [2345]
+Q1 atom type: C
+M1 atom type: CA
+MM bond distance parameter (R0) for XC-H1 stretch: 1.09
+MM bond distance parameter (R0) for C -XC stretch: 1.522
+C_HL: 0.7162
+R_Q1HL(Å)=1.1045
+
+Capping Q1 atom of bond 12:
+Q1 atom ID: [2374]
+M1 atom ID: [2375]
+Q1 atom type: CA
+M1 atom type: C
+MM bond distance parameter (R0) for XC-H1 stretch: 1.09
+MM bond distance parameter (R0) for XC-C  stretch: 1.522
+C_HL: 0.7162
+R_Q1HL(Å)=1.1082
+
+Hydrogen link atoms to cap the QM region have been added to CAPPED-prot_autocap_fixed.pdb
+
+----------------------------------------------------------------------------------------------------
+                                           check_QM_file                                            
+----------------------------------------------------------------------------------------------------
+psi4 filename: reference_convert_psi4_file_lig.py
+Number of point charges in MM region: 0
+Number of atoms in QM region: 41
+----------------------------------------------------------------------------------------------------
+                                           check_QM_file                                            
+----------------------------------------------------------------------------------------------------
+psi4 filename: reference_convert_psi4_file_prot.py
+Total charge of MM region: 3.00
+Number of point charges in MM region: 4225
+Number of atoms in QM region: 680
+----------------------------------------------------------------------------------------------------
+                                           check_QM_file                                            
+----------------------------------------------------------------------------------------------------
+psi4 filename: reference_convert_psi4_file_cx.py
+Total charge of MM region: 3.00
+Number of point charges in MM region: 4225
+Number of atoms in QM region: 721

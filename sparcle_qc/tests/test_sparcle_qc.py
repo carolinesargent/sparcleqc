@@ -554,3 +554,30 @@ def test_exit():
         true_exits.append(SystemExit)
         
     assert exits == true_exits 
+
+def test_run_convert():
+    inputs = {
+    'input_filename': 'test19.in',
+    'pdb_file': '3QU0_templated_from_3QXP_amber.pdb',
+    'template_path': 'reference_convert/cx_autocap_fixed.pdb',
+    'cutoff': 6,
+    'seed': 'ligand',
+    'charge_scheme': 'BRC',
+    'ligand_charge': 0,
+    'method': 'hf',
+    'basis_set': 'aug-cc-pv(D+d)z',
+    'amber_ff': 'ff19SB',
+    'env_path': '/theoryfs2/ds/ipberry/miniconda3/envs/emb_sapt/',
+    'water_model': 'opc' ,
+    'o_charge': 0,
+    'h_charge': 0.6791,
+    'ep_charge': -1.3582,
+    'software': 'psi4',
+    'mem': '100 GB',
+    'nthreads': 16,
+    }
+
+    output_dictionary= sparcle_qc.run(user_options = inputs)
+    true_dictionary = {'Complex': [718, 4225, 2.0, 3.0], 'Ligand': [38, 0, 0.0, 0.0], 'Protein': [680, 4225, 2.0, 3.0]}
+    assert output_dictionary == true_dictionary
+
