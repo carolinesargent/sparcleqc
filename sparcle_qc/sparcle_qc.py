@@ -307,6 +307,15 @@ def input_parser(filename:str) -> Dict:
     if keywords['software'] == 'nwchem' and 'sapt' in keywords['method']:
         print('Error: SAPT is not available in NWChem. Choose a different method.')
         sys.exit()
+    if 'other_amber_ff' in keywords.keys():
+        try:
+            ast.literal_eval(keywords['other_amber_ff'])
+        except:
+            print("Error: other_amber_ff is not a list of strings")
+            sys.exit()
+        keywords['other_amber_ff'] = ast.literal_eval(keywords['other_amber_ff'])
+    else:
+        keywords['other_amber_ff'] = []
     print(f"\u2728Sparcle-QC is sparkling\u2728\nBeginning file preparation for an embedded QM calculation of {keywords['pdb_file']} ")
     
     return keywords
@@ -425,7 +434,7 @@ def run(input_file= None, user_options = None) -> None:
             seed, seed_coords = convert_atom_id(keywords['seed'], keywords['seed_file'])
         #if forcefield is amber, writing and running tleap to create mol2
         if 'amber_ff' in keywords:
-            write_tleap(keywords['amber_ff'], keywords['water_model'])
+            write_tleap(keywords['amber_ff'], keywords['water_model'], keywords['other_amber_ff'])
             result = subprocess.run(['tleap -f tleap.in'], text = True, shell = True, capture_output = True)
             output.write('----------------------------------------------------------------------------------------------------\n')
             output.write('tleap'.center(100)+'\n')

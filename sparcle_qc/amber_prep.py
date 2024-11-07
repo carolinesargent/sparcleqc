@@ -192,7 +192,7 @@ def write_cpptraj_skip_autocap(pdb_file: str) -> None:
         f.write(f'loadcrd {pdb_file} name tmp1\n')
         f.write(f'prepareforleap crdset tmp1 name tmp2 pdbout cx_autocap.pdb nosugar\n')
 
-def write_tleap(forcefield: str, water_model: str) -> None:
+def write_tleap(forcefield: str, water_model: str, other_ffs: list) -> None:
     """
     Writes a tleap input file that loads the given forcefield and water model
 
@@ -202,6 +202,8 @@ def write_tleap(forcefield: str, water_model: str) -> None:
         name of amber forcefield (ex. ff19SB)
     water_model: str
         name of the desired water model (ex. OPC)
+    other_ffs: list
+        list of names of non-water, non-protein model (ex. ['leaprc.DNA.OL15', 'leaprc.gaff2'])
 
     Returns
     -------
@@ -210,6 +212,8 @@ def write_tleap(forcefield: str, water_model: str) -> None:
     with open('tleap.in', 'w') as f:
         f.write(f'source leaprc.protein.{forcefield}\n')
         f.write(f'source leaprc.water.{water_model}\n')
+        for ff in other_ffs:
+            f.write(f'source {ff}\n')
         f.write(f'mol = loadPdb "prot_autocap_fixed.pdb"\n')
         f.write(f'savemol2 mol prot_autocap_fixed.mol2 1\n')
         f.write('quit')
