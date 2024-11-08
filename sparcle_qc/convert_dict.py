@@ -9,7 +9,7 @@ import os
 from typing import List
 from typing import Dict
 
-def match_resi(Me_PDB_lines: List[List[str]], Cl_PDB_lines: List[List[str]]) -> Dict[str,str]:
+def match_resi_neighborhood(Me_PDB_lines: List[List[str]], Cl_PDB_lines: List[List[str]]) -> Dict[str,str]:
     """
     This function will use the 'neighborhood' of a given residue
     in one PDB (called Me) to match it to the residue in another
@@ -63,7 +63,7 @@ def match_resi(Me_PDB_lines: List[List[str]], Cl_PDB_lines: List[List[str]]) -> 
     return mapping_dict
 
 
-def check_resi_me(Me_d: Dict[str,str],Me_PDB_lines: List[List[str]]) -> None:
+def atoms_in_resi(Me_d: Dict[str,str],Me_PDB_lines: List[List[str]]) -> None:
     """
     This function checks to see how much of a given residue is in the QM
     region in the reference PDB to take the same amount of that residue
@@ -158,8 +158,8 @@ def convert_dictionary(cutoff: str,template_path:str) -> None:
                 Cl_PDB_lines.append([line[0:6].strip(),line[6:11].strip(), line[11:16].strip(), line[16:20].strip(), line[20:22].strip(), line[22:26].strip(), line[26:38].strip(), line[38:46].strip(), line[46:54].strip(), line[54:60].strip(), line[60:66].strip(), line[66:79].strip()])
     
     #finds how much of the reference residues are in the QM region and maps each residue between the two PDBS
-    grab_dict = check_resi_me(Me_d,Me_PDB_lines)
-    mapping = match_resi(Me_PDB_lines, Cl_PDB_lines)
+    grab_dict = atoms_in_resi(Me_d,Me_PDB_lines)
+    mapping = match_resi_neighborhood(Me_PDB_lines, Cl_PDB_lines)
    
     #directly maps the link regions
     me_atom_dict = {}

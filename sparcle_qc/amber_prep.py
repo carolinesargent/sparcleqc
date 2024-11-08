@@ -2,7 +2,7 @@ from pymol.cgo import *
 from pymol import cmd, editor
 
 
-def fix_numbers_amber(pdb_file: str) -> None:
+def reorder_atoms_amber(pdb_file: str) -> None:
     """
     When given a pdb, creates a new copy {pdb_file}_fixed.pdb that
     has the protein residues followed by waters and then the ligand.

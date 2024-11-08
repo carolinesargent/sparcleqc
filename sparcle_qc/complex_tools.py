@@ -4,7 +4,7 @@ from typing import Tuple
 import parmed as pmd
 
 
-def get_coords(pdb_file1: str, atom_id1: str) -> Tuple[str, str, str]:
+def id_to_coords(pdb_file1: str, atom_id1: str) -> Tuple[str, str, str]:
     """
     extracts the x,y,z coordinates of a specified atom in a specified pdb
 
@@ -29,7 +29,7 @@ def get_coords(pdb_file1: str, atom_id1: str) -> Tuple[str, str, str]:
                     z_coord = l[46:54].strip()
                     return x_coord, y_coord, z_coord
 
-def match_coords(x:str, y:str, z:str, pdb_file2:str) -> str:
+def coords_to_new_id(x:str, y:str, z:str, pdb_file2:str) -> str:
     """
     returns the atom number that corresponds to the specified x,y,z
     coordinates in the specified pdb_file
@@ -75,12 +75,12 @@ def convert_atom_id(seed: str, seed_file:str, new_pdb:str ='cx_autocap_fixed.pdb
     coords: list
         coordinates of seed atom
     """
-    x1,y1,z1 = get_coords(seed_file, seed)
-    cx_id = match_coords(x1, y1, z1, new_pdb)
+    x1,y1,z1 = id_to_coords(seed_file, seed)
+    cx_id = coords_to_new_id(x1, y1, z1, new_pdb)
     coords = [float(x1),float(y1),float(z1)]
     return cx_id, coords
 
-def check_resi_charges(mol2_file: str) -> Tuple[int, str]:
+def check_mol2_charges(mol2_file: str) -> Tuple[int, str]:
     """
     checks the sum of the point charges for each residue listed in the
     mol2 and ensures that it sums to an integer

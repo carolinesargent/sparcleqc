@@ -56,7 +56,7 @@ def test_run_sapt_psi4_amber():
     'mem': '100 GB',
     'nthreads': 16,
     'cp': 'true'}
-    output_dictionary= sparcle_qc.run(user_options = inputs)
+    output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
     true_dictionary = (392, 3903, 0.0, -0.0)
     assert output_dictionary == true_dictionary
 def test_run_hf_psi4_amber():
@@ -82,7 +82,7 @@ def test_run_hf_psi4_amber():
     'mem': '100 GB',
     'nthreads': 16,
     'cp': 'true'}
-    output_dictionary= sparcle_qc.run(user_options = inputs)
+    output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
     true_dictionary = {'Complex': [392, 3903, 0.0, -0.0], 'Ligand': [19, 0, 0.0, 0.0], 'Protein': [373, 3903, 0.0, -0.0]}
     assert output_dictionary == true_dictionary
 def test_run_sapt_psi4_charmm():
@@ -104,7 +104,7 @@ def test_run_sapt_psi4_charmm():
     'mem': '100 GB',
     'nthreads': 16,
     'cp': 'true'}
-    output_dictionary= sparcle_qc.run(user_options =inputs)
+    output_dictionary= sparcle_qc.run_sparcle(user_options =inputs)
     true_dictionary = (542, 4957, 1.0, 2.0)
     assert output_dictionary == true_dictionary
 def test_run_hf_psi4_charmm():
@@ -126,7 +126,7 @@ def test_run_hf_psi4_charmm():
     'mem': '100 GB',
     'nthreads': 16,
     'cp': 'true'}
-    output_dictionary= sparcle_qc.run(user_options = inputs)
+    output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
     true_dictionary = {'Complex': [542, 4845, 1.0, 2.0], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [501, 4845, 1.0, 2.0]}
     assert output_dictionary == true_dictionary
 
@@ -151,7 +151,7 @@ def test_run_sapt_qchem_amber():
     'software': 'q-chem',
     'mem': '60 GB',
     'nthreads': 2}
-    output_dictionary= sparcle_qc.run(user_options = inputs)
+    output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
     true_dictionary = (392, 3903, 0.0, -0.0)
     assert output_dictionary == true_dictionary
 def test_run_hf_qchem_amber():
@@ -176,7 +176,7 @@ def test_run_hf_qchem_amber():
     'mem': '60 GB',
     'nthreads': 2,
     'cp': 'false'}
-    output_dictionary= sparcle_qc.run(user_options = inputs)
+    output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
     true_dictionary = {'Complex': [392, 3903, 0.0, -0.0], 'Ligand': [19, 0, 0.0, 0.0], 'Protein': [373, 3903, 0.0, -0.0]}
     assert output_dictionary == true_dictionary
 def test_run_sapt_qchem_charmm():
@@ -197,7 +197,7 @@ def test_run_sapt_qchem_charmm():
     'mem': '100 GB',
     'nthreads': 16,
     'cp': 'true'}
-    output_dictionary= sparcle_qc.run(user_options =inputs)
+    output_dictionary= sparcle_qc.run_sparcle(user_options =inputs)
     true_dictionary = (542, 4957, 1.0, 2.0)
     assert output_dictionary == true_dictionary
 def test_run_hf_qchem_charmm():
@@ -219,7 +219,7 @@ def test_run_hf_qchem_charmm():
     'mem': '100 GB',
     'nthreads': 16,
     'cp': 'true'}
-    output_dictionary= sparcle_qc.run(user_options = inputs)
+    output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
     true_dictionary = {'Complex': [542, 4845, 1.0, 2.0], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [501, 4845, 1.0, 2.0]}
     assert output_dictionary == true_dictionary
 def test_run_hf_nwchem_amber():
@@ -246,7 +246,7 @@ def test_run_hf_nwchem_amber():
     'mem': '60 GB',
     'nthreads': 2,
     'cp': 'false'}
-    output_dictionary= sparcle_qc.run(user_options = inputs)
+    output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
     true_dictionary = {'Complex': [392, 3903, 0.0, -0.0], 'Ligand': [19, 0, 0.0, 0.0], 'Protein': [373, 3903, 0.0, -0.0]}
     assert output_dictionary == true_dictionary
 def test_run_hf_nwchem_charmm():
@@ -270,7 +270,7 @@ def test_run_hf_nwchem_charmm():
     'mem': '100 GB',
     'nthreads': 16,
     'cp': 'true'}
-    output_dictionary= sparcle_qc.run(user_options = inputs)
+    output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
     true_dictionary = {'Complex': [542, 4845, 1.0, 2.0], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [501, 4845, 1.0, 2.0]}
     assert output_dictionary == true_dictionary
 def test_run_dz1():
@@ -294,7 +294,7 @@ def test_run_dz1():
     'nthreads': 16,
     }
     
-    output_dictionary= sparcle_qc.run(user_options = inputs)
+    output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
     true_dictionary = (586, 4330, 4.0, 2.0)
     assert output_dictionary == true_dictionary
 def test_run_dz2():
@@ -318,7 +318,7 @@ def test_run_dz2():
     'nthreads': 16,
     }
     
-    output_dictionary= sparcle_qc.run(user_options = inputs)
+    output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
     true_dictionary = (586, 4290, 4.0, 2.0)
     assert output_dictionary == true_dictionary
 def test_run_z1():
@@ -342,7 +342,7 @@ def test_run_z1():
     'nthreads': 16,
     }
     
-    output_dictionary= sparcle_qc.run(user_options = inputs)
+    output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
     true_dictionary = {'Complex': [721, 4207, 2.0, -0.3], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4207, 2.0, -0.3]}
     assert output_dictionary == true_dictionary
 def test_run_z2():
@@ -366,7 +366,7 @@ def test_run_z2():
     'nthreads': 16,
     }
     
-    output_dictionary= sparcle_qc.run(user_options = inputs)
+    output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
     true_dictionary = {'Complex': [721, 4207, 2.0, 6.97], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4207, 2.0, 6.97]}
     assert output_dictionary == true_dictionary
 def test_run_z3():
@@ -390,7 +390,7 @@ def test_run_z3():
     'nthreads': 16,
     }
     
-    output_dictionary= sparcle_qc.run(user_options = inputs)
+    output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
     true_dictionary = {'Complex': [721, 4207, 2.0, 4.97], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4207, 2.0, 4.97]} 
     assert output_dictionary == true_dictionary
 def test_run_brcd():
@@ -414,7 +414,7 @@ def test_run_brcd():
     'nthreads': 16,
     }
     
-    output_dictionary= sparcle_qc.run(user_options = inputs)
+    output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
     true_dictionary = {'Complex': [721, 4225, 2.0, 3.0], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4225, 2.0, 3.0]}
     assert output_dictionary == true_dictionary
 def test_run_brc2():
@@ -438,7 +438,7 @@ def test_run_brc2():
     'nthreads': 16,
     }
     
-    output_dictionary= sparcle_qc.run(user_options = inputs)
+    output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
     true_dictionary = {'Complex': [721, 4195, 2.0, 3.0], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4195, 2.0, 3.0]}
     assert output_dictionary == true_dictionary
 def test_run_see():
@@ -462,7 +462,7 @@ def test_run_see():
     'nthreads': 16,
     }
     
-    output_dictionary= sparcle_qc.run(user_options = inputs)
+    output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
     true_dictionary = {'Complex': [721, 78, 2.0, -1.81], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 78, 2.0, -1.81]}
     assert output_dictionary == true_dictionary
 def test_exit():
@@ -553,7 +553,7 @@ def test_exit():
     }]
     for input_test in inputs:
         with pytest.raises(SystemExit) as e: 
-            output_dictionary= sparcle_qc.run(user_options = input_test)
+            output_dictionary= sparcle_qc.run_sparcle(user_options = input_test)
         exits.append(e.type)
         true_exits.append(SystemExit)
         
@@ -581,7 +581,7 @@ def test_run_convert():
     'nthreads': 16,
     }
 
-    output_dictionary= sparcle_qc.run(user_options = inputs)
+    output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
     true_dictionary = {'Complex': [718, 4225, 2.0, 3.0], 'Ligand': [38, 0, 0.0, 0.0], 'Protein': [680, 4225, 2.0, 3.0]}
     assert output_dictionary == true_dictionary
 

@@ -27,7 +27,7 @@ def get_M2_N_resn(bond:str, df:pd.DataFrame, no_HL:Dict[str, List[int]]) -> str:
             M2_N_resn = df.loc[atom, 'PDB_RES']
     return M2_N_resn
 
-def find_M3(bond:str, M2resn:str, df:pd.DataFrame, no_HL:Dict[str,List[int]]) -> int:
+def M3_to_exclude(bond:str, M2resn:str, df:pd.DataFrame, no_HL:Dict[str,List[int]]) -> int:
     """
     For a specific fronteir bond, this function returns an atom number
     if there is an M3 atom for that bond that is a different resname
@@ -123,9 +123,9 @@ def move_m3s() -> None:
     to_move = []
     for bond in range(1,num_broken_bonds+1):
         M2resn = get_M2_N_resn(bond, df, no_HL)
-        atom_to_move = find_M3(bond, M2resn, df, no_HL)
+        atom_to_move = M3_to_exclude(bond, M2resn, df, no_HL)
         if atom_to_move is not None:
-            to_move.append(find_M3(bond, M2resn, df, no_HL))
+            to_move.append(M3_to_exclude(bond, M2resn, df, no_HL))
     new_dict = move_ids(to_move, no_HL)
     with open('dictionary.dat', 'w+') as dictfile:
         dictfile.write(json.dumps(new_dict))
