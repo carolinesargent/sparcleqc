@@ -9,16 +9,16 @@ import time
 import ast
 from typing import Dict
 
-from .amber_prep import write_cpptraj, write_cpptraj_skip_autocap, write_tleap, autocap, skip_autocap, reorder_atoms_amber
-from .charmm_prep import psf_to_mol2, get_cx_pdb, reorder_atoms_charmm
-from .complex_tools import check_df_charges, check_mol2_charges, convert_atom_id, closest_contact
-from .combine_data import create_csv
-from .cut_protein import run_cut_protein 
-from .convert_dict import convert_dictionary 
-from .move_M3s import move_m3s
-from .create_est_inp import make_monomers, check_est_file, copy_input, write_est_file, ghost
-from .cap import run_cap
-from .make_fsapt_partition import fsapt_partition 
+from sparcle_qc.amber_prep import write_cpptraj, write_cpptraj_skip_autocap, write_tleap, autocap, skip_autocap, reorder_atoms_amber
+from sparcle_qc.charmm_prep import psf_to_mol2, get_cx_pdb, reorder_atoms_charmm
+from sparcle_qc.complex_tools import check_df_charges, check_mol2_charges, convert_atom_id, closest_contact
+from sparcle_qc.combine_data import create_csv
+from sparcle_qc.cut_protein import run_cut_protein 
+from sparcle_qc.convert_dict import convert_dictionary 
+from sparcle_qc.move_M3s import move_m3s
+from sparcle_qc.create_est_inp import make_monomers, check_est_file, copy_input, write_est_file, ghost
+from sparcle_qc.cap import run_cap
+from sparcle_qc.make_fsapt_partition import fsapt_partition 
 
 stop_flashing = threading.Event()
 
