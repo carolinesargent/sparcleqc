@@ -1,8 +1,8 @@
 sparcle_qc
 ==============================
 [//]: # (Badges)
-[![GitHub Actions Build Status](https://github.com/REPLACE_WITH_OWNER_ACCOUNT/sparcle_qc/workflows/CI/badge.svg)](https://github.com/REPLACE_WITH_OWNER_ACCOUNT/sparcle_qc/actions?query=workflow%3ACI)
-[![codecov](https://codecov.io/gh/REPLACE_WITH_OWNER_ACCOUNT/sparcle_qc/branch/main/graph/badge.svg)](https://codecov.io/gh/REPLACE_WITH_OWNER_ACCOUNT/sparcle_qc/branch/main)
+[![GitHub Actions Build Status](https://github.com/carolinesargent/sparcle_qc/workflows/CI/badge.svg)](https://github.com/carolinesargent/sparcle_qc/actions?query=workflow%3ACI)
+[![codecov](https://codecov.io/gh/carolinesargent/sparcle_qc/branch/main/graph/badge.svg)](https://codecov.io/gh/carolinesargent/sparcle_qc/branch/main)
 
 
 Software Package that Automatically Redistributes Charges for Embedded Quantum Chemistry
