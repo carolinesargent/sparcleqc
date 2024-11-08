@@ -5,7 +5,7 @@ import json
 from glob import glob
 from importlib import resources
 
-def pocketfrag(sub:str, monoC:str = None):
+def fragmentprotein(sub:str, monoC:str = None):
     """
     Fragments a protein between QM and MM regions
 
@@ -35,7 +35,7 @@ def pocketfrag(sub:str, monoC:str = None):
     -------
     None
     """
-    name="pocketfrag"
+    name="fragmentprotein"
 
     out = open(glob('*.out')[0], 'a')
 
@@ -145,7 +145,7 @@ def pocketfrag(sub:str, monoC:str = None):
     out.close()
     return
 
-def make_dictionary(cutoff:str) -> None: 
+def makepredictionary(cutoff:str) -> None: 
     """ 
     Creates an initial version of the dictionary that assigns each atom
     to its region. Atoms in the fronteir region are named according to
@@ -195,8 +195,8 @@ def make_dictionary(cutoff:str) -> None:
         dictfile.write(json.dumps(bond_dict))
     return
 
-cmd.extend("pocketfrag", pocketfrag)
-cmd.extend("make_dictionary", make_dictionary)
+cmd.extend("fragmentprotein", fragmentprotein)
+cmd.extend("makepredictionary", makepredictionary)
 
 def run_cut_protein(pdb_file:str, sub:str, cutoff:str) -> None:
     """
@@ -222,5 +222,5 @@ def run_cut_protein(pdb_file:str, sub:str, cutoff:str) -> None:
     with resources.path('sparcle_qc.data', 'cut_protein.py') as file_path:
         cut_path = str(file_path)
     cmd.do(f'run {cut_path}')
-    cmd.do(f'pocketfrag {sub}, monoC="be. {cutoff}"')
-    cmd.do(f'make_dictionary {cutoff}')
+    cmd.do(f'fragmentprotein {sub}, monoC="be. {cutoff}"')
+    cmd.do(f'makepredictionary {cutoff}')

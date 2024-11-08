@@ -5,7 +5,7 @@ import pandas as pd
 from glob import glob
 from typing import List, Dict, Tuple
 
-def qm_ligand(LIGAND_PDB_PATH: str) -> List[str]:
+def ligand_pdb_lines(LIGAND_PDB_PATH: str) -> List[str]:
     """
     This functions converts a pdb into a list of atom/hetatm lines in the pdb
 
@@ -85,7 +85,7 @@ def atoms_to_pdb_lines(CAPPED_PDB_PATH:str, atoms:List[str]) -> List[str]:
                         pdb_lines.append(l)
     return pdb_lines
 
-def write_pdb(CAPPED_PDB_PATH:str, atoms:List[str], CAPPED_QM_PATH:str, LIGAND_PATH:str) -> None:
+def write_capped_qm_pdb(CAPPED_PDB_PATH:str, atoms:List[str], CAPPED_QM_PATH:str, LIGAND_PATH:str) -> None:
     """
     This functions writes the PDB capped with hydrogens
 
@@ -582,7 +582,7 @@ def Z3(df:pd.DataFrame,with_HL:Dict[str,List[int]], num_bonds_broken:int) -> Lis
     mm_env = MM_for_array
     return mm_env
 
-def get_charge_residue(MOL2_PATH:str, MM_line:str) -> Tuple[float, str]: # get charge for one MM PDB line
+def get_charge_and_resn(MOL2_PATH:str, MM_line:str) -> Tuple[float, str]: # get charge for one MM PDB line
     """
     returns the charge and residue of a specified MM atom based on coordinates
 
@@ -624,65 +624,6 @@ def get_charge_residue(MOL2_PATH:str, MM_line:str) -> Tuple[float, str]: # get c
             charge = 0
             residue = ''
     return charge, residue
-
-def redist_charges(num_bonds_broken:int, MM_for_array:List[str], MOL2_PATH:str, CAPPED_PDB_PATH:str, with_HL:Dict[str,List[int]]) -> List[str]:
-    """
-    RC: M1 charge is evenly redistributed to the midpoints of M1-M2 bonds
-
-    Parameters
-    ----------
-    num_bonds_broken: int
-        number of bonds broken that need to be capped
-    MM_for_array: List[str]
-        List of charges of each MM atom along with their XYZ coordinates
-    MOL2_PATH: str
-        path to mol2 file
-    CAPPED_PDB_PATH: str
-        path to capped complex pdb
-    with_HL: Dict[str, List[int]]
-        Dictionary with key of the region and value with a list of atoms in that region
-
-    Returns
-    -------
-    MM_for_array: List[str]
-        list of the charges along with xyz coords
-    """
-    for bond in range(1,num_bonds_broken+1):
-        # get coordinates of M1 and M2 atoms
-        M1_atom = with_HL[f'M1_{bond}']
-        M1atom_pdb = atoms_to_pdb_lines(CAPPED_PDB_PATH, M1_atom)
-        M1atom_xyz = pdb_to_xyz(M1atom_pdb)
-        M1atom_charge, M1atom_residue = get_charge_residue(MOL2_PATH, M1atom_xyz)  # this is for non-balanced scheme
-        # M1atom_charge = q_total - q_i - q_QM
-        M2_atoms = with_HL[f'M2_{bond}']
-        num_M2 = len(M2_atoms)
-        redist_charge = float(M1atom_charge) / float(num_M2)
-        for atom in M2_atoms:
-            midpoint_xyz = []
-            M2atom_pdb = atoms_to_pdb_lines(CAPPED_PDB_PATH, [atom])
-            M2atom_xyz = pdb_to_xyz(M2atom_pdb)
-            M2atom_charge, M2atom_residue = get_charge_residue(MOL2_PATH, M2atom_xyz)
-            # appending M2 atoms to array with new charge for RCD only
-            if charge_method == 'RCD':
-                rcd_m2_charge = float(M2atom_charge) - float(redist_charge)
-                MM_for_array.append(f'{float(rcd_m2_charge):.3f}')
-                MM_for_array.append(f'{float(M2atom_xyz[1]):.3f}')
-                MM_for_array.append(f'{float(M2atom_xyz[2]):.3f}')
-                MM_for_array.append(f'{float(M2atom_xyz[3]):.3f}\n')
-            if charge_method == 'RC':
-                MM_for_array.append(str(redist_charge))
-            elif charge_method == 'RCD':
-                MM_for_array.append(str(2*redist_charge)) # double redistributed charge for RCD scheme
-            # calculate midpoints of M1 and M2
-            for n,x in enumerate(M2atom_xyz[1:]):
-                coord = (float(M1atom_xyz[n+1]) + float(x))/2
-                midpoint_xyz.append(f'{coord:.3f}')
-                if n == 0 or n == 1:
-                    MM_for_array.append(f'{coord:.3f}')
-                else:
-                    MM_for_array.append(f'{coord:.3f}\n')
-    return MM_for_array
-
 
 def bal_redist_charges(num_bonds_broken:int, MM_for_array:List[str], MM_atoms:List[str], charge_method:str, df:pd.DataFrame, with_HL:Dict[str,List[int]]) -> List[str]:
     """
@@ -770,7 +711,7 @@ def bal_redist_charges(num_bonds_broken:int, MM_for_array:List[str], MM_atoms:Li
                         MM_for_array.append(f'{coord:.3f}\n')
     return MM_for_array
 
-def balanced_RC(charge_method:str, df:pd.DataFrame, with_HL:Dict[str,List[int]], num_bonds_broken:int) -> List[str]:
+def bal_RC_array(charge_method:str, df:pd.DataFrame, with_HL:Dict[str,List[int]], num_bonds_broken:int) -> List[str]:
     """
     Create external charge array for BRC, BRCD, BRC2
 
@@ -837,7 +778,7 @@ def write_extern_xyz(filepath:str, mm_env:List[str]) -> None:
     with open(filepath, 'w') as wfile:
         wfile.write(' '.join(mm_env)[:-1])
 
-def make_regions(charge_method:str) -> None:
+def make_monomers(charge_method:str) -> None:
     """
     creates XYZs for QM and MM regions; gets charge of QM protein region
 
@@ -876,9 +817,9 @@ def make_regions(charge_method:str) -> None:
         QM_atoms += with_HL[f'HL_{bond}']
     QM_atoms.sort()
     qm_pdb_pro_lines = atoms_to_pdb_lines(CAPPED_PDB_PATH, QM_atoms)
-    write_pdb(CAPPED_PDB_PATH, QM_atoms, CAPPED_QM_PDB_PATH, LIGAND_PDB_PATH)
+    write_capped_qm_pdb(CAPPED_PDB_PATH, QM_atoms, CAPPED_QM_PDB_PATH, LIGAND_PDB_PATH)
     qm_pro = pdb_to_xyz(qm_pdb_pro_lines)
-    qm_pdb_lig_lines = qm_ligand(LIGAND_PDB_PATH)
+    qm_pdb_lig_lines = ligand_pdb_lines(LIGAND_PDB_PATH)
     qm_lig = pdb_to_xyz(qm_pdb_lig_lines)
     # get MM array of frontier region
     if charge_method == 'SEE':
@@ -896,11 +837,11 @@ def make_regions(charge_method:str) -> None:
     elif charge_method == 'DZ3':
           mm_env = DZn(3, df, with_HL, num_bonds_broken)
     elif charge_method == 'BRC':
-          mm_env = balanced_RC(charge_method, df, with_HL, num_bonds_broken)
+          mm_env = bal_RC_array(charge_method, df, with_HL, num_bonds_broken)
     elif charge_method == 'BRC2':
-          mm_env = balanced_RC(charge_method, df, with_HL, num_bonds_broken)
+          mm_env = bal_RC_array(charge_method, df, with_HL, num_bonds_broken)
     elif charge_method == 'BRCD':
-          mm_env = balanced_RC(charge_method, df, with_HL, num_bonds_broken)
+          mm_env = bal_RC_array(charge_method, df, with_HL, num_bonds_broken)
     else:
         #we check for this in the input file so this else shouldn't ever be reached
         print('incorrect charge scheme')
@@ -1146,7 +1087,7 @@ SCRATCH_DIR """ + nwchem_scratch +
             inpfile.write("""\ntask """ + method +""" energy""")
 
 
-def write_file(software, qm_lig, c_QM, qm_pro, uniq_gh_elements, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: str = None, nwchem_scratch = None, nwchem_perm = None, nwchem_scf = None, nwchem_dft = None, psi4_options = None, qchem_options = None, qchem_sapt = None):
+def write_est_file(software, qm_lig, c_QM, qm_pro, uniq_gh_elements, mm_env, PSI4_FILE_PATH:str, c_ligand:str, method:str, basis_set:str, mem:str, nthreads:str, do_fsapt: str = None, nwchem_scratch = None, nwchem_perm = None, nwchem_scf = None, nwchem_dft = None, psi4_options = None, qchem_options = None, qchem_sapt = None):
     """
     calls appropriate function for writing specific software's input file
     """
@@ -1166,7 +1107,7 @@ def write_file(software, qm_lig, c_QM, qm_pro, uniq_gh_elements, mm_env, PSI4_FI
         write_nwchem_file(qm_lig, c_QM, qm_pro, uniq_gh_elements, qchem_mm_env, PSI4_FILE_PATH, c_ligand, method, basis_set, mem, nthreads, nwchem_scratch, nwchem_perm, nwchem_scf, nwchem_dft)
 
 
-def write_input(inputfile, psi4file, software):
+def copy_input(inputfile, psi4file, software):
     """
     Writes the Sparcle-QC input file to the top of the psi4file
 
@@ -1220,7 +1161,7 @@ def ghost(mol, software):
         uniq_elements = None
     return ghost_mol, uniq_elements
 
-def check_QM_file(psi4file: str) -> None:
+def check_est_file(psi4file: str) -> None:
 
     """
     Checks that the charge of the QM region in the created input file is integer
@@ -1324,7 +1265,7 @@ def check_QM_file(psi4file: str) -> None:
                 num_mm_atoms = 0
         
         out.write('\n----------------------------------------------------------------------------------------------------\n')
-        out.write('check_QM_file'.center(100)+'\n')
+        out.write('check_est_file'.center(100)+'\n')
         out.write('----------------------------------------------------------------------------------------------------\n')
 
         out.write(f'{software} filename: {psi4file}\n')

@@ -1,6 +1,6 @@
 import MDAnalysis as mda
 
-def partition(pdb_file: str) -> None:
+def fsapt_partition(pdb_file: str) -> None:
     """
 
     Makes a partition file for each monomer for use in fisapt in psi4

@@ -10,7 +10,7 @@ with open(os.devnull, 'w') as devnull:
         sys.stdout = old_stdout
 import json
 
-def fix_numbers_charmm(pdb_file: str) -> None:
+def reorder_atoms_charmm(pdb_file: str) -> None:
     """
     When given a pdb, creates a new copy {pdb_file}_fixed.pdb that
     has the protein residues followed by waters and then the ligand.
@@ -89,7 +89,7 @@ def fix_numbers_charmm(pdb_file: str) -> None:
     out.write('END')
     out.close()
 
-def combine_charmm(prot_file: str) -> None:
+def get_cx_pdb(prot_file: str) -> None:
     """
     When given a CHARMM protein pdb, uses parmed to combine it with the ligand into a single complex pdb
 

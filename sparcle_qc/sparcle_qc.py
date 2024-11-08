@@ -9,16 +9,16 @@ import time
 import ast
 from typing import Dict
 
-from .amber_prep import write_cpptraj, write_cpptraj_skip_autocap, write_tleap, autocap, skip_autocap, fix_numbers_amber
-from .charmm_prep import psf_to_mol2, combine_charmm, fix_numbers_charmm
-from .pdb_prep import check_df_charges, check_resi_charges, convert_atom_id, closest_contact
-from .combine_data import combine_data
+from .amber_prep import write_cpptraj, write_cpptraj_skip_autocap, write_tleap, autocap, skip_autocap, reorder_atoms_amber
+from .charmm_prep import psf_to_mol2, get_cx_pdb, reorder_atoms_charmm
+from .complex_tools import check_df_charges, check_mol2_charges, convert_atom_id, closest_contact
+from .combine_data import create_csv
 from .cut_protein import run_cut_protein 
 from .convert_dict import convert_dictionary 
 from .move_M3s import move_m3s
-from .df_make_psi4 import make_regions, check_QM_file, write_input, write_file, ghost
+from .create_est_inp import make_monomers, check_est_file, copy_input, write_est_file, ghost
 from .cap import run_cap
-from .make_partition import partition 
+from .make_fsapt_partition import fsapt_partition 
 
 stop_flashing = threading.Event()
 
@@ -321,7 +321,7 @@ def input_parser(filename:str) -> Dict:
     return keywords
 
 
-def run(input_file= None, user_options = None) -> None:
+def run_sparcle(input_file= None, user_options = None) -> None:
     """ 
     given an input file, parses the specified parameters into a
     dictionary of keywords and runs the necessary sparcle_qc functions to
@@ -417,13 +417,13 @@ def run(input_file= None, user_options = None) -> None:
                     autocap('uncapped.pdb')
             else:
                 autocap('uncapped.pdb')
-            fix_numbers_amber('prot_autocap.pdb')
-            fix_numbers_amber('cx_autocap.pdb')
+            reorder_atoms_amber('prot_autocap.pdb')
+            reorder_atoms_amber('cx_autocap.pdb')
             os.remove('prot_autocap.pdb')
         #otherwise, the forcefield is charmm and combining protein and ligand into a complex pdb
         else:
-            combine_charmm(keywords['pdb_file'])
-            fix_numbers_charmm('cx_autocap.pdb')
+            get_cx_pdb(keywords['pdb_file'])
+            reorder_atoms_charmm('cx_autocap.pdb')
         os.remove('cx_autocap.pdb')
 
         #obtaining seed containing information of which group to grow the QM region from
@@ -450,18 +450,18 @@ def run(input_file= None, user_options = None) -> None:
             sys.exit()
         
         #checking for residue integer charges in the mol2
-        resi_output = check_resi_charges('prot_autocap_fixed.mol2')
+        resi_output = check_mol2_charges('prot_autocap_fixed.mol2')
         if resi_output[0] == 0:
             print(resi_output[1])
             sys.exit()
         #combining information from the cx pdb, protein pdb, and mol2 into a dataframe for easy handling
         #updating water charges if specified by user
         if 'ep_charge' in keywords:
-            combine_data(keywords['o_charge'], keywords['h_charge'], keywords['ep_charge'])
+            create_csv(keywords['o_charge'], keywords['h_charge'], keywords['ep_charge'])
         elif 'h_charge' in keywords:
-            combine_data(keywords['o_charge'], keywords['h_charge'])
+            create_csv(keywords['o_charge'], keywords['h_charge'])
         else:
-            combine_data()
+            create_csv()
 
         #checking created dataframe for residue integer charges
         df_output = check_df_charges()
@@ -491,14 +491,14 @@ def run(input_file= None, user_options = None) -> None:
         else:
             run_cap(ff_type = 'charmm', rtf = keywords['charmm_rtf'], prm = keywords['charmm_prm'])
         #redistribute charge based on charge scheme and write QM input file
-        qm_lig, c_QM, qm_pro, mm_env = make_regions(keywords['charge_scheme'])
+        qm_lig, c_QM, qm_pro, mm_env = make_monomers(keywords['charge_scheme'])
         ext = {'psi4':'.py', 'nwchem':'.in', 'q-chem':'.in'}
         sapt_inp_filename = f'{new_dir}_' + keywords['software'] + '_file' + ext[keywords['software']]
         if 'sapt' in keywords['method'].lower():
-            write_input(input_file, sapt_inp_filename, keywords['software'])
-            write_file(keywords['software'], qm_lig, c_QM, qm_pro, '', mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], keywords['do_fsapt'], keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'], keywords['qchem_sapt'])
+            copy_input(input_file, sapt_inp_filename, keywords['software'])
+            write_est_file(keywords['software'], qm_lig, c_QM, qm_pro, '', mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], keywords['do_fsapt'], keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'], keywords['qchem_sapt'])
 #            #check the charges and number of atoms in the written QM input file
-            qm_atoms, mm_atoms, qm_charge, mm_charge = check_QM_file(sapt_inp_filename)
+            qm_atoms, mm_atoms, qm_charge, mm_charge = check_est_file(sapt_inp_filename)
         else:
             if keywords['cp'] == 'true':
                 ghost_lig, lig_uniq_elements = ghost(qm_lig, keywords['software'])
@@ -511,21 +511,21 @@ def run(input_file= None, user_options = None) -> None:
                 prot_uniq_elements = None
                 ghost_charge = None
             lig_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_lig' + ext[keywords['software']]
-            write_input(input_file, lig_inp_filename, keywords['software'])
-            write_file(keywords['software'], qm_lig, ghost_charge, ghost_pro, prot_uniq_elements, None, lig_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], False, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
+            copy_input(input_file, lig_inp_filename, keywords['software'])
+            write_est_file(keywords['software'], qm_lig, ghost_charge, ghost_pro, prot_uniq_elements, None, lig_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], False, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
             prot_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_prot' + ext[keywords['software']]
-            write_input(input_file, prot_inp_filename, keywords['software'])
-            write_file(keywords['software'], ghost_lig, c_QM, qm_pro, lig_uniq_elements, mm_env, prot_inp_filename, ghost_charge, keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
+            copy_input(input_file, prot_inp_filename, keywords['software'])
+            write_est_file(keywords['software'], ghost_lig, c_QM, qm_pro, lig_uniq_elements, mm_env, prot_inp_filename, ghost_charge, keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
             cx_inp_filename = f'{new_dir}_' + keywords['software'] + '_file_cx' + ext[keywords['software']]
-            write_input(input_file, cx_inp_filename, keywords['software'])
-            write_file(keywords['software'], qm_lig, c_QM, qm_pro, None, mm_env, cx_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
-            qm_atoms_lig, mm_atoms_lig, qm_charge_lig, mm_charge_lig = check_QM_file(lig_inp_filename)
-            qm_atoms_pro, mm_atoms_pro, qm_charge_pro, mm_charge_pro = check_QM_file(prot_inp_filename)
-            qm_atoms_cx, mm_atoms_cx, qm_charge_cx, mm_charge_cx = check_QM_file(cx_inp_filename)
+            copy_input(input_file, cx_inp_filename, keywords['software'])
+            write_est_file(keywords['software'], qm_lig, c_QM, qm_pro, None, mm_env, cx_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], None, keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'])
+            qm_atoms_lig, mm_atoms_lig, qm_charge_lig, mm_charge_lig = check_est_file(lig_inp_filename)
+            qm_atoms_pro, mm_atoms_pro, qm_charge_pro, mm_charge_pro = check_est_file(prot_inp_filename)
+            qm_atoms_cx, mm_atoms_cx, qm_charge_cx, mm_charge_cx = check_est_file(cx_inp_filename)
 
         #write fsapt files
         if keywords['fisapt_partition'] == 'true':
-            partition('CAPPED_qm.pdb')
+            fsapt_partition('CAPPED_qm.pdb')
         
         print(f"\u2728Sparcle-QC has sparkled\u2728")
         if 'sapt' in keywords['method'].lower():
@@ -559,7 +559,7 @@ def main():
 
     input_file = sys.argv[1]
     # Your main script logic here
-    run(input_file)
+    run_sparcle(input_file)
 
 if __name__ == "__main__":
     main()

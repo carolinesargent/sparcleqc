@@ -7,7 +7,7 @@ import warnings
 from parmed.charmm import CharmmParameterSet
 from typing import Dict, List, Tuple
 
-def get_atom_types(Q1_coords:Tuple[str,str,str], M1_coords:Tuple[str,str,str], MOL2_PATH:str, ff_type:str, params:CharmmParameterSet = None) -> Tuple[str,str,str,str]: 
+def get_boundary_bonds(Q1_coords:Tuple[str,str,str], M1_coords:Tuple[str,str,str], MOL2_PATH:str, ff_type:str, params:CharmmParameterSet = None) -> Tuple[str,str,str,str]: 
     """
     Given the coordinates of the two atoms in the fronteir bond (the
     Q1 atom and M1 atom), returns the atom types in the fronteir bond
@@ -214,7 +214,7 @@ def cap(no_HL:Dict[str,List[int]], num_broken_bonds:int, PDB_PATH:str, MOL2_PATH
         Q1_coords = [float(x) for x in Q1_coords]
         M1_coords = [float(x) for x in M1_coords]
         R_Q1M1 = math.dist(Q1_coords, M1_coords)
-        a,b,c,d = get_atom_types(Q1_coords, M1_coords, MOL2_PATH, ff_type = ff_type, params = params)
+        a,b,c,d = get_boundary_bonds(Q1_coords, M1_coords, MOL2_PATH, ff_type = ff_type, params = params)
         out.close()
         out = open(glob('*.out')[0], 'a')
         if ff_type =='amber':

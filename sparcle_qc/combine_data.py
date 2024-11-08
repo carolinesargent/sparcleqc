@@ -1,7 +1,7 @@
 import pandas as pd
 from typing import Dict
 
-def read_pdb(PDB_PATH: str, d:Dict) -> pd.DataFrame:
+def prot_pdb_to_df(PDB_PATH: str, d:Dict) -> pd.DataFrame:
     """ 
     Populates a pandas dataframe with the information in the pdb
     (x_coord, y_coord, z_coordi, resname, atom type) indexed by atom id
@@ -41,7 +41,7 @@ def read_pdb(PDB_PATH: str, d:Dict) -> pd.DataFrame:
                 df.loc[l[6:11].strip(), 'AT_LABEL'] = l[66:87].strip() 
     return df
 
-def read_mol2(MOL2_PATH:str, m:Dict) -> pd.DataFrame:
+def mol2_to_df(MOL2_PATH:str, m:Dict) -> pd.DataFrame:
     """ 
     Populates a pandas dataframe with the information in the mol2
     (x_coord, y_coord, z_coordi, resname, atom type) indexed by atom id
@@ -79,7 +79,7 @@ def read_mol2(MOL2_PATH:str, m:Dict) -> pd.DataFrame:
                 df.loc[l.split()[0], 'q'] = l.split()[-2]
     return df        
 
-def combine(pdb_df:pd.DataFrame, mol2_df:pd.DataFrame) -> pd.DataFrame:
+def combine_prot_dfs(pdb_df:pd.DataFrame, mol2_df:pd.DataFrame) -> pd.DataFrame:
     """ 
     combines information from a pdb dataframe with a
     mol2 dataframe based on matching the coordinates
@@ -123,7 +123,7 @@ def combine(pdb_df:pd.DataFrame, mol2_df:pd.DataFrame) -> pd.DataFrame:
                 pdb_df.loc[str(float(EPW_idx)+.5), 'PDB_RES'] = pdb_df.loc[idx, 'PDB_RES']
     return pdb_df
 
-def read_cx_pdb(CX_PDB_PATH:str, d:Dict) -> pd.DataFrame:
+def cx_pdf_to_df(CX_PDB_PATH:str, d:Dict) -> pd.DataFrame:
     """ 
     Populates a pandas dataframe with the information in the pdb
     (x_coord, y_coord, z_coordi, resname, atom type) indexed by atom id
@@ -158,7 +158,7 @@ def read_cx_pdb(CX_PDB_PATH:str, d:Dict) -> pd.DataFrame:
                 df.loc[l[6:11].strip(), 'Z'] = float(z_coord)
     return df
 
-def combine2(pdb_df:pd.DataFrame, cx_pdb_df:pd.DataFrame) -> pd.DataFrame:
+def combine_all_dfs(pdb_df:pd.DataFrame, cx_pdb_df:pd.DataFrame) -> pd.DataFrame:
     """
     combines information from a dataframe from the protein pdb with a
     dataframe from the cx pdb based on matching the coordinates
@@ -223,7 +223,7 @@ def change_water_charges(df: pd.DataFrame, o: str, h: str, ep:str = None) -> pd.
                     df.loc[idx, 'q'] = float(ep)
     return df
 
-def combine_data(o_charge:str = None, h_charge:str = None, ep_charge:str = None) -> None:
+def create_csv(o_charge:str = None, h_charge:str = None, ep_charge:str = None) -> None:
     """
     Creates a dataframe from the provided protein pdb, complex pdb,
     and mol2 information and then updates it with the desired water
@@ -248,11 +248,11 @@ def combine_data(o_charge:str = None, h_charge:str = None, ep_charge:str = None)
     p = {'PDB_ID':[]}
     m = {'MOL2_ID':[]}
     c = {'CX_PDB_ID':[]}
-    pdb_info = read_pdb(PDB_PATH, p)
-    mol2_info = read_mol2(MOL2_PATH, m)
-    cx_pdb_info = read_cx_pdb(CX_PDB_PATH, c)
-    combined = combine(pdb_info, mol2_info)
-    combined2 = combine2(combined, cx_pdb_info)
+    pdb_info = prot_pdb_to_df(PDB_PATH, p)
+    mol2_info = mol2_to_df(MOL2_PATH, m)
+    cx_pdb_info = cx_pdf_to_df(CX_PDB_PATH, c)
+    combined = combine_prot_dfs(pdb_info, mol2_info)
+    combined2 = combine_all_dfs(combined, cx_pdb_info)
     if o_charge!= None and h_charge != None and ep_charge !=None:
         final = change_water_charges(combined2, o_charge, h_charge, ep_charge)
     elif o_charge != None and h_charge != None:
