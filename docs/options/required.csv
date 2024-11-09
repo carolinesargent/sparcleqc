@@ -1,0 +1,9 @@
+Keyword,Description,Option Type
+pdb_file,PDB filename of complex (if using Amber) or protein (if using CHARMM) ,string
+cutoff,distance from seed; where cutting of protein begins,float > 0
+seed,"starting point for QM region expansion; either the whole ligand ('ligand') or an atom within the ligand (given by the atom ID). If an atom ID is given, 'seed_file' is required. See other options.",
+ligand_charge,charge of ligand,integer
+software,"Software package for generated input files. Choose psi4, nwchem, or q-chem.",string
+charge_scheme,"Scheme for handling charges at the QM/MM boundary. Choose Z1, Z2, Z3, DZ1, DZ2, DZ3, BRC, BRC2, or BRCD.",string
+method,QM method for treatment of the QM region. Ex: hf or b3lyp or sapt0,string
+basis_set,Basis set for treatment of QM region. Ex: aug-cc-pvdz or 6-31G*,string

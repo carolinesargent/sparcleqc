@@ -1,0 +1,3 @@
+Keyword,Description,Option Type,Default
+qchem_options,"dictionary of options to add to $rem block, optional. Note: method and basis are added to $rem block by default.",dictionary,{'JOBTYPE':'xsapt'} if sapt in method; or {'JOBTYPE':'sp'}
+qchem_sapt,"dictionary of options to include in $sapt block, optional",dictionary,"{}, or if method is sapt0: {'algorithm':'ri-mo','basis':'dimer'}"

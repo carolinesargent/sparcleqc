@@ -25,7 +25,7 @@ import sparcle_qc
 project = 'sparcle_qc'
 copyright = ("2024, Caroline S. Glick. Project structure based on the "
              "Computational Molecular Science Python Cookiecutter version 1.10")
-author = 'Caroline S. Glick'
+author = 'C.S. Glick, I.P. Berry, C.D. Sherrill'
 
 # The short X.Y version
 version = ''
@@ -77,7 +77,7 @@ master_doc = 'index'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
