@@ -1,0 +1,6 @@
+Keyword,Description,Option Type,Default
+nwchem_scratch,path/to/scratch for SCRATCH_DIR,string,None
+nwchem_perm,path/to/perm for PERMANENT_DIR,string,None
+nwchem_scf,dictionary of options to add to SCF block,dictionary,None
+nwchem_dft,dictionary of options to add to DFT block,dictionary,{'xc':'b3lyp'}
+mem,"String for memory setting, including units",string,32 GB

@@ -1,0 +1,6 @@
+Keyword,Description,Option Type,Default
+fisapt_partition,Generate fA.dat and fB.dat files for FSAPT partition? true or false,string,false
+do_fsapt,Run functional-group SAPT? true or false,string,false
+psi4_options,dictionary of extra Psi4 options (ex. {'e_convergence':9}),dictionary,{}
+nthreads,"number of threads to be used by Psi4, if set in the input file",integer,1
+mem,"String for memory setting, including units",string,32 GB
