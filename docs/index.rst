@@ -25,7 +25,7 @@ Welcome to sparcle_qc's documentation!
     .. grid-item-card::  User Guide
       :margin: 0 3 0 0
       
-      See a list of all options
+      See a list of all options and example input files.
 
       .. button-link:: ./user_guide.html
          :color: primary
