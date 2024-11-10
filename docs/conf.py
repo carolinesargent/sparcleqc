@@ -102,7 +102,7 @@ html_theme = 'pydata_sphinx_theme'
 html_theme_options = {
    "logo": {
       "image_light": "_static/sparcle_logo.png",
-      "image_dark": "_static/sparcle_logo.png",
+      "image_dark": "_static/dark-sparcle_logo.png",
    }
 }
 
