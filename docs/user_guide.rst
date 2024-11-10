@@ -70,11 +70,11 @@ Example Inputs
     
     .. code-block::
  
-        pdb_file': 3qxp.pdb
+        pdb_file: 3qxp.pdb
         cutoff: 5
         seed: ligand
         charge_scheme: DZ3
-        ligand_charge: 0,
+        ligand_charge: 0
         method: b3lyp
         basis_set: 6-31G*
         charmm_rtf: top_all36_prot.rtf
@@ -90,7 +90,7 @@ Example Inputs
 
         pdb_file: 2cji.pdb
         pre-capped: true
-        cutoff: 8.5,
+        cutoff: 8.5
         seed: 4247
         seed_file: 4yff.pdb
         charge_scheme: BRC
@@ -159,7 +159,7 @@ Example Inputs
   
     With the two SAPT files, a relative interaction energy can be computed, giving insight into which ligand is more stable within the protein pocket. 
       
-.. dropdown:: Convergence Study with Increasing QM Region Size
+.. dropdown:: Convergence Study with Increasing QM Region Size via API
 
     A python loop can be used to generate multiple input files with an increasing size of the QM region. We can increase the size of the QM region by incrementing the cutoff. An example python script is below.    
 
@@ -168,10 +168,8 @@ Example Inputs
         import sparcle_qc
 
 	inputs = {
-            'input_filename': '',
             'pdb_file': '2cji.pdb',
             'pre-capped': 'True',
-            'cutoff': ,
             'seed': 'ligand',
             'charge_scheme': 'BRC',
             'ligand_charge': 0,
@@ -186,6 +184,13 @@ Example Inputs
             'software': 'psi4',
             'mem': '60 GB',
             'nthreads': 10}
-        output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
 
+	cutoffs = [3, 4, 5]
 
+	for c in cutoffs:
+	    inputs['cutoff'] = f'{c}'
+	    inputs['input_filename'] = f'cutoff_{c}.in'
+	    print(inputs)
+	    sparcle_qc.run_sparcle(user_options = inputs)
+
+                                                     
