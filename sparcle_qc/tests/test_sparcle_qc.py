@@ -96,7 +96,6 @@ def test_run_sapt_psi4_charmm():
     'method': 'fisapt0',
     'fisapt_partition': 'True',
     'basis_set': 'aug-cc-pv(D+d)z',
-    'env_path': '/theoryfs2/ds/ipberry/miniconda3/envs/emb_sapt/',
     'charmm_rtf': 'top_all36_prot.rtf',
     'charmm_prm': 'par_all36m_prot.prm',
     'water_model': 'tip3p' ,
