@@ -7,7 +7,7 @@ channels:
 dependencies:
   # sparcle
   - ambertools
-  - pymol
+  - pymol-open-source
   - mdanalysis
     # Testing
   - pytest
