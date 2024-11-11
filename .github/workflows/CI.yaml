@@ -42,7 +42,10 @@ jobs:
           environment-name: test
           condarc: |
             channels:
-              - flexible
+               - schrodinger
+               - conda-forge
+               - salilab
+               - defaults
           create-args: >- 
             python=${{ matrix.python-version }}
 
