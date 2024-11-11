@@ -14,6 +14,7 @@ on:
     #   Scheduled workflows run on the latest commit on the default or base branch.
     #   (from https://help.github.com/en/actions/reference/events-that-trigger-workflows#scheduled-events-schedule)
     - cron: "0 0 * * 0"
+  workflow_dispatch:
 
 jobs:
   test:
@@ -21,8 +22,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macOS-latest, ubuntu-latest, windows-latest]
-        python-version: [3.9, "3.10", "3.11"]
+        os: [ubuntu-latest, macOS-latest]
+        python-version: ["3.10", "3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v4
@@ -37,11 +38,14 @@ jobs:
       # More info on options: https://github.com/marketplace/actions/setup-micromamba
       - uses: mamba-org/setup-micromamba@v1
         with:
-          environment-file: devtools/conda-envs/sparcle11.yaml
+          environment-file: devtools/conda-envs/sparcle_qc.yaml
           environment-name: test
           condarc: |
             channels:
-              - conda-forge
+               - schrodinger
+               - conda-forge
+               - salilab
+               - defaults
           create-args: >- 
             python=${{ matrix.python-version }}
 
@@ -56,7 +60,8 @@ jobs:
         # conda setup requires this special shell
         shell: bash -l {0}
         run: |
-          pytest -v --cov=sparcle_qc --cov-report=xml --color=yes sparcle_qc/tests/
+          cd sparcle_qc/tests
+          pytest -v --cov=sparcle_qc --cov-report=xml --color=yes .
 
       - name: CodeCov
         uses: codecov/codecov-action@v1
