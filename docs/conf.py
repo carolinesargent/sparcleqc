@@ -132,7 +132,10 @@ html_static_path = ['_static']
 # default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
 # 'searchbox.html']``.
 #
-# html_sidebars = {}
+# Below removes primary sidebars from every page
+html_sidebars = {
+    "**": []
+}
 
 
 # -- Options for HTMLHelp output ---------------------------------------------
