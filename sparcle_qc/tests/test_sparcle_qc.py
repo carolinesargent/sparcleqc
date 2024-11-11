@@ -540,7 +540,7 @@ def test_exit():
     'method': 'hf',
     'basis_set': 'aug-cc-pv(D+d)z',
     'charmm_rtf': 'top_all36_prot.rtf',
-    'env_path': f'{os.getcwd()}/'
+    'env_path': f'{os.getcwd()}/',
     'water_model': 'tip3p' ,
     'software': 'psi4',
     'mem': '100 GB',
