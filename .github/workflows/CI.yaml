@@ -42,6 +42,8 @@ jobs:
           condarc: |
             channels:
               - conda-forge
+              - schrodinger
+              - defaults
           create-args: >- 
             python=${{ matrix.python-version }}
 
