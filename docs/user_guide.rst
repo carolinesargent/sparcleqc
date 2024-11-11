@@ -161,7 +161,7 @@ Example Inputs
       
 .. dropdown:: Convergence Study with Increasing QM Region Size via API
 
-    A python loop can be used to generate multiple input files with an increasing size of the QM region. We can increase the size of the QM region by incrementing the cutoff. An example python script is below.    
+    A Python loop can be used to generate multiple input files with an increasing size of the QM region. We can increase the size of the QM region by incrementing the cutoff. An example Python script is below.    
 
     .. code-block::
  
