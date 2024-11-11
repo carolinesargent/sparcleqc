@@ -48,7 +48,7 @@ def test_run_sapt_psi4_amber():
     'fisapt_partition': 'True',
     'basis_set': 'aug-cc-pv(D+d)z',
     'amber_ff': 'ff19SB',
-    'env_path': './',
+    'env_path': '/home/runner/work/sparcle_qc/sparcle_qc/sparcle_qc/tests/',
     'water_model': 'opc' ,
     'o_charge': 0,
     'h_charge': 0.6791,
