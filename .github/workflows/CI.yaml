@@ -60,7 +60,8 @@ jobs:
         # conda setup requires this special shell
         shell: bash -l {0}
         run: |
-          pytest -v --cov=sparcle_qc --cov-report=xml --color=yes sparcle_qc/tests/
+          cd sparcle_qc/tests
+          pytest -v --cov=sparcle_qc --cov-report=xml --color=yes .
 
       - name: CodeCov
         uses: codecov/codecov-action@v1
