@@ -34,6 +34,7 @@ def test_sparcle_qc_imported():
     assert "sparcle_qc" in sys.modules
 
 def test_run_sapt_psi4_amber():
+    print(os.getcwd())
     inputs = {
     'input_filename': 'test1.in',
     'pdb_file': '4yff_cl_cleaned.pdb',

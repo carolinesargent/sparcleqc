@@ -61,7 +61,7 @@ jobs:
         shell: bash -l {0}
         run: |
           cd sparcle_qc/tests
-          pytest -v --cov=sparcle_qc --cov-report=xml --color=yes . --rootdir=.
+          pytest -v --cov=sparcle_qc --cov-report=xml --color=yes .
 
       - name: CodeCov
         uses: codecov/codecov-action@v1
