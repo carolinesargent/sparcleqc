@@ -6,9 +6,9 @@ channels:
   - defaults
 dependencies:
   # sparcle
-  - conda-forge::ambertools
-  - schrodinger::pymol
-  - conda-forge::mdanalysis
+  - ambertools
+  - pymol
+  - mdanalysis
     # Testing
   - pytest
   - pytest-cov
