@@ -6,6 +6,10 @@ To get started, you will need to install sparcle_qc and its dependencies. We hav
 
 First, clone the `Sparcle_QC repository <https://github.com/carolinesargent/sparcle_qc>`_
 
+.. code-block:: bash
+
+   git clone https://github.com/carolinesargent/sparcle_qc.git
+
 Change your working directory to sparcle_qc/:
 
 .. code-block:: bash
