@@ -321,7 +321,7 @@ def input_parser(filename:str) -> Dict:
     return keywords
 
 
-def run_sparcle(input_file= None, user_options = None) -> None:
+def run_sparcle(input_file= None, user_options = None):
     """ 
     given an input file, parses the specified parameters into a
     dictionary of keywords and runs the necessary sparcle_qc functions to
@@ -338,7 +338,9 @@ def run_sparcle(input_file= None, user_options = None) -> None:
 
     Returns
     -------
-    None
+    number of QM atoms, number of MM atoms, charge of QM region, charge of MM region: List or Dict
+        Number of atoms and charge of each region in a List for a SAPT computation or a Dictionary for a supermolecular computation with keys 'Complex', 'Protein', and 'Ligand'
+        
     """
     
     #starting sparkle on command line
