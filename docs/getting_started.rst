@@ -1,10 +1,10 @@
 Getting Started
 ===============
-Installing sparcle_qc
+Installing Sparcle_QC
 ---------------------
 To get started, you will need to install sparcle_qc and its dependencies. We have provided a yaml file to create a conda environment containing all of the necessary packages.
 
-First, clone the `sparcle_qc repository <https://github.com/carolinesargent/sparcle_qc>`_
+First, clone the `Sparcle_QC repository <https://github.com/carolinesargent/sparcle_qc>`_
 
 Change your working directory to sparcle_qc/:
 
@@ -20,7 +20,7 @@ Create a conda environment from the yaml file provided in this repository:
 
 Command Line Usage 
 ------------------
-Sparcle_qc is now installed in this enviornment and can be called on the command line in any directory using the following syntax:
+Sparcle_QC is now installed in this enviornment and can be called on the command line in any directory using the following syntax:
 
 .. code-block:: bash
 
@@ -28,13 +28,13 @@ Sparcle_qc is now installed in this enviornment and can be called on the command
 
 Python API
 ----------    
-Alternatively, for more advanced scripting utilities, sparcle_qc can be imported as a python package:
+Alternatively, for more advanced scripting utilities, Sparcle_QC can be imported as a python package:
 
 .. code-block:: python
     
     import sparcle_qc
 
-Sparcle_qc can be called by referencing an input file:
+Sparcle_QC can be called by referencing an input file:
 
 .. code-block:: python
 
@@ -66,10 +66,9 @@ or by passing a dictionary of inputs:
 
     sparcle_qc.run_sparcle(user_options = inputs)
 
-The run function will return a dictionary containing a list of the number of atoms in the QM region, the number of atoms in the MM region, the charge of the QM region, and the charge of the MM region with a key for the complex, ligand, and protein during a supermolecular calculation and simply a single list for a SAPT calculation.
 
 Examples 
 --------
 
-For more details on the inputs to sparcle_qc and example inputs, check out the :doc:`user_guide`.
+For more details on the inputs to Sparcle_QC and example inputs, check out the :doc:`user_guide`.
 
