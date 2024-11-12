@@ -1,0 +1,21 @@
+name: sparcle_qc
+channels:
+  - schrodinger
+  - conda-forge
+  - salilab
+  - defaults
+dependencies:
+  # sparcle
+  - ambertools
+  - pymol-open-source
+  - mdanalysis
+    # Testing
+  - pytest
+  - pytest-cov
+  - codecov
+    # Documentation
+  - pydata-sphinx-theme
+  - sphinx-design
+  - sphinx-copybutton
+  - pip:
+     - -e .
