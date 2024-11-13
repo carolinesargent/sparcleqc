@@ -321,7 +321,7 @@ def input_parser(filename:str) -> Dict:
     return keywords
 
 
-def run_sparcle(input_file= None, user_options = None) -> list or Dict:
+def run_sparcle(input_file= None, user_options = None):
     """ 
     given an input file, parses the specified parameters into a
     dictionary of keywords and runs the necessary sparcle_qc functions to
