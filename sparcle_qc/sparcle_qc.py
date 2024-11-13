@@ -11,7 +11,7 @@ from typing import Dict
 
 from sparcle_qc.amber_prep import write_cpptraj, write_cpptraj_skip_autocap, write_tleap, autocap, skip_autocap, reorder_atoms_amber
 from sparcle_qc.charmm_prep import psf_to_mol2, get_cx_pdb, reorder_atoms_charmm
-from sparcle_qc.complex_tools import check_df_charges, check_mol2_charges, convert_atom_id, closest_contact
+from sparcle_qc.complex_tools import check_df_charges, check_mol2_charges, convert_seed, closest_contact
 from sparcle_qc.combine_data import create_csv
 from sparcle_qc.cut_protein import run_cut_protein 
 from sparcle_qc.convert_dict import convert_dictionary 
@@ -433,7 +433,7 @@ def run_sparcle(input_file= None, user_options = None):
             seed = 'ligand'
             seed_coords = 'ligand.pdb'
         else:
-            seed, seed_coords = convert_atom_id(keywords['seed'], keywords['seed_file'])
+            seed, seed_coords = convert_seed(keywords['seed'], keywords['seed_file'])
         #if forcefield is amber, writing and running tleap to create mol2
         if 'amber_ff' in keywords:
             write_tleap(keywords['amber_ff'], keywords['water_model'], keywords['other_amber_ff'])

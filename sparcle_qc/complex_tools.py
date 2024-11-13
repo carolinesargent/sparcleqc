@@ -54,7 +54,7 @@ def coords_to_new_id(x:str, y:str, z:str, pdb_file2:str) -> str:
                if x_coord == x and y_coord == y and z_coord == z:
                    return l[6:11].strip()
 
-def convert_atom_id(seed: str, seed_file:str, new_pdb:str ='cx_autocap_fixed.pdb') -> str:
+def convert_seed(seed: str, seed_file:str, new_pdb:str ='cx_autocap_fixed.pdb') -> str:
     """
     finds the atom the corresponds to atom number = seed in seed_file
     pdb and then maps this to the newly created complex pdb
