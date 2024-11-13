@@ -6,11 +6,43 @@ General Information
 
 .. dropdown:: Cutting and Capping Bonds
     
-    Alpha carbon - carbonyl carbon bonds are cut to separate the QM region from the MM region. The valencies on the QM atoms of the cut bonds are satisfied by placing a hydrogen along the cut bond.
+    Alpha carbon - carbonyl carbon bonds are cut to separate the QM region from the MM region. 
+   
+    .. image:: _static/cutonly.svg
+        :align: center
+        :width: 500 px
+
+    The valencies on the QM atoms of the cut bonds are satisfied by placing a hydrogen along the cut bond. The hydrogen bond length, :math:`r_{\rm{Q1-H1}}`, is determined by
+
+    .. math::
+    
+        r_{\rm{Q1-H1}} = r_{\rm{Q1-M1}}\frac{r^{\rm{QM0}}_{\rm{Q1-HL}}}{r^{\rm{MM0}}_{\rm{Q1-M1}}},
+    
+    where :math:`r_{\rm{Q1-M1}}` is the bond length of the cut bond, :math:`r^{\rm{QM0}}_{\rm{Q1-M1}}` is the corresponding bond length according to the force field used, and :math:`r^{\rm{QM0}}_{\rm{Q1-HL}}` is the force field bond length for the hydrogen link bond. [1]_
+
+    .. [1]      L.H. Hu, P. Soderhjelm, and U. Ryde, "On the convergence of QM/MM energies," *J. Chem. Theory Comput.* 7, 761-777 (2011). `<https://doi.org/10.1021/ct100530r>`_
 
 .. dropdown:: QM/MM Boundary Charges
 
-    Point charges too close to the capped QM region may cause overpolarization. Users have the option of choosing one of nine charge schemes to alter charges at this boundary. These schemes are outlined below:
+    Point charges too close to the capped QM region may cause overpolarization. Users have the option of choosing one of nine charge schemes to alter charges at this boundary. These schemes are:
+
+    * **Z1**: Charges of the M1 atoms are set to zero.
+    * **Z2**: Charges of the M1 and M2 atoms are set to zero.
+    * **Z3**: Charges of the M1, M2, and M3 atoms are set to zero.
+    * **DZ1**: At each cut, the charge of M1 is set to zero, and the charge needed to return the MM boundary residue to its original integer charge is evenly distributed to all MM atoms in that residue.
+    * **DZ2**: At each cut, the charges of M1 and M2 atoms are set to zero, and the charge needed to return the MM boundary residue to its original integer charge is evenly distributed to all MM atoms in that residue.
+    * **DZ3**: At each cut, the charges of M1, M2, and M3 atoms are set to zero, and the charge needed to return the MM boundary residue to its original integer charge is evenly distributed to all MM atoms in that residue.
+    * **BRC**: At each cut, the charge of M1 is set to zero, and the charge needed to return the MM boundary residue to its original integer charge is evenly distributed to the midpoints of the M1-M2 bonds.
+    * **BRCD**: At each cut, the charge of M1 is set to zero, and the charge needed to return the MM boundary residue to its original integer charge is evenly distributed to the midpoints of the M1-M2 bonds, but doubled. This charge is also subtracted from each M2 atom within the residue.
+    * **BRC2**: At each cut, the charge of M1 is set to zero, and the charge needed to return the MM boundary residue to its original integer charge is evenly distributed to the M2 atoms in that residue.
+
+    For SAPT0 in Psi4, we recommend BRC. [2]_ 
+
+    .. image:: _static/qmmm.svg
+        :align: center
+        :width: 700 px
+
+    .. [2] C.S. Glick, A. Alenaizan, D.L. Cheney, C.E. Cavender, and C.D. Sherrill, "Electrostatically embedded symmetry-adapted perturbation theory," *J. Chem. Phys.* 161, 134112 (2024). `<https://doi.org/10.1063/5.0221974>`_
 
 .. dropdown:: Resulting Input File for QM Calculation
 
