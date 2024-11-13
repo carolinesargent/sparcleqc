@@ -138,6 +138,8 @@ html_sidebars = {
     "**": []
 }
 
+# Below removes show source link from right hand sidebar
+html_show_sourcelink = False
 
 # -- Options for HTMLHelp output ---------------------------------------------
 

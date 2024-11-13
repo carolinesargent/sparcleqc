@@ -1,6 +1,47 @@
 User Guide
 ===============
 
+General Information
+*********************
+
+.. dropdown:: Cutting and Capping Bonds
+    
+    Alpha carbon - carbonyl carbon bonds are cut to separate the QM region from the MM region. The valencies on the QM atoms of the cut bonds are satisfied by placing a hydrogen along the cut bond.
+
+.. dropdown:: QM/MM Boundary Charges
+
+    Point charges too close to the capped QM region may cause overpolarization. Users have the option of choosing one of nine charge schemes to alter charges at this boundary. These schemes are outlined below:
+
+.. dropdown:: Resulting Input File for QM Calculation
+
+    The result of running Sparcle_QC is an input file for either Psi4, Q-Chem, or NWChem. In general, the input file will look similar to the files below.
+
+    .. tab-set::
+    
+        .. tab-item:: Psi4
+    
+            .. code-block:: 
+    
+                int main(const int argc, const char **argv) {
+                    return 0;
+                }
+    
+        .. tab-item:: Q-Chem
+    
+            .. code-block:: 
+    
+                def main():
+                    return
+    
+        .. tab-item:: NWChem
+    
+            .. code-block:: 
+    
+                class Main {
+                    public static void main(String[] args) {
+                    }
+                }
+
 Options
 ********
 

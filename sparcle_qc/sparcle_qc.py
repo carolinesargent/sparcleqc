@@ -323,11 +323,12 @@ def input_parser(filename:str) -> Dict:
 
 def run_sparcle(input_file= None, user_options = None):
     """ 
-    given an input file, parses the specified parameters into a
-    dictionary of keywords and runs the necessary sparcle_qc functions to
+    Given an input file, parses the specified options into a
+    dictionary of keywords (or just takes in a dictionary) 
+    and runs the necessary sparcle_qc functions to
     create a quantum chemistry software input file. Steps include
-    preparing pdbs, obtaining mol2s, carving out the QM region, capping
-    the Q1 bonds with hydrogens, and finally writing an input file
+    preparing PDBs, obtaining MOL2s, carving out the QM region, capping
+    the cut bonds with hydrogens, and writing an input file.
 
     Parameters
     ----------
