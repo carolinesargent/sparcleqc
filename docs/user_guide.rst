@@ -73,7 +73,7 @@ General Information
                 psi4.core.set_num_threads(2)
                 
                 psi4.core.set_output_file('psi4_file.out', False)
-                dimer =psi4.geometry('''
+                dimer = psi4.geometry('''
                 0 1
                  N -17.183 -79.238 -85.266
                  C -13.352 -80.694 -86.001
@@ -106,7 +106,8 @@ General Information
                 ,-0.5679,-26.081,-91.792,-81.032
                 ,-0.3662,-24.383,-92.801,-79.671
                 ,0.1123,-25.065,-93.243,-78.959
-                ,0.290950,-17.794,-72.944,-87.521]).reshape((-1,4))
+                ,0.1123,-23.555,-93.476,-79.829
+                ,0.1123,-24.006,-91.874,-79.266]).reshape((-1,4))
                 Chargefield_B[:,[1,2,3]] /= qcel.constants.bohr2angstroms
                 
                 psi4.set_options({
@@ -128,8 +129,8 @@ General Information
             .. code-block:: 
 
                 """
-                This Psi4 file was created using Sparcle-QC with the following specifications:
-                pdb_file: 3QXP_templated_amber.pdb
+                This Q-Chem file was created using Sparcle-QC with the following specifications:
+                pdb_file: 2cji.pdb
                 cutoff: 5
                 ...
                 ... # copy of Sparcle_QC input file
@@ -162,6 +163,7 @@ General Information
                     -24.383    -92.801    -79.671    -0.3662
                     -25.065    -93.243    -78.959    0.1123
                     -23.555    -93.476    -79.829    0.1123
+                    -24.006    -91.874    -79.266    0.1123
                 $end
                 
                 $rem
@@ -176,8 +178,8 @@ General Information
             .. code-block:: 
     
                 """
-                This Psi4 file was created using Sparcle-QC with the following specifications:
-                pdb_file: 3QXP_templated_amber.pdb
+                This NWChem file was created using Sparcle-QC with the following specifications:
+                pdb_file: 2cji.pdb
                 ...
                 ... # copy of Sparcle_QC input file
                 """
@@ -214,6 +216,7 @@ General Information
                     -24.383    -92.801    -79.671    -0.3662
                     -25.065    -93.243    -78.959    0.1123
                     -23.555    -93.476    -79.829    0.1123
+                    -24.006    -91.874    -79.266    0.1123
                 end
                 
                 basis
