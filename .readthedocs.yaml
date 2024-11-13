@@ -10,3 +10,7 @@ conda:
 
 sphinx:
   configuration: docs/conf.py
+
+formats:
+  - pdf
+  - epub
