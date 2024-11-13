@@ -8,7 +8,13 @@ General Information
     
     Alpha carbon - carbonyl carbon bonds are cut to separate the QM region from the MM region. 
    
-    .. image:: _static/cutonly.svg
+    .. image:: _static/cut-lightmode.svg
+        :class: only-light
+        :align: center
+        :width: 500 px
+
+    .. image:: _static/cut-darkmode.svg
+        :class: only-dark
         :align: center
         :width: 500 px
 
@@ -38,7 +44,13 @@ General Information
 
     For SAPT0 in Psi4, we recommend BRC. [2]_ 
 
-    .. image:: _static/qmmm.svg
+    .. image:: _static/qmmm-lightmode.svg
+        :class: only-light
+        :align: center
+        :width: 700 px
+        
+    .. image:: _static/qmmm-darkmode.svg
+        :class: only-dark
         :align: center
         :width: 700 px
 
