@@ -10,6 +10,8 @@
 [//]: # (Badges)
 [![GitHub Actions Build Status](https://github.com/carolinesargent/sparcle_qc/workflows/CI/badge.svg)](https://github.com/carolinesargent/sparcle_qc/actions?query=workflow%3ACI)
 [![codecov](https://codecov.io/gh/carolinesargent/sparcle_qc/branch/main/graph/badge.svg)](https://codecov.io/gh/carolinesargent/sparcle_qc/branch/main)
+[![Documentation Status](https://readthedocs.org/projects/sparcle-qc/badge/?version=latest)](https://sparcle-qc.readthedocs.io/en/latest/?badge=latest)
+
 
 Sparcle_QC is a Python package that automatically creates protein:ligand, QM/MM-like input files for the quantum chemistry codes Psi4, Q-Chem, and NWChem.
 
