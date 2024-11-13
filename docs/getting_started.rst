@@ -4,7 +4,7 @@ Installing Sparcle_QC
 ---------------------
 To get started, you will need to install sparcle_qc and its dependencies. We have provided a yaml file to create a conda environment containing all of the necessary packages.
 
-First, clone the `Sparcle_QC repository <https://github.com/carolinesargent/sparcle_qc>`_
+First, clone the `Sparcle_QC repository <https://github.com/carolinesargent/sparcle_qc>`_:
 
 .. code-block:: bash
 
@@ -49,8 +49,8 @@ or by passing a dictionary of inputs:
 .. code-block:: python
 
     inputs = {
-    'input_filename': 'test14.in',
-    'pdb_file': '3QXP_templated_amber.pdb',
+    'input_filename': 'example.in',
+    'pdb_file': 'complex_pdb_file.pdb',
     'cutoff': 6,
     'seed': 'ligand',
     'charge_scheme': 'Z2',
@@ -58,14 +58,8 @@ or by passing a dictionary of inputs:
     'method': 'hf',
     'basis_set': 'aug-cc-pv(D+d)z',
     'amber_ff': 'ff19SB',
-    'env_path': f'{os.getcwd()}/',
-    'water_model': 'opc' ,
-    'o_charge': 0,
-    'h_charge': 0.6791,
-    'ep_charge': -1.3582,
+    'env_path': f'path/to/conda/env/sparcle_qc',
     'software': 'psi4',
-    'mem': '100 GB',
-    'nthreads': 16,
     }
 
     sparcle_qc.run_sparcle(user_options = inputs)

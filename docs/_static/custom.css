@@ -1,3 +1,8 @@
+:root {
+    color-scheme: light dark;
+    }
+
 body {
-    color: #003057; /* Dark gray text */
+    color: light-dark(#003057, #FFFFFF); /* Dark blue text */
 }
+
