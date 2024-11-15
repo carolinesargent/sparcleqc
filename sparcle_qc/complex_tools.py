@@ -167,7 +167,6 @@ def check_df_charges() -> Tuple[int, str]:
     
     # loop through residues and their sum of point charges
     for k,v in charges.items():
-        print(k,v)
         total_charge += v
         # check for integer charge
         if np.abs(np.round(v, 0) - v) > tolerance:
@@ -206,7 +205,6 @@ def check_df_charges() -> Tuple[int, str]:
             try:
                 df_charge
             except NameError:
-                    print('else:',k)
                     # if there is no formal charge already listed in df, add it to the beta carbon
                     cb_idx = df[(df['PDB_RES']  == k) & (df['PDB_AT'] == 'CB')].index.tolist()
                     if len(cb_idx) > 0:
