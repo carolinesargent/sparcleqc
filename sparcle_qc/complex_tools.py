@@ -202,7 +202,9 @@ def check_df_charges() -> Tuple[int, str]:
                             # if there is no beta carbon (likely a metal ion)
                             possible_idx = df[(df['PDB_RES']  == k)].index.tolist()
                             df.at[possible_idx[0], 'AT_LABEL'] = str(df.at[possible_idx[0], 'AT_LABEL']) + q_str
-                else:
+            try:
+                df_charge
+            except NameError:
                     # if there is no formal charge already listed in df, add it to the beta carbon
                     cb_idx = df[(df['PDB_RES']  == k) & (df['PDB_AT'] == 'CB')].index.tolist()
                     if len(cb_idx) > 0:
@@ -212,7 +214,6 @@ def check_df_charges() -> Tuple[int, str]:
                         possible_idx = df[(df['PDB_RES']  == k)].index.tolist()
                         if '+' not in df.at[possible_idx[0],'AT_LABEL'] and '-' not in df.at[possible_idx[0],'AT_LABEL']:
                             df.at[possible_idx[0], 'AT_LABEL'] = str(df.at[possible_idx[0], 'AT_LABEL']) + q_str
-    
             df.to_csv('dataframe.csv')
     if not failed:
         return_message = (1, 'worked')

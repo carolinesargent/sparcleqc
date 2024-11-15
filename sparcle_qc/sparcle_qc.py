@@ -375,7 +375,7 @@ def run_sparcle(input_file= None, user_options = None):
 
         keywords = input_parser(input_file)
         #creating new directory for the created files, changing working directories, and copying necessary files into the new directory
-        new_dir = input_file.split('.')[0]
+        new_dir = '.'.join(input_file.split('.')[:-1])
         os.mkdir(new_dir)
         if 'charmm_rtf' in keywords:
             shutil.copy(keywords['pdb_file'], new_dir)

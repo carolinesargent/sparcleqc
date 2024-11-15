@@ -290,7 +290,7 @@ def test_run_dz1():
     }
     
     output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
-    true_dictionary = (586, 4330, 4.0, 2.0)
+    true_dictionary = (586, 4330, 2.0, 2.0)
     assert output_dictionary == true_dictionary
 def test_run_dz2():
     inputs = {
@@ -314,7 +314,7 @@ def test_run_dz2():
     }
     
     output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
-    true_dictionary = (586, 4290, 4.0, 2.0)
+    true_dictionary = (586, 4290, 2.0, 2.0)
     assert output_dictionary == true_dictionary
 def test_run_z1():
     inputs = {
@@ -338,7 +338,7 @@ def test_run_z1():
     }
     
     output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
-    true_dictionary = {'Complex': [721, 4207, 2.0, -0.3], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4207, 2.0, -0.3]}
+    true_dictionary = {'Complex': [721, 4207, 1.0, -0.3], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4207, 1.0, -0.3]}
     assert output_dictionary == true_dictionary
 def test_run_z2():
     inputs = {
@@ -362,7 +362,7 @@ def test_run_z2():
     }
     
     output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
-    true_dictionary = {'Complex': [721, 4207, 2.0, 6.97], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4207, 2.0, 6.97]}
+    true_dictionary = {'Complex': [721, 4207, 1.0, 6.97], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4207, 1.0, 6.97]}
     assert output_dictionary == true_dictionary
 def test_run_z3():
     inputs = {
@@ -386,7 +386,7 @@ def test_run_z3():
     }
     
     output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
-    true_dictionary = {'Complex': [721, 4207, 2.0, 4.97], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4207, 2.0, 4.97]} 
+    true_dictionary = {'Complex': [721, 4207, 1.0, 4.97], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4207, 1.0, 4.97]} 
     assert output_dictionary == true_dictionary
 def test_run_brcd():
     inputs = {
@@ -410,7 +410,7 @@ def test_run_brcd():
     }
     
     output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
-    true_dictionary = {'Complex': [721, 4225, 2.0, 3.0], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4225, 2.0, 3.0]}
+    true_dictionary = {'Complex': [721, 4225, 1.0, 3.0], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4225, 1.0, 3.0]}
     assert output_dictionary == true_dictionary
 def test_run_brc2():
     inputs = {
@@ -434,7 +434,7 @@ def test_run_brc2():
     }
     
     output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
-    true_dictionary = {'Complex': [721, 4195, 2.0, 3.0], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4195, 2.0, 3.0]}
+    true_dictionary = {'Complex': [721, 4195, 1.0, 3.0], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 4195, 1.0, 3.0]}
     assert output_dictionary == true_dictionary
 def test_run_see():
     inputs = {
@@ -458,7 +458,7 @@ def test_run_see():
     }
     
     output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
-    true_dictionary = {'Complex': [721, 78, 2.0, -1.81], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 78, 2.0, -1.81]}
+    true_dictionary = {'Complex': [721, 78, 1.0, -1.81], 'Ligand': [41, 0, 0.0, 0.0], 'Protein': [680, 78, 1.0, -1.81]}
     assert output_dictionary == true_dictionary
 def test_exit():
     exits = []
@@ -577,6 +577,6 @@ def test_run_convert():
     }
 
     output_dictionary= sparcle_qc.run_sparcle(user_options = inputs)
-    true_dictionary = {'Complex': [718, 4225, 2.0, 3.0], 'Ligand': [38, 0, 0.0, 0.0], 'Protein': [680, 4225, 2.0, 3.0]}
+    true_dictionary = {'Complex': [718, 4225, 1.0, 3.0], 'Ligand': [38, 0, 0.0, 0.0], 'Protein': [680, 4225, 1.0, 3.0]}
     assert output_dictionary == true_dictionary
 
