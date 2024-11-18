@@ -123,10 +123,6 @@ def input_parser(filename:str) -> Dict:
                 if key_word == 'amber_ff':
                     #potentially check if the ff is in amber
                     pass
-                if key_word =='env_path':
-                    if os.path.exists(value) == False:
-                        print('Error: Invalid input file. Path to environment does not exist')
-                        sys.exit()
                 if key_word == 'charmm_rtf':
                     if os.path.isfile(value) == False:
                         print('Error: Invalid input file. Path to CHARMM topology (.rtf) does not exist')
@@ -198,9 +194,6 @@ def input_parser(filename:str) -> Dict:
         print('Error: Invalid input file. CHARMM or Amber FF is not provided')
         sys.exit()
     if 'amber_ff' in keywords.keys():
-        if 'env_path' not in keywords.keys():
-            print('Error: Invalid input file. Path to enviornment is not provided')
-            sys.exit()
         if 'water_model' not in keywords.keys():
             print('Error: Invalid input file. Water model is not provided')
             sys.exit()
@@ -490,7 +483,7 @@ def run_sparcle(input_file= None, user_options = None):
         
         #cap the cut QM bonds with link hydrogens
         if 'amber_ff' in keywords:
-            run_cap(ff_type = 'amber', path_to_env = keywords['env_path'])
+            run_cap(ff_type = 'amber')
         else:
             run_cap(ff_type = 'charmm', rtf = keywords['charmm_rtf'], prm = keywords['charmm_prm'])
         #redistribute charge based on charge scheme and write QM input file
