@@ -128,12 +128,6 @@ def calc_C_HL(QM_bond:str, QM_bond_perm:str, QH_bond:str, QH_bond_perm:str, ff_t
                 if l.startswith(QM_bond+'  ') or l.startswith(QM_bond_perm+'  '):
                     line = l.split('  ')
                     R0_Q1M1 = float(line[3])
-                else:
-                    with open(FRCMOD_PATH, 'r') as frcmodfile:
-                        lns = frcmodfile.readlines()
-                        for x in lns:
-                            if x.startswith(QM_bond + '  ') or x.startswith(QM_bond_perm + '  '):
-                                R0_Q1M1 = float(x.split()[2])
                 if l.startswith(QH_bond+'  ') or l.startswith(QH_bond_perm+'  '):
                     line = l.split('  ')
                     R0_Q1HL = float(line[3])
