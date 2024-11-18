@@ -80,7 +80,7 @@ def get_boundary_bonds(Q1_coords:Tuple[str,str,str], M1_coords:Tuple[str,str,str
     return QM_bond, QM_bond_perm, QH_bond, QH_bond_perm
 
 
-def calc_C_HL(QM_bond:str, QM_bond_perm:str, QH_bond:str, QH_bond_perm:str, ff_type:str, params:CharmmParameterSet = None, PARM_PATH:str= None, FRCMOD_PATH:str = None) -> float:
+def calc_C_HL(QM_bond:str, QM_bond_perm:str, QH_bond:str, QH_bond_perm:str, ff_type:str, params:CharmmParameterSet = None, PARM_PATH:str= None) -> float:
     """
     This function returns the scaling factor for a given cut bond based
     on the forcefield bond sretch parameters of the Q1-M1 bond and the
@@ -110,9 +110,6 @@ def calc_C_HL(QM_bond:str, QM_bond_perm:str, QH_bond:str, QH_bond_perm:str, ff_t
 
     PARM_PATH: str or None
         path to parameters for amber forcefield
-
-    FRCMOD_PATH:str or None
-        path to modified parameters of amber forcefield
 
     Returns
     -------
@@ -144,7 +141,7 @@ def calc_C_HL(QM_bond:str, QM_bond_perm:str, QH_bond:str, QH_bond_perm:str, ff_t
     out.close() 
     return R0_Q1HL/R0_Q1M1
 
-def cap(no_HL:Dict[str,List[int]], num_broken_bonds:int, PDB_PATH:str, MOL2_PATH:str, CAPPED_PDB_PATH:str, ff_type:str, params:CharmmParameterSet = None, PARM_PATH:str=None, FRCMOD_PATH:str = None) -> None:
+def cap(no_HL:Dict[str,List[int]], num_broken_bonds:int, PDB_PATH:str, MOL2_PATH:str, CAPPED_PDB_PATH:str, ff_type:str, params:CharmmParameterSet = None, PARM_PATH:str=None) -> None:
     """
     caps Q1 atoms with hydrogen, scaled along Q1 M1 bond; produces new dictionary 'with_HL'
 
@@ -173,9 +170,6 @@ def cap(no_HL:Dict[str,List[int]], num_broken_bonds:int, PDB_PATH:str, MOL2_PATH
 
     PARM_PATH: str or None
         path to parameters for amber forcefield
-
-    FRCMOD_PATH:str or None
-        path to modified parameters of amber forcefield
 
     Returns
     -------
@@ -212,7 +206,7 @@ def cap(no_HL:Dict[str,List[int]], num_broken_bonds:int, PDB_PATH:str, MOL2_PATH
         out.close()
         out = open(glob('*.out')[0], 'a')
         if ff_type =='amber':
-            C_HL = calc_C_HL(a,b,c,d, ff_type, PARM_PATH = PARM_PATH, FRCMOD_PATH = FRCMOD_PATH) #doi:10.1021/jp0446332 eqn (4)
+            C_HL = calc_C_HL(a,b,c,d, ff_type, PARM_PATH = PARM_PATH) #doi:10.1021/jp0446332 eqn (4)
         else:
             C_HL = calc_C_HL(a,b,c,d, ff_type, params = params)                             # doi:10.1021/jp0446332 eqn (4)
         out.write(f'C_HL: {C_HL:.4f}\n')
@@ -252,7 +246,7 @@ def cap(no_HL:Dict[str,List[int]], num_broken_bonds:int, PDB_PATH:str, MOL2_PATH
     out.close()
     return 
 
-def run_cap(ff_type:str, path_to_env:str = None, rtf:str = None, prm:str = None) -> None:    
+def run_cap(ff_type:str, rtf:str = None, prm:str = None) -> None:    
     """
     caps Q1 atoms with hydrogen, scaled along Q1 M1 bond; produces new dictionary 'with_HL'
 
@@ -260,9 +254,6 @@ def run_cap(ff_type:str, path_to_env:str = None, rtf:str = None, prm:str = None)
     ----------
     ff_type: str
         forcefield type (charmm or amber)
-
-    path_to_env: str or None
-        path to installation of amber. required if ff_type is amber to look up ff parameters
 
     rtf: str or None
         path to topology for charmm forcefield. required if ff_type is charmm to look up ff parameters
@@ -292,9 +283,9 @@ def run_cap(ff_type:str, path_to_env:str = None, rtf:str = None, prm:str = None)
     CAPPED_PDB_PATH = 'CAPPED-prot_autocap_fixed.pdb'
         
     if ff_type =='amber':
-        PARM_PATH = f'{path_to_env}dat/leap/parm/parm19.dat' 
-        FRCMOD_PATH = f'{path_to_env}dat/leap/parm/frcmod.ff19SB' 
-        cap(no_HL, num_broken_bonds, PDB_PATH, MOL2_PATH, CAPPED_PDB_PATH, ff_type ='amber', PARM_PATH = PARM_PATH, FRCMOD_PATH = FRCMOD_PATH)
+        path_to_env = os.environ['AMBERHOME']
+        PARM_PATH = f'{path_to_env}/dat/leap/parm/parm19.dat' 
+        cap(no_HL, num_broken_bonds, PDB_PATH, MOL2_PATH, CAPPED_PDB_PATH, ff_type ='amber', PARM_PATH = PARM_PATH)
     else:
         rtf_file = '../' + rtf
         prm_file = '../' + prm
