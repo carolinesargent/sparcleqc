@@ -3,28 +3,44 @@ Input Generator
 
 .. raw:: html
 
-   <form id="input-form" onsubmit="return false;">
+   <form id="input-form" onsubmit ="generateFile(event)">
 
        <label for="filename">Input Filename:</label>
-       <!-- Add the onblur attribute here -->
        <input 
            type="text" 
            id="filename" 
            onblur="processFilename('filename')" 
            placeholder="Enter filename">
-       <br><br>
+       <br>
+       <small id="filenameHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: block;">
+           Enter the desired file name for the Sparcle_QC input file that will be created 
+       </small>
+       <br>
 
 
        <label for="pdb_file">PDB File:</label>
-       <input type="text" id="pdb_file" name="pdb_file" placeholder="Enter PDB file name or path" required>
-       <br><br>
+       <input type="text" id="pdb_file" name="pdb_file" placeholder="Enter PDB file name or path" style="margin-bottom: 7px;" required>
+       <small id="pdbHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: block;">
+           Enter the path to the complex pdb (amber) or protein pdb (charmm)<br>
+           The path should be either absolute or relative to where the input file will be executed<br>
+           E.x., "example.pdb", "user/documents/example.pdb"
+       </small>
+
+       <br>
 
        <label for="cutoff_radius">Cutoff Radius (Å):</label>
-       <input type="number" id="cutoff_radius" name="cutoff_radius" placeholder="Enter a floating-point number" step="any" required>
-       <br><br>
+       <input type="number" id="cutoff_radius" name="cutoff_radius" placeholder="Enter a floating-point number" step="any" min ="0" required>
+       <small id="cutoffHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: block;">
+           Enter the cutoff radius (float) that determines which atoms are included in the QM region 
+       </small>
+       <br>
 
        <label for="seed_ligand">Seed:</label>
-       <div style="display: flex; align-items: center; margin-left: 30px;">
+       <small id="seedHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: block;">
+           Choose if the QM region should be defined by distance to any atom in the ligand or to a specific atom<br>
+           If choosing a specific atom, specify the file that contains that atom with the corresponding atomid     
+       </small>
+       <div style="display: flex; align-items: center; margin-left: 30px; margin-top: 10px;">
            <label for="seed_ligand" style="margin-right: 10px;">Ligand:</label>
            <input type="checkbox" id="seed_ligand" name="seed_ligand" style="margin-right: 20px;">
            <label for="seed_id" style="margin-right: 10px;">Seed ID:</label>
@@ -46,15 +62,27 @@ Input Generator
            <option value="BRC2">BRC2</option>
            <option value="BRCD">BRCD</option>
        </select>
-       <br><br>
+       <small id="schemeHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: block;">
+           Choose a charge scheme that determines how boundary MM charges are redistrubted <br>
+           Specifics on each charge scheme can be found in the <a href="user_guide.html" style="color: #007bff; text-decoration: none;">user guide</a>
+       </small>
+       <br>
 
 
        <label for="forcefield">Forcefield:</label>
-       <div id="forcefields" style="margin-left: 30px;">
+       <small id="ffHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: block;">
+           If CHARMM is the selected forcefield, charges must be precomputed using CHARMM-GUI<br>
+           If Amber is selected, Sparcle_QC will obtain point charges automatically 
+       </small>
+       <div id="forcefields" style="margin-left: 30px; margin-top: 7px;">
           <div>
               <input type="checkbox" id="forcefield_charmm" name="forcefield" value="charmm" onclick="toggleExclusiveCheckbox('forcefield_charmm')">
               <label for="forcefield_charmm">CHARMM</label>
           </div>
+          <small id="charmmHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: none;">
+              Enter the path to the CHARMM parameter files<br>  
+              The path should be either absolute or relative to where the input file will be executed
+          </small>
           <div id="charmm-options">
               <div style="margin-left: 30px;">
                   <label for="charmm_rtf" style="margin-right: 10px;">CHARMM RTF:</label>
@@ -69,6 +97,11 @@ Input Generator
               <input type="checkbox" id="forcefield_amber" name="forcefield" value="amber" onclick="toggleExclusiveCheckbox('forcefield_amber')">
               <label for="forcefield_amber">Amber</label>
           </div>
+          <small id="amberHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: none;">
+              Enter the desired Amber forcefield (e.g. ff19SB)<br>
+              If other forcefields are needed to obtain point charges for the system enter them here <br>
+              If the checkbox below is checked, Sparcle_QC will cap the terminal residues with ACE and NME  
+          </small>
           <div id="amber-options" style="margin-top: 10px;">
               <div style="margin-left: 30px;">
                   <label for="amber_ff" style="margin-right: 10px;">Amber FF:</label>
@@ -78,17 +111,20 @@ Input Generator
                   <label for="other_amber_ffs" style="margin-right: 10px;">Other Amber FFs (Optional):</label>
                   <input type="text" id="other_amber_ffs" name="other_amber_ffs" placeholder="Enter other Amber FFs">
               </div>
+              <div style="display: flex; align-items: center; margin-left: 30px;">
+                  <label for="cap" style="margin-right: 10px;">Cap Terminal Residues?</label>
+                  <input type="checkbox" id="precapbox" name="precap">
+              </div>
           </div>
        </div>
-       
-       
-       
-
-
        <br>
        
        <label for="water-charges-header" class="section-header">Water Charges:</label>
-       <div style="margin-left: 30px;">
+       <small id="waterHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: block;">
+           Enter the desired water model (e.g. OPC)<br>
+           If you wish to override these charges, check the box below and you will be able to manually add charges for either a 3 or 4 point water
+       </small>
+       <div style="margin-left: 30px; margin-top: 7px;">
            <div style="margin-bottom: 10px;">
                <label for="water_model">Water Model:</label>
                <input type="text" id="water_model" name="water_model" placeholder="Enter water model" required>
@@ -119,11 +155,13 @@ Input Generator
            </div>
        </div>
 
-
-
        <label for="software">Software:</label>
+       <small id="softwareHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: block;">
+           Choose the desired quantum chemistry software<br>
+           After choosing, optional software specific options will be available 
+       </small>
        <div id="software" style="margin-left: 30px;">
-           <label style="display: block;">
+           <label style="display: block; margin-top: 7px;">
                <input type="checkbox" id="software_nwchem" name="software" onclick="toggleSoftware('nwchem')"> NWChem
            </label>
            <div id="nwchem-options" style="display: none; margin-left: 20px;">
@@ -159,15 +197,11 @@ Input Generator
            </label>
            <div id="psi4-options" style="display: none; margin-left: 20px;">
                <label><input type="checkbox" id="fisapt_partition" style="margin-bottom: 10px;"> FISAPT Partition</label><br>
-               
                <label><input type="checkbox" id="do_fsapt" style="margin-bottom: 10px;"> Do FSAPT</label><br>
-               
                <label for="psi4options">Psi4 Options:</label>
                <input type="text" id="psi4options" placeholder="Enter Psi4 options" style="margin-bottom: 10px;"><br>
-               
                <label for="num_threads">Num Threads:</label>
                <input type="number" id="num_threads" placeholder="Enter number of threads" style="margin-bottom: 10px;"><br>
-               
                <label for="memory">Memory:</label>
                <input type="text" id="memory" placeholder="Enter memory (e.g., 4GB)" style="margin-bottom: 10px;">
            </div>
@@ -178,12 +212,17 @@ Input Generator
 
        <label for="ligand_charge">Ligand Charge:</label>
        <input type="number" id="ligand_charge" name="ligand_charge" placeholder="Enter ligand charge" step="1" required>
-       <br>
+       <small id="ligHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: block;">
+           Enter the charge of the ligand 
+       </small>
        <br>
 
        <label for="level_of_theory">Level of Theory:</label>
-       <div style="display: flex; align-items: center; margin-left: 30px;">
-           <label for="method" style="margin-right: 10px;">Method:</label>
+       <small id="theoryHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: block;">
+           Enter desired method (e.g. hf) and basis set (e.g. cc-pvdz) for the QM computation  
+       </small>
+       <div style="display: flex; align-items: center; margin-left: 30px; margin-top: 7px;">
+           <label for="method" style="margin-right: 10px; margin-top: 7px;">Method:</label>
            <input type="text" id="method" name="method" placeholder="Enter method" required>
            <label for="basis_set" style="margin-left: 20px; margin-right: 10px;">Basis Set:</label>
            <input type="text" id="basis_set" name="basis_set" placeholder="Enter basis set" required>
@@ -192,18 +231,21 @@ Input Generator
 
 
        <label for="other_features">Other Features:</label>
-       <div style="margin-left: 30px;">
+       <small id="featureHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: block;">
+           Additional optional features are outlined in the <a href="user_guide.html" style="color: #007bff; text-decoration: none;">user guide</a> 
+       </small>
+       <div style="margin-left: 30px; margin-top: 7px;">
            <label for="template_path">Template Path (Optional):</label>
            <input type="text" id="template_path" name="template_path" placeholder="Enter/Path/To/Template/cx_autocap_fixed.pdb">
        </div>
-       <div style="margin-left: 30px;">
+       <div style="margin-left: 30px; margin-top: 7px;">
            <label for="cp_correction">Counterpoise Correct?</label>
            <input type="checkbox" id="cp_correction">
        </div>
        <br>
 
 
-       <button type="button" onclick="handleDownload();generateFile();">Download</button>
+       <button type="submit">Download</button>
    </form>
 
 
@@ -214,9 +256,6 @@ Input Generator
        function toggleWater() {
            var addWaterCharges = document.getElementById("add_water_charges").checked;
 
-           console.log("Add Water Charges: " + addWaterCharges);
-
-           // Show/hide the 3-point and 4-point options if "Add Your Own Water Charges" is checked
            if (addWaterCharges) {
                document.getElementById("tfield").style.display = "inline-block";
                document.getElementById("ffield").style.display = "inline-block";
@@ -227,6 +266,12 @@ Input Generator
                document.getElementById("o_charge_field").style.display = "none";
                document.getElementById("h_charge_field").style.display = "none";
                document.getElementById("ep_charge_field").style.display = "none";
+               const o_charge = document.getElementById("o_charge");
+               const h_charge = document.getElementById("ep_charge");
+               const ep_charge = document.getElementById("h_charge");
+               o_charge.value = '';
+               h_charge.value = '';
+               ep_charge.value = '';
            }
        }
 
@@ -234,67 +279,47 @@ Input Generator
 
 
        function toggleWaterCharges(checkBox) {
-           // Identify the checkboxes
            const threePointCheckbox = document.getElementById("three_point_water");
            const fourPointCheckbox = document.getElementById("four_point_water");
 
-           // Toggle display for the charge fields based on selected checkbox
            if (checkBox === threePointCheckbox) {
                if (checkBox.checked) {
                    document.getElementById("o_charge_field").style.display = "block";
                    document.getElementById("h_charge_field").style.display = "block";
-                   document.getElementById("ep_charge_field").style.display = "none"; // Hide Extra Point Charge
+                   document.getElementById("ep_charge_field").style.display = "none"; 
                    fourPointCheckbox.checked = false; // Uncheck 4-point checkbox
+                   const ep_charge = document.getElementById("ep_charge");
+                   ep_charge.value = '';
                } else {
                    document.getElementById("o_charge_field").style.display = "none";
                    document.getElementById("h_charge_field").style.display = "none";
+                   const o_charge = document.getElementById("o_charge");
+                   const h_charge = document.getElementById("ep_charge");
+                   o_charge.value = '';
+                   h_charge.value = '';
                }
            } else if (checkBox === fourPointCheckbox) {
                if (checkBox.checked) {
                    document.getElementById("o_charge_field").style.display = "block";
                    document.getElementById("h_charge_field").style.display = "block";
-                   document.getElementById("ep_charge_field").style.display = "block"; // Show Extra Point Charge
+                   document.getElementById("ep_charge_field").style.display = "block"; 
                    threePointCheckbox.checked = false; // Uncheck 3-point checkbox
                } else {
                    document.getElementById("o_charge_field").style.display = "none";
                    document.getElementById("h_charge_field").style.display = "none";
                    document.getElementById("ep_charge_field").style.display = "none";
+                   const o_charge = document.getElementById("o_charge");
+                   const h_charge = document.getElementById("ep_charge");
+                   const ep_charge = document.getElementById("h_charge");
+                   o_charge.value = '';
+                   h_charge.value = '';
+                   ep_charge.value = '';
                }
            }
        }
 
  
-
-
-       function handleDownload() {
-           const amberChecked = document.getElementById('forcefield_amber').checked;
-           const charmmChecked = document.getElementById('forcefield_charmm').checked;
        
-           if (!amberChecked && !charmmChecked) {
-               alert('Please select either Amber or CHARMM model type.');
-               return; // Prevent download
-           }
-       
-           let message = '';
-       
-           if (amberChecked) {
-               message = 'Ensure the PDB provided is a complex PDB.';
-           } else if (charmmChecked) {
-               message = 'Ensure the PDB is protein+environment and that the ligand is in the working directory as ligand.pdb';
-           }
-       
-           alert(message);
-       
-           // Proceed with download logic
-           // Example download trigger
-           // let a = document.createElement('a');
-           // a.href = 'path/to/your/file.txt';
-           // a.download = 'filename.txt';
-           // a.click();
-       }
-
-
-
 
 
        function processFilename(inputId) {
@@ -312,27 +337,51 @@ Input Generator
            // Update the input field with the processed filename
            inputField.value = filename;
        }
+
        function toggleExclusiveCheckbox(selectedCheckboxId) {
            const forcefieldIds = ['charmm', 'amber'];
        
            forcefieldIds.forEach(forcefield => {
                const checkbox = document.getElementById(`forcefield_${forcefield}`);
                const optionsDiv = document.getElementById(`${forcefield}-options`);
+               const notes = document.getElementById(`${forcefield}Help`);
        
                if (`forcefield_${forcefield}` === selectedCheckboxId) {
                    if (checkbox.checked) {
                        optionsDiv.style.display = "block"; // Show the selected options
+                       notes.style.display = 'block';
                    } else {
                        optionsDiv.style.display = "none"; // Hide if unchecked
+                       notes.style.display = "none"; // Hide if unchecked
+                       const inputs = optionsDiv.querySelectorAll('input, select, textarea'); // Get all input elements
+                       inputs.forEach(input => {
+                           if (input.type === 'checkbox') {
+                               input.checked = false; // Uncheck checkboxes
+                           } else if (input.type === 'text') {
+                               input.value = ''; // Clear textboxes
+                           }
+                       });
+
                    }
                } else {
                    const otherCheckbox = document.getElementById(`forcefield_${forcefield}`);
                    const otherOptionsDiv = document.getElementById(`${forcefield}-options`);
+                   const notes = document.getElementById(`${forcefield}Help`);
                    otherCheckbox.checked = false; // Uncheck other checkboxes
                    otherOptionsDiv.style.display = "none"; // Hide other options
+                   notes.style.display = "none"; // Hide other options
+                   const inputs = optionsDiv.querySelectorAll('input, select, textarea'); // Get all input elements
+                   inputs.forEach(input => {
+                       if (input.type === 'checkbox') {
+                           input.checked = false; // Uncheck checkboxes
+                       } else if (input.type === 'text') {
+                           input.value = ''; // Clear textboxes
+                       }
+                   });
                }
            });
        }
+
        function toggleInputs(section, disabled) {
            // Disable/enable all input fields within a section
            const inputs = section.querySelectorAll("input");
@@ -351,19 +400,18 @@ Input Generator
                if (software === selectedSoftware) {
                    // Toggle visibility of selected software options
                    if (checkbox.checked) {
-                       optionsDiv.style.display = "block"; // Show the selected options
+                       optionsDiv.style.display = "block";
                    } else {
-                       optionsDiv.style.display = "none"; // Hide if unchecked
+                       optionsDiv.style.display = "none";
                    }
                } else {
                    // Hide other software options and uncheck their boxes
                    const otherCheckbox = document.getElementById(`software_${software}`);
                    otherCheckbox.checked = false;
-                   optionsDiv.style.display = "none"; // Ensure others are hidden
+                   optionsDiv.style.display = "none";
                }
            });
        }
-       // Helper function to enable/disable options within a software div
        function toggleOptionsEnabled(optionsDiv, enabled) {
            const inputs = optionsDiv.querySelectorAll("input, select, textarea");
            inputs.forEach(input => {
@@ -375,8 +423,10 @@ Input Generator
 
 
 
-       function generateFile() {
+       function generateFile(event) {
            // Gather form inputs
+           event.preventDefault();
+
            const filename = document.getElementById("filename").value;
            const pdb_file = document.getElementById("pdb_file").value;
            const template_path = document.getElementById("template_path").value;
@@ -404,9 +454,13 @@ Input Generator
                : document.getElementById("forcefield_amber").checked
                ? "Amber"
                : null;
+           let capped = false;
+           if (forcefield === "Amber") {
+                capped = document.getElementById("precapbox").checked ? "false" : "true";
+           }
            const charmm_rtf = document.getElementById("charmm_rtf").value;
            const charmm_prm = document.getElementById("charmm_prm").value;
-           const cpChecked = document.getElementById("cp_correction").checkedi ? "true" : "false";
+           const cpChecked = document.getElementById("cp_correction").checked ? "true" : "false";
            const amber_ff = document.getElementById("amber_ff").value;
            const other_amber_ffs = document.getElementById("other_amber_ffs").value;
            const nwchem_scratch = document.getElementById("nwchem_scratch").value;
@@ -469,20 +523,21 @@ Input Generator
            let amber2 = other_amber_ffs ? `\nother_amber_ffs: ${other_amber_ffs}` : '';
            let charmmp = charmm_prm ? `\ncharmm_prm: ${charmm_prm}` : '';
            let charmmr = charmm_rtf ? `\ncharmm_rtf: ${charmm_rtf}` : '';
-           let nwcscratch = nwchem_scratch ? `\nnwchem_scratch: ${nwchem_scratch}` : '';
-           let nwcperm = nwchem_perm ? `\nnwchem_perm: ${nwchem_perm}` : '';
-           let nwcscf = nwchem_scf ? `\nnwchem_scf: ${nwchem_scf}` : '';
-           let nwcdft = nwchem_dft ? `\nnwchem_dft: ${nwchem_dft}` : '';
-           let nwcmem = nwchem_mem ? `\nnwchem_mem: ${nwchem_mem}` : '';
-           let qopt = qcopt ? `\nqchem_options: ${qcopt}` : '';
-           let qsapt = qcsapt ? `\nqchem_sapt: ${qcsapt}` : '';
-           let fsapt_part = fisapt_partition ? `\nfisapt_partition: ${fisapt_partition}` : '';
-           let dofsapt = do_fsapt ? `\ndo_fsapt: ${do_fsapt}` : '';
-           let psi4opt = psi4options ? `\npsi4_options: ${psi4options}` : '';
+           let nwcscratch = (software === 'nwchem' && nwchem_scratch) ? `\nnwchem_scratch: ${nwchem_scratch}` : '';
+           let nwcperm = (software === 'nwchem' && nwchem_perm) ? `\nnwchem_perm: ${nwchem_perm}` : '';
+           let nwcscf = (software === 'nwchem' && nwchem_scf) ? `\nnwchem_scf: ${nwchem_scf}` : '';
+           let nwcdft = (software === 'nwchem' && nwchem_dft) ? `\nnwchem_dft: ${nwchem_dft}` : '';
+           let nwcmem = (software === 'nwchem' && nwchem_mem) ? `\nnwchem_mem: ${nwchem_mem}` : '';
+           let qopt = (software === 'q-chem' && qcopt) ? `\nqchem_options: ${qcopt}` : '';
+           let qsapt = (software === 'q-chem' && qcsapt) ? `\nqchem_sapt: ${qcsapt}` : '';
+           let fsapt_part = (software === 'psi4' && fisapt_partition) ? `\nfisapt_partition: ${fisapt_partition}` : '';
+           let dofsapt = (software === 'psi4' && do_fsapt) ? `\ndo_fsapt: ${do_fsapt}` : '';
+           let psi4opt = (software === 'psi4' && psi4options) ? `\npsi4_options: ${psi4options}` : '';
            let cp = cpChecked ? `\ncp: ${cpChecked}` : ''; 
+           let cap = capped ? `\npre-capped: ${capped}` : ''; 
            let nthreads = num_threads ? `\nnum_threads: ${num_threads}` : '';
            const content = `pdb_file: ${pdb_file}${templateContent}
-   cutoff_radius: ${cutoff_radius}${amber1}${amber2}${charmmp}${charmmr}
+   cutoff_radius: ${cutoff_radius}${amber1}${amber2}${cap}${charmmp}${charmmr}
    ${seed_content}
    charge_scheme: ${charge_scheme}
    water_model: ${waterModel}${hContent}${oContent}${epContent}
@@ -491,11 +546,23 @@ Input Generator
    method: ${method}
    basis_set: ${basis_set}`;
 
-           // Create a Blob from the content
+           const amberChecked = document.getElementById('forcefield_amber').checked;
+           const charmmChecked = document.getElementById('forcefield_charmm').checked;
+       
+           if (!amberChecked && !charmmChecked) {
+               alert('Please select either Amber or CHARMM model type.');
+               return; 
+           }
+       
+           let message = '';
+       
+           if (charmmChecked) {
+               message = 'Ensure the PDB is protein+environment and that the ligand is in the working directory as ligand.pdb';
+               alert(message);
+           }
            const blob = new Blob([content], { type: "text/plain" });
            const url = URL.createObjectURL(blob);
 
-           // Create a link to download the file
            const a = document.createElement("a");
            a.href = url;
            a.download = filename ? filename : "output.txt";
@@ -503,11 +570,9 @@ Input Generator
            a.click();
            document.body.removeChild(a);
 
-           // Clean up the URL object
            URL.revokeObjectURL(url);
        }
 
-       // Function to handle the Ligand checkbox behavior
        document.getElementById("seed_ligand").addEventListener("change", function() {
            const seedIdField = document.getElementById("seed_id");
            const seedFileField = document.getElementById("seed_file");
