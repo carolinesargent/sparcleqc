@@ -5,11 +5,4 @@
 body {
     color: light-dark(#003057, #FFFFFF); /* Dark blue text */
 }
-.dropdown {
-    display: none !important; /* Disable "More" dropdown */
-}
-
-.nav-bar-item {
-    display: inline-block; /* Ensure all tabs are visible */
-}
 
