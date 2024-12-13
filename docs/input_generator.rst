@@ -530,8 +530,8 @@ Input Generator
            let nwcmem = (software === 'nwchem' && nwchem_mem) ? `\nnwchem_mem: ${nwchem_mem}` : '';
            let qopt = (software === 'q-chem' && qcopt) ? `\nqchem_options: ${qcopt}` : '';
            let qsapt = (software === 'q-chem' && qcsapt) ? `\nqchem_sapt: ${qcsapt}` : '';
-           let fsapt_part = (software === 'psi4' && fisapt_partition) ? `\nfisapt_partition: ${fisapt_partition}` : '';
-           let dofsapt = (software === 'psi4' && do_fsapt) ? `\ndo_fsapt: ${do_fsapt}` : '';
+           let fsapt_part = (software === 'psi4' && fisapt_partition && method === 'fisapt0') ? `\nfisapt_partition: ${fisapt_partition}` : '';
+           let dofsapt = (software === 'psi4' && do_fsapt && method === 'fisapt0') ? `\ndo_fsapt: ${do_fsapt}` : '';
            let psi4opt = (software === 'psi4' && psi4options) ? `\npsi4_options: ${psi4options}` : '';
            let cp = cpChecked ? `\ncp: ${cpChecked}` : ''; 
            let cap = capped ? `\npre-capped: ${capped}` : ''; 
