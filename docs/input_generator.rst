@@ -29,7 +29,7 @@ Input Generator
        <br>
 
        <label for="cutoff_radius">Cutoff Radius (Å):</label>
-       <input type="number" id="cutoff_radius" name="cutoff_radius" placeholder="Enter a floating-point number" step="any" min ="0" required>
+       <input type="number" id="cutoff_radius" name="cutoff_radius" placeholder="Enter a floating-point number" step="any" min ="0" required style = "width: 27ch;">
        <small id="cutoffHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: block;">
            Enter the cutoff radius (float) that determines which atoms are included in the QM region 
        </small>
@@ -166,19 +166,19 @@ Input Generator
            </label>
            <div id="nwchem-options" style="display: none; margin-left: 20px;">
                <label for="nwchem_scratch">NWChem Scratch:</label>
-               <input type="text" id="nwchem_scratch" placeholder="Enter NWChem scratch directory" style="margin-bottom: 10px;"><br>
+               <input type="text" id="nwchem_scratch" placeholder="None" style="margin-bottom: 10px;"><br>
                
                <label for="nwchem_perm">NWChem Perm:</label>
-               <input type="text" id="nwchem_perm" placeholder="Enter NWChem perm directory" style="margin-bottom: 10px;"><br>
+               <input type="text" id="nwchem_perm" placeholder="Default: None" style="margin-bottom: 10px;"><br>
                
                <label for="nwchem_scf">NWChem SCF:</label>
-               <input type="text" id="nwchem_scf" placeholder="Enter SCF options" style="margin-bottom: 10px;"><br>
+               <input type="text" id="nwchem_scf" placeholder="Default: None" style="margin-bottom: 10px;"><br>
                
                <label for="nwchem_dft">NWChem DFT:</label>
-               <input type="text" id="nwchem_dft" placeholder="Enter DFT options" style="margin-bottom: 10px;"><br>
+               <input type="text" id="nwchem_dft" placeholder="Default: {'xc':'b3lyp'}" style="margin-bottom: 10px;"><br>
                
                <label for="mem">Memory:</label>
-               <input type="text" id="mem" placeholder="Enter memory (e.g., 4GB)" style="margin-bottom: 10px;">
+               <input type="text" id="mem" placeholder="Default: 32 GB" style="margin-bottom: 10px;">
            </div>
        
            <label style="display: block;">
@@ -186,10 +186,10 @@ Input Generator
            </label>
            <div id="qchem-options" style="display: none; margin-left: 20px;">
                <label for="qchem_options">Q-Chem Options:</label>
-               <input type="text" id="qchem_options" placeholder="Enter Q-Chem options" style="margin-bottom: 10px;"><br>
+               <input type="text" size = "25" id="qchem_options" placeholder="Default: {'JOBTYPE': 'xsapt or sp'}" style="margin-bottom: 10px;"><br>
                
                <label for="qchem_sapt">Q-Chem SAPT:</label>
-               <input type="text" id="qchem_sapt" placeholder="Enter Q-Chem SAPT" style="margin-bottom: 10px;">
+               <input type="text" id="qchem_sapt" size = "35" placeholder="Default: {} or {‘algorithm’:’ri-mo’,’basis’:’dimer’}" style="margin-bottom: 10px;">
            </div>
        
            <label style="display: block;">
@@ -199,11 +199,11 @@ Input Generator
                <label><input type="checkbox" id="fisapt_partition" style="margin-bottom: 10px;"> FISAPT Partition</label><br>
                <label><input type="checkbox" id="do_fsapt" style="margin-bottom: 10px;"> Do FSAPT</label><br>
                <label for="psi4options">Psi4 Options:</label>
-               <input type="text" id="psi4options" placeholder="Enter Psi4 options" style="margin-bottom: 10px;"><br>
+               <input type="text" id="psi4options" placeholder="Default: {}" style="margin-bottom: 10px;"><br>
                <label for="num_threads">Num Threads:</label>
-               <input type="number" id="num_threads" placeholder="Enter number of threads" style="margin-bottom: 10px;"><br>
+               <input type="number" id="num_threads" placeholder="Default: 1" style="margin-bottom: 10px;"><br>
                <label for="memory">Memory:</label>
-               <input type="text" id="memory" placeholder="Enter memory (e.g., 4GB)" style="margin-bottom: 10px;">
+               <input type="text" id="memory" placeholder="Default: 32 GB" style="margin-bottom: 10px;">
            </div>
        </div>
        <br>
@@ -236,7 +236,7 @@ Input Generator
        </small>
        <div style="margin-left: 30px; margin-top: 7px;">
            <label for="template_path">Template Path (Optional):</label>
-           <input type="text" id="template_path" name="template_path" placeholder="Enter/Path/To/Template/cx_autocap_fixed.pdb">
+           <input type="text" id="template_path" size = "35" name="template_path" placeholder="Enter/Path/To/Template/cx_autocap_fixed.pdb">
        </div>
        <div style="margin-left: 30px; margin-top: 7px;">
            <label for="cp_correction">Counterpoise Correct?</label>
