@@ -557,7 +557,7 @@ Input Generator
            let message = '';
        
            if (charmmChecked) {
-               message = 'Ensure the PDB is protein+environment and that the ligand is in the working directory as ligand.pdb';
+               message = 'Ensure the PDB is protein+environment, that the ligand is in the working directory as ligand.pdb, and there is a psf file of the protein in the same directory as the pdb';
                alert(message);
            }
            const blob = new Blob([content], { type: "text/plain" });
