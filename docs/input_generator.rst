@@ -131,7 +131,7 @@ Input Generator
            </div>
            <div style="margin-bottom: 10px;">
                <input type="checkbox" id="add_water_charges" onclick="toggleWater()">
-               <label for="add_water_charges">Add Your Own Water Charges</label>
+               <label for="add_water_charges">Add Your Own Water Charges (Optional)</label>
            </div>
            <div style="display: none; margin-bottom: 10px;" id="tfield">
                <input type="checkbox" id="three_point_water" onclick="toggleWaterCharges(this)">
@@ -165,6 +165,7 @@ Input Generator
                <input type="checkbox" id="software_nwchem" name="software" onclick="toggleSoftware('nwchem')"> NWChem
            </label>
            <div id="nwchem-options" style="display: none; margin-left: 20px;">
+               <label style="margin-bottom: 10px; margin-top: 7px;" for="nwchemoptions">NWChem Settings (Optional):</label><br>
                <label for="nwchem_scratch">NWChem Scratch:</label>
                <input type="text" id="nwchem_scratch" placeholder="Enter NWChem scratch directory" style="margin-bottom: 10px;"><br>
                
@@ -185,6 +186,7 @@ Input Generator
                <input type="checkbox" id="software_qchem" name="software" onclick="toggleSoftware('qchem')"> Q-Chem
            </label>
            <div id="qchem-options" style="display: none; margin-left: 20px;">
+               <label style="margin-bottom: 10px; margin-top: 7px;" for="qchemoptions">Q-Chem Settings (Optional):</label><br>
                <label for="qchem_options">Q-Chem Options:</label>
                <input type="text" id="qchem_options" placeholder="Enter Q-Chem options" style="margin-bottom: 10px;"><br>
                
@@ -196,6 +198,7 @@ Input Generator
                <input type="checkbox" id="software_psi4" name="software" onclick="toggleSoftware('psi4')"> Psi4
            </label>
            <div id="psi4-options" style="display: none; margin-left: 20px;">
+               <label style="margin-bottom: 10px; margin-top: 7px;" for="psi4options">Psi4 Settings (Optional):</label><br>
                <label><input type="checkbox" id="fisapt_partition" style="margin-bottom: 10px;"> FISAPT Partition</label><br>
                <label><input type="checkbox" id="do_fsapt" style="margin-bottom: 10px;"> Do FSAPT</label><br>
                <label for="psi4options">Psi4 Options:</label>
