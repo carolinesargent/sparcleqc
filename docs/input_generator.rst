@@ -536,7 +536,7 @@ Input Generator
            let fsapt_part = (software === 'psi4' && fisapt_partition && method === 'fisapt0') ? `\nfisapt_partition: ${fisapt_partition}` : '';
            let dofsapt = (software === 'psi4' && do_fsapt && method === 'fisapt0') ? `\ndo_fsapt: ${do_fsapt}` : '';
            let psi4opt = (software === 'psi4' && psi4options) ? `\npsi4_options: ${psi4options}` : '';
-           let cp = (method !== 'fisapt0' && cpChecked) ? `\ncp: ${cpChecked}` : ''; 
+           let cp = (!method.includes('sapt') && cpChecked) ? `\ncp: ${cpChecked}` : ''; 
            let cap = capped ? `\npre-capped: ${capped}` : ''; 
            let nthreads = num_threads ? `\nnum_threads: ${num_threads}` : '';
            const content = `pdb_file: ${pdb_file}${templateContent}
