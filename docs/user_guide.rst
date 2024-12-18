@@ -13,9 +13,9 @@ General Information
 
     **CHARMM vs Amber**
 
-    If using CHARMM, add a psf file (downloaded from CHARMM-GUI) to your working directory. Point to the psf file in the Sparcle_QC input with keyword :python:`charmm_psf`. Add the protein PDB's path under the :python:`pdb_file` keyword. Separately add the ligand named "ligand.pdb" to your working directory.
+    If using CHARMM, add the protein PDB's path under the :python:`pdb_file` keyword. A psf file (downloaded from CHARMM-GUI) should be in your working directory with the same name as the protein's PDB but with the .psf extension. Separately add the ligand named "ligand.pdb" to your working directory.
 
-    If using Amber, the :python:`pdb_file` path must point to a PDB with the complex (both the protein and ligand included). Make sure the ligand atoms have "HETATM" in columns 1-6 of the PDB.
+    If using Amber, the :python:`pdb_file` path must point to a PDB with the complex (both the protein and ligand included).
 
     **On capping terminal residues**
 
