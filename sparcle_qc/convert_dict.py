@@ -139,7 +139,7 @@ def convert_dictionary(cutoff: str,template_path:str) -> None:
     #reading in the reference dict, reference pdb, and current pdb and parsing it into the correct data structure
     #path to reference pdb
     if os.path.isabs(template_path):
-        Me_PDB_PATH = templte_path
+        Me_PDB_PATH = template_path
     else:
         Me_PDB_PATH = '../' + template_path 
     Me_DICT_PATH = glob(f'{os.path.dirname(Me_PDB_PATH)}/dictionary.dat')[0]
