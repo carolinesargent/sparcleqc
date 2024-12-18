@@ -29,7 +29,7 @@ Input Generator
        <br>
 
        <label for="cutoff_radius">Cutoff Radius (Å):</label>
-       <input type="number" id="cutoff_radius" name="cutoff_radius" placeholder="Enter a floating-point number" step="any" min ="0" required>
+       <input type="number" id="cutoff_radius" name="cutoff_radius" placeholder="Enter a floating-point number" step="any" min ="0" required style = "width: 27ch;">
        <small id="cutoffHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: block;">
            Enter the cutoff radius (float) that determines which atoms are included in the QM region 
        </small>
@@ -85,11 +85,11 @@ Input Generator
           </small>
           <div id="charmm-options">
               <div style="margin-left: 30px;">
-                  <label for="charmm_rtf" style="margin-right: 10px;">CHARMM RTF:</label>
+                  <label for="charmm_rtf" style="margin-right: 10px;">Topology Path:</label>
                   <input type="text" id="charmm_rtf" name="charmm_rtf" placeholder="Enter CHARMM RTF">
               </div>
               <div style="margin-left: 30px; margin-top: 10px;">
-                  <label for="charmm_prm" style="margin-right: 10px;">CHARMM PRM:</label>
+                  <label for="charmm_prm" style="margin-right: 10px;">Parameter Path:</label>
                   <input type="text" id="charmm_prm" name="charmm_prm" placeholder="Enter CHARMM PRM">
               </div>
           </div>
@@ -104,11 +104,11 @@ Input Generator
           </small>
           <div id="amber-options" style="margin-top: 10px;">
               <div style="margin-left: 30px;">
-                  <label for="amber_ff" style="margin-right: 10px;">Amber FF:</label>
+                  <label for="amber_ff" style="margin-right: 10px;">Forcefield:</label>
                   <input type="text" id="amber_ff" name="amber_ff" placeholder="Enter Amber FF">
               </div>
               <div style="margin-left: 30px; margin-top: 10px;">
-                  <label for="other_amber_ffs" style="margin-right: 10px;">Other Amber FFs (Optional):</label>
+                  <label for="other_amber_ffs" style="margin-right: 10px;">Other Forcefields (Optional):</label>
                   <input type="text" id="other_amber_ffs" name="other_amber_ffs" placeholder="Enter other Amber FFs">
               </div>
               <div style="display: flex; align-items: center; margin-left: 30px;">
@@ -166,20 +166,20 @@ Input Generator
            </label>
            <div id="nwchem-options" style="display: none; margin-left: 20px;">
                <label style="margin-bottom: 10px; margin-top: 7px;" for="nwchemoptions">NWChem Settings (Optional):</label><br>
-               <label for="nwchem_scratch">NWChem Scratch:</label>
-               <input type="text" id="nwchem_scratch" placeholder="Enter NWChem scratch directory" style="margin-bottom: 10px;"><br>
+               <label for="nwchem_scratch">Scratch Directory:</label>
+               <input type="text" id="nwchem_scratch" placeholder="Default: None" style="margin-bottom: 10px;"><br>
                
-               <label for="nwchem_perm">NWChem Perm:</label>
-               <input type="text" id="nwchem_perm" placeholder="Enter NWChem perm directory" style="margin-bottom: 10px;"><br>
+               <label for="nwchem_perm">Permanent Directory:</label>
+               <input type="text" id="nwchem_perm" placeholder="Default: None" style="margin-bottom: 10px;"><br>
                
-               <label for="nwchem_scf">NWChem SCF:</label>
-               <input type="text" id="nwchem_scf" placeholder="Enter SCF options" style="margin-bottom: 10px;"><br>
+               <label for="nwchem_scf">SCF Options Dictionary:</label>
+               <input type="text" id="nwchem_scf" placeholder="Default: None" style="margin-bottom: 10px;"><br>
                
-               <label for="nwchem_dft">NWChem DFT:</label>
-               <input type="text" id="nwchem_dft" placeholder="Enter DFT options" style="margin-bottom: 10px;"><br>
+               <label for="nwchem_dft">DFT Options Dictionary:</label>
+               <input type="text" id="nwchem_dft" placeholder="Default: {'xc':'b3lyp'}" style="margin-bottom: 10px;"><br>
                
                <label for="mem">Memory:</label>
-               <input type="text" id="mem" placeholder="Enter memory (e.g., 4GB)" style="margin-bottom: 10px;">
+               <input type="text" id="mem" placeholder="Default: 32 GB" style="margin-bottom: 10px;">
            </div>
        
            <label style="display: block;">
@@ -187,11 +187,10 @@ Input Generator
            </label>
            <div id="qchem-options" style="display: none; margin-left: 20px;">
                <label style="margin-bottom: 10px; margin-top: 7px;" for="qchemoptions">Q-Chem Settings (Optional):</label><br>
-               <label for="qchem_options">Q-Chem Options:</label>
-               <input type="text" id="qchem_options" placeholder="Enter Q-Chem options" style="margin-bottom: 10px;"><br>
-               
-               <label for="qchem_sapt">Q-Chem SAPT:</label>
-               <input type="text" id="qchem_sapt" placeholder="Enter Q-Chem SAPT" style="margin-bottom: 10px;">
+               <label for="qchem_options">Additional Options Dictionary:</label>
+               <input type="text" size = "25" id="qchem_options" placeholder="Default: {'JOBTYPE': 'xsapt or sp'}" style="margin-bottom: 10px;"><br>
+               <label for="qchem_sapt">SAPT Options (Dictionary):</label>
+               <input type="text" id="qchem_sapt" size = "35" placeholder="Default: {} or {‘algorithm’:’ri-mo’,’basis’:’dimer’}" style="margin-bottom: 10px;">
            </div>
        
            <label style="display: block;">
@@ -201,12 +200,12 @@ Input Generator
                <label style="margin-bottom: 10px; margin-top: 7px;" for="psi4options">Psi4 Settings (Optional):</label><br>
                <label><input type="checkbox" id="fisapt_partition" style="margin-bottom: 10px;"> FISAPT Partition</label><br>
                <label><input type="checkbox" id="do_fsapt" style="margin-bottom: 10px;"> Do FSAPT</label><br>
-               <label for="psi4options">Psi4 Options:</label>
-               <input type="text" id="psi4options" placeholder="Enter Psi4 options" style="margin-bottom: 10px;"><br>
+               <label for="psi4options">Additional Options Dictionary:</label>
+               <input type="text" id="psi4options" placeholder="Default: {}" style="margin-bottom: 10px;"><br>
                <label for="num_threads">Num Threads:</label>
-               <input type="number" id="num_threads" placeholder="Enter number of threads" style="margin-bottom: 10px;"><br>
+               <input type="number" id="num_threads" placeholder="Default: 1" style="margin-bottom: 10px;"><br>
                <label for="memory">Memory:</label>
-               <input type="text" id="memory" placeholder="Enter memory (e.g., 4GB)" style="margin-bottom: 10px;">
+               <input type="text" id="memory" placeholder="Default: 32 GB" style="margin-bottom: 10px;">
            </div>
        </div>
        <br>
@@ -239,7 +238,7 @@ Input Generator
        </small>
        <div style="margin-left: 30px; margin-top: 7px;">
            <label for="template_path">Template Path (Optional):</label>
-           <input type="text" id="template_path" name="template_path" placeholder="Enter/Path/To/Template/cx_autocap_fixed.pdb">
+           <input type="text" id="template_path" size = "35" name="template_path" placeholder="Enter/Path/To/Template/cx_autocap_fixed.pdb">
        </div>
        <div style="margin-left: 30px; margin-top: 7px;">
            <label for="cp_correction">Counterpoise Correct?</label>
@@ -560,7 +559,7 @@ Input Generator
            let message = '';
        
            if (charmmChecked) {
-               message = 'Ensure the PDB is protein+environment and that the ligand is in the working directory as ligand.pdb';
+               message = 'Ensure the PDB is protein+environment, that the ligand is in the working directory as ligand.pdb, and there is a psf file of the protein in the same directory as the pdb';
                alert(message);
            }
            const blob = new Blob([content], { type: "text/plain" });
