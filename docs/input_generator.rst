@@ -85,11 +85,11 @@ Input Generator
           </small>
           <div id="charmm-options">
               <div style="margin-left: 30px;">
-                  <label for="charmm_rtf" style="margin-right: 10px;">CHARMM RTF:</label>
+                  <label for="charmm_rtf" style="margin-right: 10px;">Topology Path:</label>
                   <input type="text" id="charmm_rtf" name="charmm_rtf" placeholder="Enter CHARMM RTF">
               </div>
               <div style="margin-left: 30px; margin-top: 10px;">
-                  <label for="charmm_prm" style="margin-right: 10px;">CHARMM PRM:</label>
+                  <label for="charmm_prm" style="margin-right: 10px;">Parameter Path:</label>
                   <input type="text" id="charmm_prm" name="charmm_prm" placeholder="Enter CHARMM PRM">
               </div>
           </div>
@@ -104,11 +104,11 @@ Input Generator
           </small>
           <div id="amber-options" style="margin-top: 10px;">
               <div style="margin-left: 30px;">
-                  <label for="amber_ff" style="margin-right: 10px;">Amber FF:</label>
+                  <label for="amber_ff" style="margin-right: 10px;">Forcefield:</label>
                   <input type="text" id="amber_ff" name="amber_ff" placeholder="Enter Amber FF">
               </div>
               <div style="margin-left: 30px; margin-top: 10px;">
-                  <label for="other_amber_ffs" style="margin-right: 10px;">Other Amber FFs (Optional):</label>
+                  <label for="other_amber_ffs" style="margin-right: 10px;">Other Forcefields (Optional):</label>
                   <input type="text" id="other_amber_ffs" name="other_amber_ffs" placeholder="Enter other Amber FFs">
               </div>
               <div style="display: flex; align-items: center; margin-left: 30px;">
@@ -165,16 +165,16 @@ Input Generator
                <input type="checkbox" id="software_nwchem" name="software" onclick="toggleSoftware('nwchem')"> NWChem
            </label>
            <div id="nwchem-options" style="display: none; margin-left: 20px;">
-               <label for="nwchem_scratch">NWChem Scratch:</label>
-               <input type="text" id="nwchem_scratch" placeholder="None" style="margin-bottom: 10px;"><br>
+               <label for="nwchem_scratch">Scratch Directory:</label>
+               <input type="text" id="nwchem_scratch" placeholder="Default: None" style="margin-bottom: 10px;"><br>
                
-               <label for="nwchem_perm">NWChem Perm:</label>
+               <label for="nwchem_perm">Permanent Directory:</label>
                <input type="text" id="nwchem_perm" placeholder="Default: None" style="margin-bottom: 10px;"><br>
                
-               <label for="nwchem_scf">NWChem SCF:</label>
+               <label for="nwchem_scf">SCF Options Dictionary:</label>
                <input type="text" id="nwchem_scf" placeholder="Default: None" style="margin-bottom: 10px;"><br>
                
-               <label for="nwchem_dft">NWChem DFT:</label>
+               <label for="nwchem_dft">DFT Options Dictionary:</label>
                <input type="text" id="nwchem_dft" placeholder="Default: {'xc':'b3lyp'}" style="margin-bottom: 10px;"><br>
                
                <label for="mem">Memory:</label>
@@ -185,10 +185,10 @@ Input Generator
                <input type="checkbox" id="software_qchem" name="software" onclick="toggleSoftware('qchem')"> Q-Chem
            </label>
            <div id="qchem-options" style="display: none; margin-left: 20px;">
-               <label for="qchem_options">Q-Chem Options:</label>
+               <label for="qchem_options">Additional Options Dictionary:</label>
                <input type="text" size = "25" id="qchem_options" placeholder="Default: {'JOBTYPE': 'xsapt or sp'}" style="margin-bottom: 10px;"><br>
                
-               <label for="qchem_sapt">Q-Chem SAPT:</label>
+               <label for="qchem_sapt">SAPT Options (Dictionary):</label>
                <input type="text" id="qchem_sapt" size = "35" placeholder="Default: {} or {‘algorithm’:’ri-mo’,’basis’:’dimer’}" style="margin-bottom: 10px;">
            </div>
        
@@ -198,7 +198,7 @@ Input Generator
            <div id="psi4-options" style="display: none; margin-left: 20px;">
                <label><input type="checkbox" id="fisapt_partition" style="margin-bottom: 10px;"> FISAPT Partition</label><br>
                <label><input type="checkbox" id="do_fsapt" style="margin-bottom: 10px;"> Do FSAPT</label><br>
-               <label for="psi4options">Psi4 Options:</label>
+               <label for="psi4options">Additional Options Dcitionary:</label>
                <input type="text" id="psi4options" placeholder="Default: {}" style="margin-bottom: 10px;"><br>
                <label for="num_threads">Num Threads:</label>
                <input type="number" id="num_threads" placeholder="Default: 1" style="margin-bottom: 10px;"><br>
