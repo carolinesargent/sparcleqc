@@ -13,7 +13,7 @@ General Information
 
     **CHARMM vs Amber**
 
-    If using CHARMM, add the protein PDB's path under the :python:`pdb_file` keyword. A psf file (downloaded from CHARMM-GUI) should be in your working directory with the same name as the protein's PDB but with the .psf extension. Separately add the ligand named "ligand.pdb" to your working directory.
+    If using CHARMM, add the protein PDB's path under the :python:`pdb_file` keyword. A psf file (downloaded from CHARMM-GUI) should be in your working directory with the same name as the protein's PDB but with the .psf extension. Separately add the ligand named "ligand.pdb" to your working directory. Futhermore, the path to the toplogy and parameter files for the chosen CHARMM forcefield should be specified using the keywords :python:`charmm_rtf` and :python:`charmm_prm` respectively.
 
     If using Amber, the :python:`pdb_file` path must point to a PDB with the complex (both the protein and ligand included).
 
