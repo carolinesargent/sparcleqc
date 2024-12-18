@@ -19,7 +19,7 @@ General Information
 
     **On capping terminal residues**
 
-    If uploading a PDB with terminal residues already capped with NME and ACE, the following atom names should be used in columns 13-16: hydrogens in NME and ACE should be named H1, H2, and H, the carbon in NME should be named C. Additionally, the peptidic hydrogen (on the backbone nitrogen) of the terminal residues should be named H, not H1. In the Sparcle_QC input file, set :python:`pre-capped: true`. 
+    For CHARMM, capping of the terminal residues can be done through CHARMM-GUI before running Sparcle_QC. However, when using an Amber Forcefield, users have the option to have Sparcle_QC cap the terminal residues with ACE and NME where appropriate. If uploading a PDB with terminal residues already capped with NME and ACE, the following atom names should be used in columns 13-16: hydrogens in NME and ACE should be named H1, H2, and H, the carbon in NME should be named C. Additionally, the peptidic hydrogen (on the backbone nitrogen) of the terminal residues should be named H, not H1. In the Sparcle_QC input file, set :python:`pre-capped: true`. 
 
     If uploading a PDB without endcaps on terminal residues, Sparcle_QC will automatically handle the tasks above.
 
