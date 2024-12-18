@@ -131,7 +131,7 @@ Input Generator
            </div>
            <div style="margin-bottom: 10px;">
                <input type="checkbox" id="add_water_charges" onclick="toggleWater()">
-               <label for="add_water_charges">Add Your Own Water Charges</label>
+               <label for="add_water_charges">Add Your Own Water Charges (Optional)</label>
            </div>
            <div style="display: none; margin-bottom: 10px;" id="tfield">
                <input type="checkbox" id="three_point_water" onclick="toggleWaterCharges(this)">
@@ -165,6 +165,7 @@ Input Generator
                <input type="checkbox" id="software_nwchem" name="software" onclick="toggleSoftware('nwchem')"> NWChem
            </label>
            <div id="nwchem-options" style="display: none; margin-left: 20px;">
+               <label style="margin-bottom: 10px; margin-top: 7px;" for="nwchemoptions">NWChem Settings (Optional):</label><br>
                <label for="nwchem_scratch">Scratch Directory:</label>
                <input type="text" id="nwchem_scratch" placeholder="Default: None" style="margin-bottom: 10px;"><br>
                
@@ -185,9 +186,9 @@ Input Generator
                <input type="checkbox" id="software_qchem" name="software" onclick="toggleSoftware('qchem')"> Q-Chem
            </label>
            <div id="qchem-options" style="display: none; margin-left: 20px;">
+               <label style="margin-bottom: 10px; margin-top: 7px;" for="qchemoptions">Q-Chem Settings (Optional):</label><br>
                <label for="qchem_options">Additional Options Dictionary:</label>
                <input type="text" size = "25" id="qchem_options" placeholder="Default: {'JOBTYPE': 'xsapt or sp'}" style="margin-bottom: 10px;"><br>
-               
                <label for="qchem_sapt">SAPT Options (Dictionary):</label>
                <input type="text" id="qchem_sapt" size = "35" placeholder="Default: {} or {‘algorithm’:’ri-mo’,’basis’:’dimer’}" style="margin-bottom: 10px;">
            </div>
@@ -196,6 +197,7 @@ Input Generator
                <input type="checkbox" id="software_psi4" name="software" onclick="toggleSoftware('psi4')"> Psi4
            </label>
            <div id="psi4-options" style="display: none; margin-left: 20px;">
+               <label style="margin-bottom: 10px; margin-top: 7px;" for="psi4options">Psi4 Settings (Optional):</label><br>
                <label><input type="checkbox" id="fisapt_partition" style="margin-bottom: 10px;"> FISAPT Partition</label><br>
                <label><input type="checkbox" id="do_fsapt" style="margin-bottom: 10px;"> Do FSAPT</label><br>
                <label for="psi4options">Additional Options Dictionary:</label>
@@ -530,10 +532,10 @@ Input Generator
            let nwcmem = (software === 'nwchem' && nwchem_mem) ? `\nnwchem_mem: ${nwchem_mem}` : '';
            let qopt = (software === 'q-chem' && qcopt) ? `\nqchem_options: ${qcopt}` : '';
            let qsapt = (software === 'q-chem' && qcsapt) ? `\nqchem_sapt: ${qcsapt}` : '';
-           let fsapt_part = (software === 'psi4' && fisapt_partition) ? `\nfisapt_partition: ${fisapt_partition}` : '';
-           let dofsapt = (software === 'psi4' && do_fsapt) ? `\ndo_fsapt: ${do_fsapt}` : '';
+           let fsapt_part = (software === 'psi4' && fisapt_partition && method === 'fisapt0') ? `\nfisapt_partition: ${fisapt_partition}` : '';
+           let dofsapt = (software === 'psi4' && do_fsapt && method === 'fisapt0') ? `\ndo_fsapt: ${do_fsapt}` : '';
            let psi4opt = (software === 'psi4' && psi4options) ? `\npsi4_options: ${psi4options}` : '';
-           let cp = cpChecked ? `\ncp: ${cpChecked}` : ''; 
+           let cp = (!method.includes('sapt') && cpChecked) ? `\ncp: ${cpChecked}` : ''; 
            let cap = capped ? `\npre-capped: ${capped}` : ''; 
            let nthreads = num_threads ? `\nnum_threads: ${num_threads}` : '';
            const content = `pdb_file: ${pdb_file}${templateContent}
