@@ -198,7 +198,7 @@ Input Generator
            <div id="psi4-options" style="display: none; margin-left: 20px;">
                <label><input type="checkbox" id="fisapt_partition" style="margin-bottom: 10px;"> FISAPT Partition</label><br>
                <label><input type="checkbox" id="do_fsapt" style="margin-bottom: 10px;"> Do FSAPT</label><br>
-               <label for="psi4options">Additional Options Dcitionary:</label>
+               <label for="psi4options">Additional Options Dictionary:</label>
                <input type="text" id="psi4options" placeholder="Default: {}" style="margin-bottom: 10px;"><br>
                <label for="num_threads">Num Threads:</label>
                <input type="number" id="num_threads" placeholder="Default: 1" style="margin-bottom: 10px;"><br>
