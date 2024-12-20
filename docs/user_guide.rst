@@ -246,6 +246,9 @@ Options
     .. csv-table:: 
         :file: options/required.csv
 
+.. role:: raw-html(raw)
+    :format: html
+
 .. dropdown:: Force Fields
 
     .. csv-table:: 
