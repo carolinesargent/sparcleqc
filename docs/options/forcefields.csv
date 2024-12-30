@@ -7,3 +7,4 @@
 "h_charge","Custom hydrogen charge for water, optional","float"
 "ep_charge","Custom extra point charge for water, optional. If extra point charge is given, set water_model to a four-point water model for generation of extra point charge coordinates.","float"
 "other_amber_ff","List of other (non-protein, non-water) Amber FFs to be used. (ex. 'leaprc.DNA.OL15', 'leaprc.gaff2')","list","Amber"
+
