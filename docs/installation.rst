@@ -67,5 +67,5 @@ or by passing a dictionary of inputs:
 Running Sparcle_QC 
 ------------------
 
-To learn how to get started using Sparcle_QC, check out the :doc:`getting_started`.
+To learn more about SparcleQC, check out :doc:`getting_started`.
 

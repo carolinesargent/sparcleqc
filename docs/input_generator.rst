@@ -21,7 +21,7 @@ Input Generator
        <label for="pdb_file">PDB File:</label>
        <input type="text" id="pdb_file" name="pdb_file" placeholder="Enter PDB file name or path" style="margin-bottom: 7px;" required>
        <small id="pdbHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: block;">
-           Enter the path to the complex pdb (amber) or protein pdb (charmm)<br>
+           Enter the path to the complex PDB (amber) or protein PDB (charmm)<br>
            The path should be either absolute or relative to where the input file will be executed<br>
            E.x., "example.pdb", "user/documents/example.pdb"
        </small>
@@ -38,7 +38,7 @@ Input Generator
        <label for="seed_ligand">Seed:</label>
        <small id="seedHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: block;">
            Choose if the QM region should be defined by distance to any atom in the ligand or to a specific atom<br>
-           If choosing a specific atom, specify the file that contains that atom with the corresponding atomid     
+           If choosing a specific atom, specify the file that contains that atom with the corresponding atom serial number (atomid)     
        </small>
        <div style="display: flex; align-items: center; margin-left: 30px; margin-top: 10px;">
            <label for="seed_ligand" style="margin-right: 10px;">Ligand:</label>
@@ -63,7 +63,7 @@ Input Generator
            <option value="BRCD">BRCD</option>
        </select>
        <small id="schemeHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: block;">
-           Choose a charge scheme that determines how boundary MM charges are redistrubted <br>
+           Choose a charge scheme that determines how boundary MM charges are redistributed <br>
            Specifics on each charge scheme can be found in the <a href="user_guide.html" style="color: #007bff; text-decoration: none;">user guide</a>
        </small>
        <br>
@@ -71,7 +71,7 @@ Input Generator
 
        <label for="forcefield">Forcefield:</label>
        <small id="ffHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: block;">
-           If CHARMM is the selected forcefield, charges must be precomputed using CHARMM-GUI<br>
+           If CHARMM is selected, charges must be precomputed using CHARMM-GUI<br>
            If Amber is selected, Sparcle_QC will obtain point charges automatically 
        </small>
        <div id="forcefields" style="margin-left: 30px; margin-top: 7px;">
@@ -559,7 +559,7 @@ Input Generator
            let message = '';
        
            if (charmmChecked) {
-               message = 'Ensure the PDB is protein+environment, that the ligand is in the working directory as ligand.pdb, and there is a psf file of the protein in the same directory as the pdb';
+               message = 'Ensure the PDB is protein+environment, that the ligand is in the working directory as ligand.pdb, and there is a psf file of the protein in the same directory as the PDB';
                alert(message);
            }
            const blob = new Blob([content], { type: "text/plain" });
