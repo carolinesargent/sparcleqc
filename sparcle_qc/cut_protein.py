@@ -256,11 +256,46 @@ def makeresifragments(num_resis):
                     filename = f'{chain}_{fragment[0]}'
                     cmd.save(f'{filename}.pdb','sys%s_B' % fragment[0],-1, 'pdb')
                     print('saved filename:', filename)
-                    cmd.save(f'external_{fragment[0]}.pdb', 'mono_C')
+                    cmd.save(f'external_{filename}.pdb', 'mono_C')
                     cmd.save('ligand.pdb', 'lig_A')
                     out.close()
+                    print('calling makepredict')
+                    #cmd.do(f'makepredictionary {fragment[0]} {fragment[0]}')
+                    print('entering makepredict explicit')
+                    M1_atms = cmd.identify("(neighbor sys%s_B)" % fragment[0])
+                    bond_dict = {}
+                    bond_dict['QM'] = cmd.identify('sys%s_B' % fragment[0])
+                    bond_dict['MM'] = cmd.identify('mono_C')
+                    # making M1_x, Q1_x, M2_x, M3_x lists for each bond broken (x). 
+                    for n,m in enumerate(M1_atms):
+                        bond_dict[f'M1_{n+1}'] = [m]
+                        bond_dict[f'Q1_{n+1}'] = cmd.identify(f'sys%s_B and neighbor id {m}' % fragment[0])
+                        bond_dict[f'M2_{n+1}'] = cmd.identify(f'mono_C and neighbor id {m}')
+                        bond_dict[f'M3_{n+1}'] = []
+                        for x in bond_dict[f'M2_{n+1}']:
+                            for a in cmd.identify(f'(mono_C and neighbor id {x}) and not id {m}'):
+                                bond_dict[f'M3_{n+1}'].append(a)
+                    # remove M1_x, M2_x, M3_x, and Q1_x atoms from MM and QM lists
+                    M123_atms = []
+                    for n, m in enumerate(M1_atms):
+                        if f'M1_{n+1}' in bond_dict.keys():
+                            for x in bond_dict[f'M1_{n+1}']:
+                                M123_atms.append(x)
+                        if f'M2_{n+1}' in bond_dict.keys():
+                            for x in bond_dict[f'M2_{n+1}']:
+                                M123_atms.append(x)
+                        if f'M3_{n+1}' in bond_dict.keys():
+                            for x in bond_dict[f'M3_{n+1}']:
+                                M123_atms.append(x)
+                        for x in bond_dict[f'Q1_{n+1}']:
+                            if x in bond_dict['QM']:
+                                bond_dict['QM'].remove(x)
+                    bond_dict['MM'] = list(set(bond_dict['MM']).difference(M123_atms))
+                    with open(f'pre-dictionary_{filename}.dat', 'w+') as dictfile:
+                        dictfile.write(json.dumps(bond_dict))
+        return
 
-def makepredictionary(cutoff:str) -> None: 
+def makepredictionary(cutoff:str, filename:str='') -> None: 
     """ 
     Creates an initial version of the dictionary that assigns each atom
     to its region. Atoms in the fronteir region are named according to
@@ -277,15 +312,23 @@ def makepredictionary(cutoff:str) -> None:
     -------
     None
     """
+    print('entering makepredict fxn')
+    print('cutoff', cutoff)
     M1_atms = cmd.identify("(neighbor sys%s_B)" % cutoff)
+    print('found M1_atms')
     bond_dict = {}
     bond_dict['QM'] = cmd.identify('sys%s_B' % cutoff)
+    print('1:',bond_dict)
     bond_dict['MM'] = cmd.identify('mono_C')
+    print('2:',bond_dict)
     # making M1_x, Q1_x, M2_x, M3_x lists for each bond broken (x). 
     for n,m in enumerate(M1_atms):
         bond_dict[f'M1_{n+1}'] = [m]
+        print('3:',bond_dict)
         bond_dict[f'Q1_{n+1}'] = cmd.identify(f'sys%s_B and neighbor id {m}' % cutoff)
+        print('4:',bond_dict)
         bond_dict[f'M2_{n+1}'] = cmd.identify(f'mono_C and neighbor id {m}')
+        print('5:',bond_dict)
         bond_dict[f'M3_{n+1}'] = []
         for x in bond_dict[f'M2_{n+1}']:
             for a in cmd.identify(f'(mono_C and neighbor id {x}) and not id {m}'):
@@ -306,7 +349,7 @@ def makepredictionary(cutoff:str) -> None:
             if x in bond_dict['QM']:
                 bond_dict['QM'].remove(x)
     bond_dict['MM'] = list(set(bond_dict['MM']).difference(M123_atms))
-    with open('pre-dictionary.dat', 'w+') as dictfile:
+    with open(f'pre-dictionary{filename}.dat', 'w+') as dictfile:
         dictfile.write(json.dumps(bond_dict))
     return
 
@@ -334,6 +377,7 @@ def run_cut_protein(pdb_file:str, sub:str, cutoff:str, num_resis:str = 0) -> Non
     None
     """
     cmd.feedback("disable", "all", "everything")
+    cmd.extend("makepredictionary", makepredictionary)
     cmd.reinitialize()
     cmd.load(pdb_file)
     with resources.path('sparcle_qc.data', 'cut_protein.py') as file_path:
@@ -343,4 +387,4 @@ def run_cut_protein(pdb_file:str, sub:str, cutoff:str, num_resis:str = 0) -> Non
         cmd.do(f'makeresifragments {num_resis}')
     else:
         cmd.do(f'fragmentprotein {sub}, monoC="be. {cutoff}"')
-    cmd.do(f'makepredictionary {cutoff}')
+        cmd.do(f'makepredictionary {cutoff}')
