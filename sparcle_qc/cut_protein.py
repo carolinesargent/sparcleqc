@@ -118,6 +118,7 @@ def fragmentprotein(sub:str, monoC:str = None):
             cmd.select("mono_C", "mono_C + ((mono_C and elem C) xt. 1 and elem O)") 
             # Expand C so that endcaps aren't on fronteir regions
             cmd.select("mono_C", "mono_C + ((mono_C and elem C) xt. 3 and resn ACE)") 
+            cmd.select("mono_C", "mono_C + ((mono_C and elem C) xt. 3 and resn NME)") 
             cmd.select("mono_C", "mono_C + ((mono_C and elem C) xt. 3 and resn NMA)") 
             # Now re-specify system B so that there are no overlapping atoms (in both system B and monoC)
             cmd.select("sys%s_B" % cutoff, "not mono_C and not lig_A")
@@ -226,6 +227,12 @@ def makeresifragments(num_resis):
                     cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem Se) xt. 1)" % (fragment[0], fragment[0])) 
                     cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem Se) xt. 1)" % (fragment[0], fragment[0])) 
                     cmd.select('sys%s_B' % fragment[0], "sys%s_B + (sys%s_B (xt. 1 and elem H))" % (fragment[0], fragment[0])) 
+                    # Expand B to include endcaps if next to QM region
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem C) xt. 3 and resn ACE)" % (fragment[0], fragment[0]))
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem C) xt. 3 and resn NMA)" % (fragment[0], fragment[0]))
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem C) xt. 3 and resn NME)" % (fragment[0], fragment[0]))
+                    #cmd.select('sys%s_B' % fragment[0], "sys%s_B + byres (sys%s_B and resn ACE)" % (fragment[0], fragment[0])) 
+                    #cmd.select('sys%s_B' % fragment[0], "sys%s_B + byres (sys%s_B and resn NME)" % (fragment[0], fragment[0])) 
                     ## Select everything else, that's monomer C
                     cmd.select('mono_C', "not sys%s_B and not lig_A" % fragment[0])
                     # Expand C such that only alpha carbon -- carbon bonds are broken. This handles when N is on the MM side.
@@ -236,8 +243,8 @@ def makeresifragments(num_resis):
                     cmd.select("mono_C", "mono_C + ((mono_C and elem N) xt. 1)") 
                     cmd.select("mono_C", "mono_C + ((mono_C and elem C) xt. 1 and elem O)") 
                     # Expand C so that endcaps aren't on fronteir regions
-                    cmd.select("mono_C", "mono_C + ((mono_C and elem C) xt. 3 and resn ACE)") 
-                    cmd.select("mono_C", "mono_C + ((mono_C and elem C) xt. 3 and resn NMA)") 
+                    #cmd.select("mono_C", "mono_C + ((mono_C and elem C) xt. 3 and resn ACE)") 
+                    #cmd.select("mono_C", "mono_C + ((mono_C and elem C) xt. 3 and resn NMA)") 
                     # Now re-specify system B so that there are no overlapping atoms (in both system B and monoC)
                     cmd.select("sys%s_B" % fragment[0], "not mono_C and not lig_A")
                     out.write('----------------------------------------------------------------------------------------------------\n')
