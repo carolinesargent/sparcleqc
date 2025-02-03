@@ -470,7 +470,12 @@ def run_sparcle(input_file= None, user_options = None):
         #if the a template path has been specified, mapping the QM region from the QM region of the template
         if 'template_path' in keywords:
             convert_dictionary(keywords['cutoff'], keywords['template_path'])
-        #if there is no template specified then cutting the protein
+        # if resis_per_fragment is specified, cut protein into many fragments with N residues
+        elif 'resis_per_fragment' in keywords:
+            run_cut_protein('cx_autocap_fixed.pdb', seed, keywords['cutoff'], keywords['resis_per_fragment'])
+            print(keywords['resis_per_fragment'])
+            exit()
+        #if there is no template specified or resis_per_fragment then cutting the protein
         else:
             run_cut_protein('cx_autocap_fixed.pdb', seed, keywords['cutoff'])
             os.mkdir(f'data')

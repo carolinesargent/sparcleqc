@@ -1,9 +1,53 @@
-from pymol import cmd
+from pymol import cmd, stored
 import random
 import warnings
 import json
 from glob import glob
 from importlib import resources
+
+def sort_residues(unsorted):
+# sort residues and allow for non-integer resis
+    intidx = []
+    stridx = []
+    for resi in unsorted:
+        try:
+            intidx.append(int(resi))
+        except ValueError:
+            stridx.append(resi)
+    intidx.sort()
+
+    insertmap = dict()
+    for resi in stridx:
+        resv = int(resi[:-1])
+        letter = resi[-1]
+        if resv not in insertmap.keys():
+            insertmap[resv] = [letter]
+        else:
+            insertmap[resv].append(letter)
+
+
+    for resv, letters in insertmap.items():
+        letters.sort()
+        idx = intidx.index(resv)
+        insertion = ["%s%s" % (resv, letter) for letter in letters]
+        intidx = intidx[:(idx + 1)] + insertion + intidx[(idx+1):]
+
+    residues = [str(resi) for resi in intidx]
+    return residues
+
+# make dict of resis of each protein chain
+def resisdict():
+    resis = {}
+    cmd.select("sidechains", "sidechain")
+    stored.chains = cmd.get_chains("sidechains")
+    for chain in stored.chains:
+        stored.residues = []
+        cmd.select("subsidechains", "sidechain and chain %s" % chain)
+        cmd.iterate("subsidechains", "stored.residues.append(resi)")
+        unsorted_residues = list(set(stored.residues))
+        resis[f'{chain}'] = sort_residues(unsorted_residues)
+    print('resis:',resis)
+    return stored.chains, resis
 
 def fragmentprotein(sub:str, monoC:str = None):
     """
@@ -145,6 +189,39 @@ def fragmentprotein(sub:str, monoC:str = None):
     out.close()
     return
 
+# make fragments of every 3 resn or every 1 resn
+def makeresifragments(num_resis):
+    #charge_dict = make_charge_dict(f'{args.PDB_file}')
+    stored.chains, resis = resisdict()
+    #frag_charges = {}
+    print('stored.chains', stored.chains)
+    for chain in stored.chains:
+        print(chain)
+        resi_list = resis[chain]
+        print('resi_list', resi_list)
+        resi_len = len(resi_list)
+        print('resi_len', resi_len)
+        for i in range(resi_len):
+            i = int(i)
+            print('i',i)
+            if num_resis == '3':
+                fragment = resi_list[i:i+3]
+                if len(fragment) == 3: #make sure every section has 3 residues (handles end cases)
+                    cmd.select("frag", "chain %s and (resi %s or resi %s or resi %s)" % (chain, fragment[0], fragment[1], fragment[2]))
+              #      charge = retrieve_charges(chain, fragment, charge_dict)
+                    filename = f'{chain}_'+'-'.join(fragment)
+              #      frag_charges[filename] = charge
+                    cmd.save(f'{filename}.pdb',"frag",-1, 'pdb')
+                    #frag_xyz = sele2xyz('frag', f'{chain}_'+'-'.join(fragment))
+            elif num_resis == '1':
+                print('num_resis is 1')
+                fragment = resi_list[int(i)]
+                print('fragment complete')
+                if len(fragment) == 1: #make sure every section has 1 residue (handles end cases)
+                    cmd.select("frag", "chain %s and (resi %s)" % (chain, fragment[0]))
+                    filename = f'{chain}_{fragment}'
+                    cmd.save(f'{filename}.pdb',"frag",-1, 'pdb')
+
 def makepredictionary(cutoff:str) -> None: 
     """ 
     Creates an initial version of the dictionary that assigns each atom
@@ -196,9 +273,11 @@ def makepredictionary(cutoff:str) -> None:
     return
 
 cmd.extend("fragmentprotein", fragmentprotein)
+cmd.extend("resisdict", resisdict)
+cmd.extend("makeresifragments", makeresifragments)
 cmd.extend("makepredictionary", makepredictionary)
 
-def run_cut_protein(pdb_file:str, sub:str, cutoff:str) -> None:
+def run_cut_protein(pdb_file:str, sub:str, cutoff:str, num_resis:str = 0) -> None:
     """
    Calls the other necessary functions to cut the system in pdb_file
    by including everything that is {cutoff} angstroms away from {sub}
@@ -222,5 +301,8 @@ def run_cut_protein(pdb_file:str, sub:str, cutoff:str) -> None:
     with resources.path('sparcle_qc.data', 'cut_protein.py') as file_path:
         cut_path = str(file_path)
     cmd.do(f'run {cut_path}')
-    cmd.do(f'fragmentprotein {sub}, monoC="be. {cutoff}"')
+    if num_resis != '0':
+        cmd.do(f'makeresifragments {num_resis}')
+    else:
+        cmd.do(f'fragmentprotein {sub}, monoC="be. {cutoff}"')
     cmd.do(f'makepredictionary {cutoff}')
