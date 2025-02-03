@@ -350,7 +350,7 @@ def DZn(k:int, df:pd.DataFrame, with_HL:Dict[str,List[int]], num_bonds_broken:in
     MM_for_array: List[str]
         list of the charges along with xyz coords
     """
-    output = open(glob('*.out')[0], 'a')
+    output = open(glob('../*.out')[0], 'a')
     MM_for_array = []
     MM_used = [] # keep track of MM atoms placed in psi4 file already
     for bond in range(1, num_bonds_broken+1):
@@ -793,10 +793,10 @@ def make_monomers(charge_method:str) -> None:
     None
     """
     CAPPED_PDB_PATH = 'CAPPED-prot_autocap_fixed.pdb'
-    LIGAND_PDB_PATH = 'ligand.pdb'
+    LIGAND_PDB_PATH = '../ligand.pdb'
     CAPPED_QM_PDB_PATH = 'CAPPED_qm.pdb'
-    MOL2_PATH = 'prot_autocap_fixed.mol2'
-    df = pd.read_csv('dataframe.csv', index_col=['CX_PDB_ID'])
+    MOL2_PATH = '../prot_autocap_fixed.mol2'
+    df = pd.read_csv('../dataframe.csv', index_col=['CX_PDB_ID'])
     with open('with_HL.dat', 'r') as dictfile:
         with_HL = json.load(dictfile)
     num_bonds_broken = int(list(with_HL.keys())[-1].split('_')[-1])
@@ -1177,7 +1177,7 @@ def check_est_file(psi4file: str) -> None:
     num_qm_atoms: int
         number of atoms in the qm region
     """
-    out = open(glob('*.out')[0], 'a')
+    out = open(glob('../*.out')[0], 'a')
     
     with open(psi4file, 'r') as pfile:
         lines = pfile.readlines()

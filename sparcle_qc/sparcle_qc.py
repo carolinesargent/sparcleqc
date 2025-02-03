@@ -483,6 +483,15 @@ def run_sparcle(input_file= None, user_options = None):
                     run_cap(ff_type = 'amber')
                 else:
                     run_cap(ff_type = 'charmm', rtf = keywords['charmm_rtf'], prm = keywords['charmm_prm'])
+                #redistribute charge based on charge scheme and write QM input file
+                qm_lig, c_QM, qm_pro, mm_env = make_monomers(keywords['charge_scheme'])
+                ext = {'psi4':'.py', 'nwchem':'.in', 'q-chem':'.in'}
+                sapt_inp_filename = f'{frag_dir}_' + keywords['software'] + '_file' + ext[keywords['software']]
+                if 'sapt' in keywords['method'].lower():
+                    copy_input('../'+input_file, sapt_inp_filename, keywords['software'])
+                    write_est_file(keywords['software'], qm_lig, c_QM, qm_pro, '', mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], keywords['do_fsapt'], keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'], keywords['qchem_sapt'])
+#                    #check the charges and number of atoms in the written QM input file
+                    qm_atoms, mm_atoms, qm_charge, mm_charge = check_est_file(sapt_inp_filename)
                 os.chdir('../')
             print(dirs_list)
             exit()
