@@ -215,11 +215,14 @@ def makeresifragments(num_resis):
                     #frag_xyz = sele2xyz('frag', f'{chain}_'+'-'.join(fragment))
             elif num_resis == '1':
                 print('num_resis is 1')
-                fragment = resi_list[int(i)]
-                print('fragment complete')
+                fragment = [resi_list[int(i)]]
+                print('fragment complete:',fragment)
                 if len(fragment) == 1: #make sure every section has 1 residue (handles end cases)
+                    print('fragment:',fragment)
                     cmd.select("frag", "chain %s and (resi %s)" % (chain, fragment[0]))
-                    filename = f'{chain}_{fragment}'
+                    print('after selection')
+                    filename = f'{chain}_{fragment[0]}'
+                    print('filename:', filename)
                     cmd.save(f'{filename}.pdb',"frag",-1, 'pdb')
 
 def makepredictionary(cutoff:str) -> None: 
