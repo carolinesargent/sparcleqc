@@ -19,6 +19,7 @@ from sparcle_qc.move_M3s import move_m3s
 from sparcle_qc.create_est_inp import make_monomers, check_est_file, copy_input, write_est_file, ghost
 from sparcle_qc.cap import run_cap
 from sparcle_qc.make_fsapt_partition import fsapt_partition 
+from sparcle_qc.make_frag_dirs import make_dirs
 
 stop_flashing = threading.Event()
 
@@ -473,7 +474,17 @@ def run_sparcle(input_file= None, user_options = None):
         # if resis_per_fragment is specified, cut protein into many fragments with N residues
         elif 'resis_per_fragment' in keywords:
             run_cut_protein('cx_autocap_fixed.pdb', seed, keywords['cutoff'], keywords['resis_per_fragment'])
-            print(keywords['resis_per_fragment'])
+            dirs_list = make_dirs()
+            for frag_dir in dirs_list:
+                os.chdir(frag_dir)
+                move_m3s()
+                #cap the cut QM bonds with link hydrogens
+                if 'amber_ff' in keywords:
+                    run_cap(ff_type = 'amber')
+                else:
+                    run_cap(ff_type = 'charmm', rtf = keywords['charmm_rtf'], prm = keywords['charmm_prm'])
+                os.chdir('../')
+            print(dirs_list)
             exit()
         #if there is no template specified or resis_per_fragment then cutting the protein
         else:

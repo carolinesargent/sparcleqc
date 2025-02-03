@@ -1,3 +1,4 @@
+import os
 import json
 import pandas as pd
 from typing import Dict, List
@@ -116,10 +117,11 @@ def move_m3s() -> None:
     -------
     None
     """
-    with open('pre-dictionary.dat', 'r') as dictfile:
+    pre_dict_file = [f for f in os.listdir() if 'pre-dictionary' in f]
+    with open(pre_dict_file[0], 'r') as dictfile:
         no_HL = json.load(dictfile)
     num_broken_bonds = int(list(no_HL.keys())[-1].split('_')[-1])
-    df = pd.read_csv('dataframe.csv', index_col=['CX_PDB_ID'])
+    df = pd.read_csv('../dataframe.csv', index_col=['CX_PDB_ID'])
     to_move = []
     for bond in range(1,num_broken_bonds+1):
         M2resn = get_M2_N_resn(bond, df, no_HL)

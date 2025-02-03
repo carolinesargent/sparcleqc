@@ -293,7 +293,7 @@ def makeresifragments(num_resis):
                     bond_dict['MM'] = list(set(bond_dict['MM']).difference(M123_atms))
                     with open(f'pre-dictionary_{filename}.dat', 'w+') as dictfile:
                         dictfile.write(json.dumps(bond_dict))
-        return
+    return
 
 def makepredictionary(cutoff:str, filename:str='') -> None: 
     """ 
@@ -388,3 +388,4 @@ def run_cut_protein(pdb_file:str, sub:str, cutoff:str, num_resis:str = 0) -> Non
     else:
         cmd.do(f'fragmentprotein {sub}, monoC="be. {cutoff}"')
         cmd.do(f'makepredictionary {cutoff}')
+    return 

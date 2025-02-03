@@ -40,7 +40,7 @@ def get_boundary_bonds(Q1_coords:Tuple[str,str,str], M1_coords:Tuple[str,str,str
         a permutation of that bond, the new Q1-capping H bond, and a permutation of that bond
 
     """
-    out = open(glob('*.out')[0], 'a')
+    out = open(glob('../*.out')[0], 'a')
     # get atom types of Q1 and M1
     with open(MOL2_PATH, 'r', encoding="iso-8859-1") as mol2file:
         lines = mol2file.readlines()
@@ -116,7 +116,7 @@ def calc_C_HL(QM_bond:str, QM_bond_perm:str, QH_bond:str, QH_bond_perm:str, ff_t
     R0_Q1H1/R0_Q1M1: float
         length of scaling factor
     """
-    out = open(glob('*.out')[0], 'a')
+    out = open(glob('../*.out')[0], 'a')
     # get bond parameters and divide them
     if ff_type =='amber':
         with open(PARM_PATH, 'r') as parmfile:
@@ -175,7 +175,7 @@ def cap(no_HL:Dict[str,List[int]], num_broken_bonds:int, PDB_PATH:str, MOL2_PATH
     -------
     None
     """
-    out = open(glob('*.out')[0], 'a')
+    out = open(glob('../*.out')[0], 'a')
     with open(PDB_PATH, 'r') as pdbfile:
         lines = pdbfile.readlines()
         lines = [l for l in lines if l.startswith('ATOM')]
@@ -204,7 +204,7 @@ def cap(no_HL:Dict[str,List[int]], num_broken_bonds:int, PDB_PATH:str, MOL2_PATH
         R_Q1M1 = math.dist(Q1_coords, M1_coords)
         a,b,c,d = get_boundary_bonds(Q1_coords, M1_coords, MOL2_PATH, ff_type = ff_type, params = params)
         out.close()
-        out = open(glob('*.out')[0], 'a')
+        out = open(glob('../*.out')[0], 'a')
         if ff_type =='amber':
             C_HL = calc_C_HL(a,b,c,d, ff_type, PARM_PATH = PARM_PATH) #doi:10.1021/jp0446332 eqn (4)
         else:
@@ -265,7 +265,7 @@ def run_cap(ff_type:str, rtf:str = None, prm:str = None) -> None:
     -------
     None
     """
-    out = open(glob('*.out')[0], 'a')
+    out = open(glob('../*.out')[0], 'a')
     out.write('----------------------------------------------------------------------------------------------------\n')
     out.write('cap'.center(100)+'\n')
     out.write('----------------------------------------------------------------------------------------------------\n')
@@ -278,8 +278,8 @@ def run_cap(ff_type:str, rtf:str = None, prm:str = None) -> None:
     
     num_broken_bonds = int(list(no_HL.keys())[-1].split('_')[-1])
     
-    PDB_PATH = 'cx_autocap_fixed.pdb' 
-    MOL2_PATH = 'prot_autocap_fixed.mol2'
+    PDB_PATH = '../cx_autocap_fixed.pdb' 
+    MOL2_PATH = '../prot_autocap_fixed.mol2'
     CAPPED_PDB_PATH = 'CAPPED-prot_autocap_fixed.pdb'
         
     if ff_type =='amber':
@@ -301,6 +301,6 @@ def run_cap(ff_type:str, rtf:str = None, prm:str = None) -> None:
             warnings.simplefilter("ignore")
             params = CharmmParameterSet(prm_file,rtf_file)
         cap(no_HL, num_broken_bonds, PDB_PATH, MOL2_PATH, CAPPED_PDB_PATH, 'charmm', params = params)
-    out = open(glob('*.out')[0], 'a')
+    out = open(glob('../*.out')[0], 'a')
     out.write(f'Hydrogen link atoms to cap the QM region have been added to {CAPPED_PDB_PATH}\n')
     out.close()
