@@ -191,6 +191,8 @@ def fragmentprotein(sub:str, monoC:str = None):
 
 # make fragments of every 3 resn or every 1 resn
 def makeresifragments(num_resis):
+    # first, get ligand info, add to system
+    cmd.select("lig_A", "bm. hetatm and not sol. and not metals")
     #charge_dict = make_charge_dict(f'{args.PDB_file}')
     stored.chains, resis = resisdict()
     #frag_charges = {}
@@ -214,16 +216,42 @@ def makeresifragments(num_resis):
                     cmd.save(f'{filename}.pdb',"frag",-1, 'pdb')
                     #frag_xyz = sele2xyz('frag', f'{chain}_'+'-'.join(fragment))
             elif num_resis == '1':
-                print('num_resis is 1')
                 fragment = [resi_list[int(i)]]
-                print('fragment complete:',fragment)
                 if len(fragment) == 1: #make sure every section has 1 residue (handles end cases)
-                    print('fragment:',fragment)
-                    cmd.select("frag", "chain %s and (resi %s)" % (chain, fragment[0]))
-                    print('after selection')
+                    out = open(glob('*.out')[0], 'a')
+                    cmd.select("sys%s_B" % fragment[0], "chain %s and (resi %s)" % (chain, fragment[0]))
+                    # Expand B such that only alpha carbon -- carbon bonds are broken. This only handles when N is on the QM side.
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem N) xt. 1)" % (fragment[0], fragment[0])) 
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem C) xt. 1 and elem O)" % (fragment[0], fragment[0])) 
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem Se) xt. 1)" % (fragment[0], fragment[0])) 
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem Se) xt. 1)" % (fragment[0], fragment[0])) 
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + (sys%s_B (xt. 1 and elem H))" % (fragment[0], fragment[0])) 
+                    ## Select everything else, that's monomer C
+                    cmd.select('mono_C', "not sys%s_B and not lig_A" % fragment[0])
+                    # Expand C such that only alpha carbon -- carbon bonds are broken. This handles when N is on the MM side.
+                    cmd.select("mono_C", "mono_C + ((mono_C and elem S) xt. 1 and elem S)")
+                    cmd.select("mono_C", "mono_C + ((mono_C and elem S) xt. 2)")
+                    cmd.select("mono_C", "mono_C + ((mono_C and name CA) xt. 1 and elem H)")
+                    cmd.select("mono_C", "mono_C + ((mono_C and name CA) xt. 1 and elem N)")
+                    cmd.select("mono_C", "mono_C + ((mono_C and elem N) xt. 1)") 
+                    cmd.select("mono_C", "mono_C + ((mono_C and elem C) xt. 1 and elem O)") 
+                    # Expand C so that endcaps aren't on fronteir regions
+                    cmd.select("mono_C", "mono_C + ((mono_C and elem C) xt. 3 and resn ACE)") 
+                    cmd.select("mono_C", "mono_C + ((mono_C and elem C) xt. 3 and resn NMA)") 
+                    # Now re-specify system B so that there are no overlapping atoms (in both system B and monoC)
+                    cmd.select("sys%s_B" % fragment[0], "not mono_C and not lig_A")
+                    out.write('----------------------------------------------------------------------------------------------------\n')
+                    out.write('cut_protein'.center(100)+'\n')
+                    out.write('----------------------------------------------------------------------------------------------------\n')
+                    out.write('Making an initial cut:\n')
+                    out.write('Number of atoms in QM protein: ')
+                    out.write(f"{cmd.count_atoms('sys%s_B' % fragment[0])}\n")
                     filename = f'{chain}_{fragment[0]}'
-                    print('filename:', filename)
-                    cmd.save(f'{filename}.pdb',"frag",-1, 'pdb')
+                    cmd.save(f'{filename}.pdb','sys%s_B' % fragment[0],-1, 'pdb')
+                    print('saved filename:', filename)
+                    cmd.save(f'external_{fragment[0]}.pdb', 'mono_C')
+                    cmd.save('ligand.pdb', 'lig_A')
+                    out.close()
 
 def makepredictionary(cutoff:str) -> None: 
     """ 
