@@ -492,6 +492,9 @@ def run_sparcle(input_file= None, user_options = None):
                     write_est_file(keywords['software'], qm_lig, c_QM, qm_pro, '', mm_env, sapt_inp_filename, keywords['ligand_charge'], keywords['method'], keywords['basis_set'], keywords['mem'], keywords['nthreads'], keywords['do_fsapt'], keywords['nwchem_scratch'], keywords['nwchem_perm'], keywords['nwchem_scf'], keywords['nwchem_dft'], keywords['psi4_options'], keywords['qchem_options'], keywords['qchem_sapt'])
 #                    #check the charges and number of atoms in the written QM input file
                     qm_atoms, mm_atoms, qm_charge, mm_charge = check_est_file(sapt_inp_filename)
+                #write fsapt files
+                if keywords['fisapt_partition'] == 'true':
+                    fsapt_partition('CAPPED_qm.pdb')
                 os.chdir('../')
             print(dirs_list)
             exit()
