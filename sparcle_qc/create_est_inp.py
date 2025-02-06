@@ -919,6 +919,8 @@ no_reorient
         if do_fsapt is not None:
             if do_fsapt == False:
                 inpfile.write("'fisapt_do_fsapt': 'false',\n")
+            else:
+                inpfile.write(f"'fisapt_fsapt_filepath': '{inp_filename[:-3]}/',\n")
         for ind, (k,v) in enumerate(psi4_options.items()):
             if ind < len(psi4_options) - 1:
                 inpfile.write(f"""'{k}':'{v}',\n""")

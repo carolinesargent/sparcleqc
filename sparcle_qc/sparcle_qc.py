@@ -477,6 +477,7 @@ def run_sparcle(input_file= None, user_options = None):
             dirs_list = make_dirs()
             for frag_dir in dirs_list:
                 os.chdir(frag_dir)
+                print(f'Working in {frag_dir}')
                 move_m3s()
                 #cap the cut QM bonds with link hydrogens
                 if 'amber_ff' in keywords:

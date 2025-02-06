@@ -150,7 +150,7 @@ def fragmentprotein(sub:str, monoC:str = None):
                     cmd.select('sys%s_B' % cutoff, "sys%s_B + resi %s" % (cutoff, r))
                     cmd.select('sys%s_B' % cutoff, "sys%s_B + ((sys%s_B and resi %s and elem N) xt. 1)" % (cutoff, cutoff, r)) 
                     cmd.select('sys%s_B' % cutoff, "sys%s_B + ((sys%s_B and resi %s and elem C) xt. 1 and elem O)" % (cutoff, cutoff, r)) 
-                    cmd.select('sys%s_B' % cutoff, "sys%s_B + ((sys%s_B and resi %s and elem S) xt. 1)" % (cutoff, cutoff, r)) 
+                    cmd.select('sys%s_B' % cutoff, "sys%s_B + ((sys%s_B and resi %s and elem S and resn CYX) xt. 3 and resn CYX)" % (cutoff, cutoff, r)) 
                     cmd.select('sys%s_B' % cutoff, "sys%s_B + (br. (sys%s_B and elem S))" % (cutoff, cutoff)) 
                     cmd.select('sys%s_B' % cutoff, "sys%s_B + ((sys%s_B and resi %s and elem Se) xt. 1)" % (cutoff, cutoff, r)) 
                     cmd.select('sys%s_B' % cutoff, "sys%s_B + ((sys%s_B and resi %s and elem Se) xt. 1)" % (cutoff, cutoff, r)) 
@@ -226,6 +226,9 @@ def makeresifragments(num_resis):
                     cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem C) xt. 1 and elem O)" % (fragment[0], fragment[0])) 
                     cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem Se) xt. 1)" % (fragment[0], fragment[0])) 
                     cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem Se) xt. 1)" % (fragment[0], fragment[0])) 
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem S and resn CYX) xt. 5 and resn CYX)" % (fragment[0], fragment[0])) 
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem N and resn CYX) xt. 1)" % (fragment[0], fragment[0])) 
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem C) xt. 1 and elem O)" % (fragment[0], fragment[0])) 
                     cmd.select('sys%s_B' % fragment[0], "sys%s_B + (sys%s_B (xt. 1 and elem H))" % (fragment[0], fragment[0])) 
                     # Expand B to include endcaps if next to QM region
                     cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem C) xt. 3 and resn ACE)" % (fragment[0], fragment[0]))
