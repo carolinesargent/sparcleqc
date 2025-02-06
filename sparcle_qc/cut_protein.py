@@ -210,15 +210,86 @@ def makeresifragments(num_resis):
             if num_resis == '3':
                 fragment = resi_list[i:i+3]
                 if len(fragment) == 3: #make sure every section has 3 residues (handles end cases)
-                    cmd.select("frag", "chain %s and (resi %s or resi %s or resi %s)" % (chain, fragment[0], fragment[1], fragment[2]))
-              #      charge = retrieve_charges(chain, fragment, charge_dict)
+                    out = open(glob('*.out')[0], 'a')
+                    cmd.select("sys%s_B" % fragment[0], "chain %s and (resi %s or resi %s or resi %s)" % (chain, fragment[0], fragment[1], fragment[2]))
+                    # Expand B such that only alpha carbon -- carbon bonds are broken. This only handles when N is on the QM side.
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem N) xt. 1)" % (fragment[0], fragment[0])) 
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem C) xt. 1 and elem O)" % (fragment[0], fragment[0])) 
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem Se) xt. 1)" % (fragment[0], fragment[0])) 
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem Se) xt. 1)" % (fragment[0], fragment[0])) 
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem S and resn CYX) xt. 5 and resn CYX)" % (fragment[0], fragment[0])) 
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem N and resn CYX) xt. 1)" % (fragment[0], fragment[0])) 
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem C) xt. 1 and elem O)" % (fragment[0], fragment[0])) 
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + (sys%s_B (xt. 1 and elem H))" % (fragment[0], fragment[0])) 
+                    # Expand B to include endcaps if next to QM region
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem C) xt. 3 and resn ACE)" % (fragment[0], fragment[0]))
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem C) xt. 3 and resn NMA)" % (fragment[0], fragment[0]))
+                    cmd.select('sys%s_B' % fragment[0], "sys%s_B + ((sys%s_B and elem C) xt. 3 and resn NME)" % (fragment[0], fragment[0]))
+                    #cmd.select('sys%s_B' % fragment[0], "sys%s_B + byres (sys%s_B and resn ACE)" % (fragment[0], fragment[0])) 
+                    #cmd.select('sys%s_B' % fragment[0], "sys%s_B + byres (sys%s_B and resn NME)" % (fragment[0], fragment[0])) 
+                    ## Select everything else, that's monomer C
+                    cmd.select('mono_C', "not sys%s_B and not lig_A" % fragment[0])
+                    # Expand C such that only alpha carbon -- carbon bonds are broken. This handles when N is on the MM side.
+                    cmd.select("mono_C", "mono_C + ((mono_C and elem S) xt. 1 and elem S)")
+                    cmd.select("mono_C", "mono_C + ((mono_C and elem S) xt. 2)")
+                    cmd.select("mono_C", "mono_C + ((mono_C and name CA) xt. 1 and elem H)")
+                    cmd.select("mono_C", "mono_C + ((mono_C and name CA) xt. 1 and elem N)")
+                    cmd.select("mono_C", "mono_C + ((mono_C and elem N) xt. 1)") 
+                    cmd.select("mono_C", "mono_C + ((mono_C and elem C) xt. 1 and elem O)") 
+                    # Expand C so that endcaps aren't on fronteir regions
+                    #cmd.select("mono_C", "mono_C + ((mono_C and elem C) xt. 3 and resn ACE)") 
+                    #cmd.select("mono_C", "mono_C + ((mono_C and elem C) xt. 3 and resn NMA)") 
+                    # Now re-specify system B so that there are no overlapping atoms (in both system B and monoC)
+                    cmd.select("sys%s_B" % fragment[0], "not mono_C and not lig_A")
+                    out.write('----------------------------------------------------------------------------------------------------\n')
+                    out.write('cut_protein'.center(100)+'\n')
+                    out.write('----------------------------------------------------------------------------------------------------\n')
+                    out.write('Making an initial cut:\n')
+                    out.write('Number of atoms in QM protein: ')
+                    out.write(f"{cmd.count_atoms('sys%s_B' % fragment[0])}\n")
                     filename = f'{chain}_'+'-'.join(fragment)
-              #      frag_charges[filename] = charge
-                    cmd.save(f'{filename}.pdb',"frag",-1, 'pdb')
-                    #frag_xyz = sele2xyz('frag', f'{chain}_'+'-'.join(fragment))
+                    cmd.save(f'{filename}.pdb','sys%s_B' % fragment[0],-1, 'pdb')
+                    print('saved filename:', filename)
+                    cmd.save(f'external_{filename}.pdb', 'mono_C')
+                    cmd.save('ligand.pdb', 'lig_A')
+                    out.close()
+                    print('calling makepredict')
+                    #cmd.do(f'makepredictionary {fragment[0]} {fragment[0]}')
+                    print('entering makepredict explicit')
+                    M1_atms = cmd.identify("(neighbor sys%s_B)" % fragment[0])
+                    bond_dict = {}
+                    bond_dict['QM'] = cmd.identify('sys%s_B' % fragment[0])
+                    bond_dict['MM'] = cmd.identify('mono_C')
+                    # making M1_x, Q1_x, M2_x, M3_x lists for each bond broken (x). 
+                    for n,m in enumerate(M1_atms):
+                        bond_dict[f'M1_{n+1}'] = [m]
+                        bond_dict[f'Q1_{n+1}'] = cmd.identify(f'sys%s_B and neighbor id {m}' % fragment[0])
+                        bond_dict[f'M2_{n+1}'] = cmd.identify(f'mono_C and neighbor id {m}')
+                        bond_dict[f'M3_{n+1}'] = []
+                        for x in bond_dict[f'M2_{n+1}']:
+                            for a in cmd.identify(f'(mono_C and neighbor id {x}) and not id {m}'):
+                                bond_dict[f'M3_{n+1}'].append(a)
+                    # remove M1_x, M2_x, M3_x, and Q1_x atoms from MM and QM lists
+                    M123_atms = []
+                    for n, m in enumerate(M1_atms):
+                        if f'M1_{n+1}' in bond_dict.keys():
+                            for x in bond_dict[f'M1_{n+1}']:
+                                M123_atms.append(x)
+                        if f'M2_{n+1}' in bond_dict.keys():
+                            for x in bond_dict[f'M2_{n+1}']:
+                                M123_atms.append(x)
+                        if f'M3_{n+1}' in bond_dict.keys():
+                            for x in bond_dict[f'M3_{n+1}']:
+                                M123_atms.append(x)
+                        for x in bond_dict[f'Q1_{n+1}']:
+                            if x in bond_dict['QM']:
+                                bond_dict['QM'].remove(x)
+                    bond_dict['MM'] = list(set(bond_dict['MM']).difference(M123_atms))
+                    with open(f'pre-dictionary_{filename}.dat', 'w+') as dictfile:
+                        dictfile.write(json.dumps(bond_dict))
             elif num_resis == '1':
                 fragment = [resi_list[int(i)]]
-                if len(fragment) == 1: #make sure every section has 1 residue (handles end cases)
+                if len(fragment) == 1: #make sure every section has 1 residue
                     out = open(glob('*.out')[0], 'a')
                     cmd.select("sys%s_B" % fragment[0], "chain %s and (resi %s)" % (chain, fragment[0]))
                     # Expand B such that only alpha carbon -- carbon bonds are broken. This only handles when N is on the QM side.
