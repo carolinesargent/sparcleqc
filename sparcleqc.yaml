@@ -1,4 +1,4 @@
-name: sparcle_qc
+name: sparcleqc
 channels:
   - schrodinger
   - conda-forge

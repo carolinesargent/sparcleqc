@@ -219,7 +219,7 @@ def run_cut_protein(pdb_file:str, sub:str, cutoff:str) -> None:
     cmd.feedback("disable", "all", "everything")
     cmd.reinitialize()
     cmd.load(pdb_file)
-    with resources.path('sparcle_qc.data', 'cut_protein.py') as file_path:
+    with resources.path('sparcleqc.data', 'cut_protein.py') as file_path:
         cut_path = str(file_path)
     cmd.do(f'run {cut_path}')
     cmd.do(f'fragmentprotein {sub}, monoC="be. {cutoff}"')
