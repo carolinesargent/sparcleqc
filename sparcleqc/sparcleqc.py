@@ -309,7 +309,7 @@ def input_parser(filename:str) -> Dict:
         keywords['other_amber_ff'] = ast.literal_eval(keywords['other_amber_ff'])
     else:
         keywords['other_amber_ff'] = []
-    print(f"\u2728Sparcle-QC is sparkling\u2728\nBeginning file preparation for an embedded QM calculation of {keywords['pdb_file']} ")
+    print(f"\u2728SparcleQC is sparkling\u2728\nBeginning file preparation for an embedded QM calculation of {keywords['pdb_file']} ")
     
     return keywords
 
@@ -523,7 +523,7 @@ def run_sparcle(input_file= None, user_options = None):
         if keywords['fisapt_partition'] == 'true':
             fsapt_partition('CAPPED_qm.pdb')
         
-        print(f"\u2728Sparcle-QC has sparkled\u2728")
+        print(f"\u2728SparcleQC has sparkled\u2728")
         if 'sapt' in keywords['method'].lower():
             return qm_atoms, mm_atoms, qm_charge, mm_charge
         else:

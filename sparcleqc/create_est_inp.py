@@ -1109,12 +1109,12 @@ def write_est_file(software, qm_lig, c_QM, qm_pro, uniq_gh_elements, mm_env, PSI
 
 def copy_input(inputfile, psi4file, software):
     """
-    Writes the Sparcle-QC input file to the top of the psi4file
+    Writes the SparcleQC input file to the top of the psi4file
 
     Parameters
     ----------
     inputfile: str
-        name of the Sparcle-QC input file
+        name of the SparcleQC input file
     psi4file: str
         name of created psi4 input file
 
@@ -1125,17 +1125,17 @@ def copy_input(inputfile, psi4file, software):
     with open(inputfile) as inp:
         with open(psi4file, 'w') as psi4file:
             if software.lower() == 'psi4':
-                psi4file.write('"""\nThis Psi4 file was created using Sparcle-QC with the following specifications:\n')
+                psi4file.write('"""\nThis Psi4 file was created using SparcleQC with the following specifications:\n')
                 for line in inp:
                     psi4file.write(line)
                 psi4file.write('"""\n\n')
             elif software.lower() == 'nwchem':
-                psi4file.write('#This NWChem file was created using Sparcle-QC with the following specifications:\n')
+                psi4file.write('#This NWChem file was created using SparcleQC with the following specifications:\n')
                 for line in inp:
                     psi4file.write('#'+line)
                 psi4file.write('\n')
             elif software.lower() == 'q-chem':
-                psi4file.write('$comment\nThis Q-Chem file was created using Sparcle-QC with the following specifications:\n')
+                psi4file.write('$comment\nThis Q-Chem file was created using SparcleQC with the following specifications:\n')
                 for line in inp:
                     psi4file.write(line)
                 psi4file.write('$end\n\n')
