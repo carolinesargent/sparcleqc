@@ -13,7 +13,7 @@ Input Generator
            placeholder="Enter filename">
        <br>
        <small id="filenameHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: block;">
-           Enter the desired file name for the Sparcle_QC input file that will be created 
+           Enter the desired file name for the SparcleQC input file that will be created 
        </small>
        <br>
 
@@ -72,7 +72,7 @@ Input Generator
        <label for="forcefield">Forcefield:</label>
        <small id="ffHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: block;">
            If CHARMM is selected, charges must be precomputed using CHARMM-GUI<br>
-           If Amber is selected, Sparcle_QC will obtain point charges automatically 
+           If Amber is selected, SparcleQC will obtain point charges automatically 
        </small>
        <div id="forcefields" style="margin-left: 30px; margin-top: 7px;">
           <div>
@@ -100,7 +100,7 @@ Input Generator
           <small id="amberHelp" style="color: #555; font-size: 0.9em; margin-top: 5px; display: none;">
               Enter the desired Amber forcefield (e.g. ff19SB)<br>
               If other forcefields are needed to obtain point charges for the system enter them here <br>
-              If the checkbox below is checked, Sparcle_QC will cap the terminal residues with ACE and NME  
+              If the checkbox below is checked, SparcleQC will cap the terminal residues with ACE and NME  
           </small>
           <div id="amber-options" style="margin-top: 10px;">
               <div style="margin-left: 30px;">
