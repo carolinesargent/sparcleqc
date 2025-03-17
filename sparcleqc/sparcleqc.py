@@ -9,16 +9,16 @@ import time
 import ast
 from typing import Dict
 
-from sparcle_qc.amber_prep import write_cpptraj, write_cpptraj_skip_autocap, write_tleap, autocap, skip_autocap, reorder_atoms_amber
-from sparcle_qc.charmm_prep import psf_to_mol2, get_cx_pdb, reorder_atoms_charmm
-from sparcle_qc.complex_tools import check_df_charges, check_mol2_charges, convert_seed, closest_contact
-from sparcle_qc.combine_data import create_csv
-from sparcle_qc.cut_protein import run_cut_protein 
-from sparcle_qc.convert_dict import convert_dictionary 
-from sparcle_qc.move_M3s import move_m3s
-from sparcle_qc.create_est_inp import make_monomers, check_est_file, copy_input, write_est_file, ghost
-from sparcle_qc.cap import run_cap
-from sparcle_qc.make_fsapt_partition import fsapt_partition 
+from sparcleqc.amber_prep import write_cpptraj, write_cpptraj_skip_autocap, write_tleap, autocap, skip_autocap, reorder_atoms_amber
+from sparcleqc.charmm_prep import psf_to_mol2, get_cx_pdb, reorder_atoms_charmm
+from sparcleqc.complex_tools import check_df_charges, check_mol2_charges, convert_seed, closest_contact
+from sparcleqc.combine_data import create_csv
+from sparcleqc.cut_protein import run_cut_protein 
+from sparcleqc.convert_dict import convert_dictionary 
+from sparcleqc.move_M3s import move_m3s
+from sparcleqc.create_est_inp import make_monomers, check_est_file, copy_input, write_est_file, ghost
+from sparcleqc.cap import run_cap
+from sparcleqc.make_fsapt_partition import fsapt_partition 
 
 stop_flashing = threading.Event()
 
@@ -318,7 +318,7 @@ def run_sparcle(input_file= None, user_options = None):
     """ 
     Given an input file, parses the specified options into a
     dictionary of keywords (or just takes in a dictionary) 
-    and runs the necessary sparcle_qc functions to
+    and runs the necessary sparcleqc functions to
     create a quantum chemistry software input file. Steps include
     preparing PDBs, obtaining MOL2s, carving out the QM region, capping
     the cut bonds with hydrogens, and writing an input file.
@@ -328,7 +328,7 @@ def run_sparcle(input_file= None, user_options = None):
     input_file: str
         path to input file
     user_options: Dict
-        User provided dictionary with sparcle_qc parameters instead of providing an input file
+        User provided dictionary with sparcleqc parameters instead of providing an input file
 
     Returns
     -------
@@ -550,7 +550,7 @@ def run_sparcle(input_file= None, user_options = None):
     
 def main():
     if len(sys.argv) != 2:
-        print("Usage: sparcle_qc <input_file>")
+        print("Usage: sparcleqc <input_file>")
         sys.exit(1)
 
     input_file = sys.argv[1]
