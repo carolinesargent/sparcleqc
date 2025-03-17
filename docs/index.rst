@@ -15,7 +15,7 @@
    :align: center
    :width: 500px
 
-Sparcle_QC is a Python package that automatically creates QM/MM-like input files for the quantum chemistry codes Psi4, Q-Chem, and NWChem. It is specifically designed for use with protein:ligand complexes. Main features include cutting the QM region out of the protein, capping the QM region with hydrogen link atoms, obtaining point charges for the MM region, and altering QM/MM boundary charges.
+SparcleQC is a Python package that automatically creates QM/MM-like input files for the quantum chemistry codes Psi4, Q-Chem, and NWChem. It is specifically designed for use with protein:ligand complexes. Main features include cutting the QM region out of the protein, capping the QM region with hydrogen link atoms, obtaining point charges for the MM region, and altering QM/MM boundary charges.
 
 .. image:: _static/index-visual-light.svg
    :class: only-light
@@ -37,7 +37,7 @@ Sparcle_QC is a Python package that automatically creates QM/MM-like input files
     .. grid-item-card:: Installation
       :margin: 0 3 0 0  
       
-      Learn how to install Sparcle_QC
+      Learn how to install SparcleQC
 
       .. button-link:: ./installation.html
          :color: primary
@@ -49,7 +49,7 @@ Sparcle_QC is a Python package that automatically creates QM/MM-like input files
     .. grid-item-card:: Getting Started
       :margin: 0 3 0 0 
       
-      Learn the basics of using Sparcle_QC.
+      Learn the basics of using SparcleQC.
 
       .. button-link:: ./getting_started.html
          :color: primary
@@ -77,7 +77,7 @@ Sparcle_QC is a Python package that automatically creates QM/MM-like input files
     .. grid-item-card:: API Reference
       :margin: 0 3 0 0
       
-      How to use the API of Sparcle_QC.
+      How to use the API of SparcleQC.
 
       .. button-link:: ./api.html
          :color: primary
@@ -91,7 +91,7 @@ Sparcle_QC is a Python package that automatically creates QM/MM-like input files
     .. grid-item-card::  Developer Guide
       :margin: 0 3 0 0  
       
-      How to contribute to Sparcle_QC.
+      How to contribute to SparcleQC.
 
       .. button-link:: ./developer_guide.html
          :color: primary
@@ -103,7 +103,7 @@ Sparcle_QC is a Python package that automatically creates QM/MM-like input files
     .. grid-item-card:: Input Generator 
       :margin: 0 3 0 0  
       
-      Generate a Sparcle_QC Input File.
+      Generate a SparcleQC Input File.
 
       .. button-link:: ./input_generator.html
          :color: primary

@@ -1,10 +1,10 @@
-Installing Sparcle_QC
+Installing SparcleQC
 =====================
-Creating a Sparcle_QC Enviornment
+Creating a SparcleQC Enviornment
 ---------------------------------
 To get started, you will need to install sparcle_qc and its dependencies. We have provided a yaml file to create a conda environment containing all of the necessary packages.
 
-First, clone the `Sparcle_QC repository <https://github.com/carolinesargent/sparcle_qc>`_:
+First, clone the `SparcleQC repository <https://github.com/carolinesargent/sparcle_qc>`_:
 
 .. code-block:: bash
 
@@ -24,7 +24,7 @@ Create a conda environment from the yaml file provided in this repository:
 
 Command Line Usage 
 ------------------
-Sparcle_QC is now installed in this enviornment and can be called on the command line in any directory using the following syntax:
+SparcleQC is now installed in this enviornment and can be called on the command line in any directory using the following syntax:
 
 .. code-block:: bash
 
@@ -32,13 +32,13 @@ Sparcle_QC is now installed in this enviornment and can be called on the command
 
 Python API
 ----------    
-Alternatively, for more advanced scripting utilities, Sparcle_QC can be imported as a python package:
+Alternatively, for more advanced scripting utilities, SparcleQC can be imported as a python package:
 
 .. code-block:: python
     
     import sparcle_qc
 
-Sparcle_QC can be called by referencing an input file:
+SparcleQC can be called by referencing an input file:
 
 .. code-block:: python
 
@@ -64,7 +64,7 @@ or by passing a dictionary of inputs:
     sparcle_qc.run_sparcle(user_options = inputs)
 
 
-Running Sparcle_QC 
+Running SparcleQC 
 ------------------
 
 To learn more about SparcleQC, check out :doc:`getting_started`.

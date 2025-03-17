@@ -9,7 +9,7 @@ General Information
     .. role:: python(code)
         :language: python
     
-    Sparcle_QC depends on a properly formatted PDB file. Make sure your PDB follows the standard format. Sparcle_QC does not require occupancy, temperature factor, segment identifier, or formal charge, but it does require all other columns. 
+    SparcleQC depends on a properly formatted PDB file. Make sure your PDB follows the standard format. SparcleQC does not require occupancy, temperature factor, segment identifier, or formal charge, but it does require all other columns. 
 
     **CHARMM vs Amber**
 
@@ -19,9 +19,9 @@ General Information
 
     **On capping terminal residues**
 
-    For CHARMM, capping of the terminal residues can be done through CHARMM-GUI before running Sparcle_QC. However, when using an Amber Forcefield, users have the option to have Sparcle_QC cap the terminal residues with ACE and NME where appropriate. If uploading a PDB with terminal residues already capped with NME and ACE, the following atom names should be used in columns 13-16: hydrogens in NME and ACE should be named H1, H2, and H, the carbon in NME should be named C. Additionally, the peptidic hydrogen (on the backbone nitrogen) of the terminal residues should be named H, not H1. In the Sparcle_QC input file, set :python:`pre-capped: true`. 
+    For CHARMM, capping of the terminal residues can be done through CHARMM-GUI before running SparcleQC. However, when using an Amber Forcefield, users have the option to have SparcleQC cap the terminal residues with ACE and NME where appropriate. If uploading a PDB with terminal residues already capped with NME and ACE, the following atom names should be used in columns 13-16: hydrogens in NME and ACE should be named H1, H2, and H, the carbon in NME should be named C. Additionally, the peptidic hydrogen (on the backbone nitrogen) of the terminal residues should be named H, not H1. In the SparcleQC input file, set :python:`pre-capped: true`. 
 
-    If uploading a PDB without endcaps on terminal residues, Sparcle_QC will automatically handle the tasks above.
+    If uploading a PDB without endcaps on terminal residues, SparcleQC will automatically handle the tasks above.
 
 .. dropdown:: Cutting and Capping Bonds
     
@@ -77,7 +77,7 @@ General Information
 
 .. dropdown:: Resulting Input File for QM Calculation
 
-    The result of running Sparcle_QC is an input file for either Psi4, Q-Chem, or NWChem. In general, the input file will look similar to the files below.
+    The result of running SparcleQC is an input file for either Psi4, Q-Chem, or NWChem. In general, the input file will look similar to the files below.
 
     .. tab-set::
     
@@ -90,7 +90,7 @@ General Information
                 pdb_file: 2cji.pdb
                 cutoff: 5
                 ... 
-                ... # copy of Sparcle_QC input file
+                ... # copy of SparcleQC input file
                 """
                 
                 import psi4
@@ -164,7 +164,7 @@ General Information
                 pdb_file: 2cji.pdb
                 cutoff: 5
                 ...
-                ... # copy of Sparcle_QC input file
+                ... # copy of SparcleQC input file
                 """
                 
                 $molcule
@@ -212,7 +212,7 @@ General Information
                 This NWChem file was created using Sparcle-QC with the following specifications:
                 pdb_file: 2cji.pdb
                 ...
-                ... # copy of Sparcle_QC input file
+                ... # copy of SparcleQC input file
                 """
                 
                 START
