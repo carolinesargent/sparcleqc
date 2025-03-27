@@ -2,25 +2,25 @@ Installing SparcleQC
 =====================
 Creating a SparcleQC Enviornment
 ---------------------------------
-To get started, you will need to install sparcle_qc and its dependencies. We have provided a yaml file to create a conda environment containing all of the necessary packages.
+To get started, you will need to install sparcleqc and its dependencies. We have provided a yaml file to create a conda environment containing all of the necessary packages.
 
-First, clone the `SparcleQC repository <https://github.com/carolinesargent/sparcle_qc>`_:
-
-.. code-block:: bash
-
-   git clone https://github.com/carolinesargent/sparcle_qc.git
-
-Change your working directory to sparcle_qc/:
+First, clone the `SparcleQC repository <https://github.com/carolinesargent/sparcleqc>`_:
 
 .. code-block:: bash
 
-    cd sparcle_qc
+   git clone https://github.com/carolinesargent/sparcleqc.git
+
+Change your working directory to sparcleqc/:
+
+.. code-block:: bash
+
+    cd sparcleqc
 
 Create a conda environment from the yaml file provided in this repository:
 
 .. code-block:: bash
 
-    conda env create -f sparcle_qc.yaml
+    conda env create -f sparcleqc.yaml
 
 Command Line Usage 
 ------------------
@@ -28,7 +28,7 @@ SparcleQC is now installed in this enviornment and can be called on the command 
 
 .. code-block:: bash
 
-    sparcle_qc input_file.in
+    sparcleqc input_file.in
 
 Python API
 ----------    
@@ -36,13 +36,13 @@ Alternatively, for more advanced scripting utilities, SparcleQC can be imported 
 
 .. code-block:: python
     
-    import sparcle_qc
+    import sparcleqc
 
 SparcleQC can be called by referencing an input file:
 
 .. code-block:: python
 
-    sparcle_qc.run_sparcle(input_file = 'input_file.in')
+    sparcleqc.run_sparcle(input_file = 'input_file.in')
 
 or by passing a dictionary of inputs: 
 
@@ -61,7 +61,7 @@ or by passing a dictionary of inputs:
     'software': 'psi4',
     }
 
-    sparcle_qc.run_sparcle(user_options = inputs)
+    sparcleqc.run_sparcle(user_options = inputs)
 
 
 Running SparcleQC 

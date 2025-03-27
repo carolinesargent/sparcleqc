@@ -420,7 +420,7 @@ Example Inputs
 
     .. code-block::
  
-        import sparcle_qc
+        import sparcleqc
 
 	inputs = {
             'pdb_file': '2cji.pdb',
@@ -445,6 +445,6 @@ Example Inputs
 	    inputs['cutoff'] = f'{c}'
 	    inputs['input_filename'] = f'cutoff_{c}.in'
 	    print(inputs)
-	    sparcle_qc.run_sparcle(user_options = inputs)
+	    sparcleqc.run_sparcle(user_options = inputs)
 
                                                      

@@ -4,44 +4,44 @@ API
 .. .. autosummary::
 ..    :toctree: autosummary
 .. 
-..    sparcle_qc.canvas
+..    sparcleqc.canvas
 
-.. automodule:: sparcle_qc.sparcle_qc
+.. automodule:: sparcleqc.sparcleqc
    :members: run_sparcle
    :show-inheritance:
 
-.. .. automodule:: sparcle_qc.amber_prep
+.. .. automodule:: sparcleqc.amber_prep
 ..    :members:
 ..    :show-inheritance:
 .. 
-.. .. automodule:: sparcle_qc.charmm_prep
+.. .. automodule:: sparcleqc.charmm_prep
 ..    :members:
 ..    :show-inheritance:
 .. 
-.. .. automodule:: sparcle_qc.cap
+.. .. automodule:: sparcleqc.cap
 ..    :members:
 ..    :show-inheritance:
 .. 
-.. .. automodule:: sparcle_qc.combine_data
+.. .. automodule:: sparcleqc.combine_data
 ..    :members:
 ..    :show-inheritance:
 .. 
-.. .. automodule:: sparcle_qc.convert_dict
+.. .. automodule:: sparcleqc.convert_dict
 ..    :members:
 ..    :show-inheritance:
 .. 
-.. .. automodule:: sparcle_qc.create_est_inp
+.. .. automodule:: sparcleqc.create_est_inp
 ..    :members:
 ..    :show-inheritance:
 .. 
-.. .. automodule:: sparcle_qc.make_fsapt_partition
+.. .. automodule:: sparcleqc.make_fsapt_partition
 ..    :members:
 ..    :show-inheritance:
 .. 
-.. .. automodule:: sparcle_qc.move_M3s
+.. .. automodule:: sparcleqc.move_M3s
 ..    :members:
 ..    :show-inheritance:
 .. 
-.. .. automodule:: sparcle_qc.complex_tools
+.. .. automodule:: sparcleqc.complex_tools
 ..    :members:
 ..    :show-inheritance:
