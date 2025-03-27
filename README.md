@@ -1,4 +1,4 @@
-[//]:Sparcle_QC
+[//]:SparcleQC
 [//]:==============================
 
 <p align="left">
@@ -15,7 +15,7 @@
 [![Documentation Status](https://readthedocs.org/projects/sparcle-qc/badge/?version=latest)](https://sparcle-qc.readthedocs.io/en/latest/?badge=latest)
 
 
-Sparcle_QC is a Python package that automatically creates protein:ligand, QM/MM-like input files for the quantum chemistry codes Psi4, Q-Chem, and NWChem.
+SparcleQC is a Python package that automatically creates protein:ligand, QM/MM-like input files for the quantum chemistry codes Psi4, Q-Chem, and NWChem.
 
 [//]: # (Software Package that Automatically Redistributes Charges for Embedded Quantum Chemistry)
 
