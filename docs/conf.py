@@ -17,12 +17,12 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
-import sparcle_qc
+import sparcleqc
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'sparcle_qc'
+project = 'sparcleqc'
 copyright = ("2024, Caroline S. Glick. Project structure based on the "
              "Computational Molecular Science Python Cookiecutter version 1.10")
 author = 'C.S. Glick, I.P. Berry, C.D. Sherrill'
@@ -109,7 +109,7 @@ html_theme_options = {
             # Label for this link
             "name": "GitHub",
             # URL where the link will redirect
-            "url": "https://github.com/carolinesargent/sparcle_qc",  # required
+            "url": "https://github.com/carolinesargent/sparcleqc",  # required
             # Icon class (if "type": "fontawesome"), or path to local image (if "type": "local")
             "icon": "fa-brands fa-square-github",
             # The type of image to be used (see below for details)
@@ -144,7 +144,7 @@ html_show_sourcelink = False
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'sparcle_qcdoc'
+htmlhelp_basename = 'sparcleqcdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -171,8 +171,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'sparcle_qc.tex', 'sparcle_qc Documentation',
-     'sparcle_qc', 'manual'),
+    (master_doc, 'sparcleqc.tex', 'sparcleqc Documentation',
+     'sparcleqc', 'manual'),
 ]
 
 
@@ -181,7 +181,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'sparcle_qc', 'sparcle_qc Documentation',
+    (master_doc, 'sparcleqc', 'sparcleqc Documentation',
      [author], 1)
 ]
 
@@ -192,8 +192,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'sparcle_qc', 'sparcle_qc Documentation',
-     author, 'sparcle_qc', 'Software Package that Automatically Redistributes Charges for Embedded Quantum Chemistry',
+    (master_doc, 'sparcleqc', 'sparcleqc Documentation',
+     author, 'sparcleqc', 'Software Package that Automatically Redistributes Charges for Embedded Quantum Chemistry',
      'Miscellaneous'),
 ]
 
