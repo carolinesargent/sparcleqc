@@ -215,5 +215,6 @@ def write_tleap(forcefield: str, water_model: str, other_ffs: list) -> None:
         for ff in other_ffs:
             f.write(f'source {ff}\n')
         f.write(f'mol = loadPdb "prot_autocap_fixed.pdb"\n')
+        f.write('check mol\n')
         f.write(f'savemol2 mol prot_autocap_fixed.mol2 1\n')
         f.write('quit')

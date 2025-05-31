@@ -436,6 +436,10 @@ def run_sparcle(input_file= None, user_options = None):
             output.write('tleap'.center(100)+'\n')
             output.write('----------------------------------------------------------------------------------------------------\n')
             output.write(result.stdout)
+            if 'missing heavy atom' in result.stdout:
+                for line in result.stdout.splitlines():
+                    if 'missing heavy atom' in line:
+                         print(f'Missing heavy atom: {line.split(':')[1]}')
         #else, the forcefield is charmm and converting psf to mol2
         else:
             psf_to_mol2(keywords['pdb_file'])
