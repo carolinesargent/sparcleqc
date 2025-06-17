@@ -9,6 +9,7 @@ dependencies:
   - ambertools
   - pymol-open-source
   - mdanalysis
+  - numpy<2.3
     # Testing
   - pytest
   - pytest-cov
