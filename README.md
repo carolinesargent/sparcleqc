@@ -23,6 +23,8 @@ SparcleQC is a Python package that automatically creates protein:ligand, QM/MM-l
 
 Full documentation is available at [https://sparcle-qc.readthedocs.io/en/latest/](https://sparcle-qc.readthedocs.io/en/latest/)
 
+Read our published article in JCIM [here](https://pubs.acs.org/doi/full/10.1021/acs.jcim.5c00617)
+
 ### Authors
 
 * Caroline S. Glick, [@carolinesargent](https://github.com/carolinesargent)
