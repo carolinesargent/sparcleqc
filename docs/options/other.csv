@@ -3,3 +3,4 @@ pre-capped,"If protein termini are already capped, set to true. Otherwise, Sparc
 seed_file,"If atom id is specified as 'seed', add filename to corresponding atom and atom id. Can be the same as pdb_file or different. ",string,
 template_path,"If you would like to cut a QM region from a new PDB that matches the QM region of an existing PDB, set this to the path of the 'cx_autocap_fixed.pdb' in the subdirectory of the existing PDB's Sparcle_QC run.",string,
 cp,Add ghost atoms for counterpoise correction? true or false,string,true
+force_include_residues,"List of residue numbers (as they appear in pdb_file) to always include in the QM region, regardless of the distance cutoff. Ignored if template_path is used. Ex: [12, 45, 201]",string,[]
