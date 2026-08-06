@@ -536,6 +536,64 @@ def test_exit():
         
     assert exits == true_exits 
 
+def test_force_include_residues_parsing():
+    """
+    force_include_residues should parse into a list of ints when given a
+    valid list, and default to an empty list when omitted.
+    """
+    base_lines = [
+        'pdb_file: 3qxp.pdb\n',
+        'cutoff: 5\n',
+        'seed: ligand\n',
+        'charge_scheme: BRC\n',
+        'method: hf\n',
+        'basis_set: aug-cc-pv(D+d)z\n',
+        'charmm_rtf: top_all36_prot.rtf\n',
+        'charmm_prm: par_all36m_prot.prm\n',
+        'water_model: tip3p\n',
+        'software: psi4\n',
+    ]
+
+    with open('test_force_include_present.in', 'w') as f:
+        f.writelines(base_lines)
+        f.write('force_include_residues: [12, 45, 201]\n')
+    keywords = sparcleqc.input_parser('test_force_include_present.in')
+    os.remove('test_force_include_present.in')
+    assert keywords['force_include_residues'] == [12, 45, 201]
+
+    with open('test_force_include_absent.in', 'w') as f:
+        f.writelines(base_lines)
+    keywords = sparcleqc.input_parser('test_force_include_absent.in')
+    os.remove('test_force_include_absent.in')
+    assert keywords['force_include_residues'] == []
+
+def test_force_include_residues_invalid():
+    """
+    force_include_residues must be a list of integers; anything else
+    (a bare string, a list of strings, etc.) should cause a SystemExit.
+    """
+    base_lines = [
+        'pdb_file: 3qxp.pdb\n',
+        'cutoff: 5\n',
+        'seed: ligand\n',
+        'charge_scheme: BRC\n',
+        'method: hf\n',
+        'basis_set: aug-cc-pv(D+d)z\n',
+        'charmm_rtf: top_all36_prot.rtf\n',
+        'charmm_prm: par_all36m_prot.prm\n',
+        'water_model: tip3p\n',
+        'software: psi4\n',
+    ]
+    bad_values = ["not a list", "12, 45", "['12', '45']"]
+    for i, bad_value in enumerate(bad_values):
+        fname = f'test_force_include_invalid_{i}.in'
+        with open(fname, 'w') as f:
+            f.writelines(base_lines)
+            f.write(f'force_include_residues: {bad_value}\n')
+        with pytest.raises(SystemExit):
+            sparcleqc.input_parser(fname)
+        os.remove(fname)
+
 def test_run_convert():
     inputs = {
     'input_filename': 'test19.in',

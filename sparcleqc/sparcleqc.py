@@ -167,6 +167,15 @@ def input_parser(filename:str) -> Dict:
                     if value != 'true' and value != 'false':
                         print("Error: Invalid input file. cp is not true or false")
                         sys.exit()
+                if key_word == 'force_include_residues':
+                    try:
+                        parsed_residues = ast.literal_eval(value)
+                    except (ValueError, SyntaxError):
+                        print("Error: Invalid input file. force_include_residues is not a list of residue numbers")
+                        sys.exit()
+                    if not isinstance(parsed_residues, list) or not all(isinstance(r, int) for r in parsed_residues):
+                        print("Error: Invalid input file. force_include_residues must be a list of integer residue numbers, e.g. [12, 45, 201]")
+                        sys.exit()
                 keywords[key_word]=value
     if 'software' not in keywords.keys():
         print('Error: Software not specified. Choose psi4, nwchem, or q-chem.')
@@ -309,6 +318,10 @@ def input_parser(filename:str) -> Dict:
         keywords['other_amber_ff'] = ast.literal_eval(keywords['other_amber_ff'])
     else:
         keywords['other_amber_ff'] = []
+    if 'force_include_residues' in keywords.keys():
+        keywords['force_include_residues'] = ast.literal_eval(keywords['force_include_residues'])
+    else:
+        keywords['force_include_residues'] = []
     print(f"\u2728SparcleQC is sparkling\u2728\nBeginning file preparation for an embedded QM calculation of {keywords['pdb_file']} ")
     
     return keywords
@@ -473,10 +486,12 @@ def run_sparcle(input_file= None, user_options = None):
         
         #if the a template path has been specified, mapping the QM region from the QM region of the template
         if 'template_path' in keywords:
+            if keywords['force_include_residues']:
+                print("Warning: force_include_residues is ignored when template_path is used; the QM region is mapped directly from the template instead.")
             convert_dictionary(keywords['cutoff'], keywords['template_path'])
         #if there is no template specified then cutting the protein
         else:
-            run_cut_protein('cx_autocap_fixed.pdb', seed, keywords['cutoff'])
+            run_cut_protein('cx_autocap_fixed.pdb', seed, keywords['cutoff'], keywords['force_include_residues'])
             os.mkdir(f'data')
             shutil.move('QM.pdb', f'data/QM-sub-cut-protein-fragment-ligand.pdb')
             #for each cut, ensure frontier MM atoms are part of one unique residue

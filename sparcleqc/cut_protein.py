@@ -5,7 +5,7 @@ import json
 from glob import glob
 from importlib import resources
 
-def fragmentprotein(sub:str, monoC:str = None):
+def fragmentprotein(sub:str, monoC:str = None, force_residues:str = None):
     """
     Fragments a protein between QM and MM regions
 
@@ -17,6 +17,11 @@ def fragmentprotein(sub:str, monoC:str = None):
         
     monoC : selection for the external charges
         Default: None
+
+    force_residues : str
+        '+'-delimited string of residue numbers (PyMOL resi values, e.g. "12+45+201")
+        that should always be added to the QM region, regardless of the distance
+        cutoff used to build the pocket. Default: None
 
     NOTES
 
@@ -30,6 +35,11 @@ def fragmentprotein(sub:str, monoC:str = None):
         - Once a proper QM region is selected, we check for MM residues
         sandwiched between two QM regions. We move that residue from
         the MM region to the QM region.
+
+        - If force_residues is provided, those residues are then also moved
+        into the QM region (on top of the distance-based cut and the
+        sandwiched-residue check above), and the QM/MM boundary is
+        re-extended so that only alpha carbon -- carbon bonds are broken.
     
     Returns
     -------
@@ -139,6 +149,36 @@ def fragmentprotein(sub:str, monoC:str = None):
         # Make pocket selection
         cmd.select('sys%s_B' % B_cutoff, "not lig_A")
     
+    # Force-include user-specified residues in the QM region, regardless of
+    # the distance-based cut above.
+    if force_residues and monoC is not None:
+        out.write('----------------------------------------------------------------------------------------------------\n')
+        out.write('Force-including user-specified residues in the QM region:\n')
+        cmd.select('forced_residues', 'byres (resi %s and not lig_A)' % force_residues)
+        n_forced = cmd.count_atoms('forced_residues and not sys%s_B' % cutoff)
+        cmd.select('sys%s_B' % cutoff, 'sys%s_B or forced_residues' % cutoff)
+        # Expand so that only alpha carbon -- carbon bonds are broken at the new frontier.
+        cmd.select('sys%s_B' % cutoff, "sys%s_B + ((sys%s_B and elem N) xt. 1)" % (cutoff, cutoff))
+        cmd.select('sys%s_B' % cutoff, "sys%s_B + ((sys%s_B and elem C) xt. 1 and elem O)" % (cutoff, cutoff))
+        cmd.select('sys%s_B' % cutoff, "sys%s_B + ((sys%s_B and elem S) xt. 1)" % (cutoff, cutoff))
+        cmd.select('sys%s_B' % cutoff, "sys%s_B + (br. (sys%s_B and elem S))" % (cutoff, cutoff))
+        cmd.select('sys%s_B' % cutoff, "sys%s_B + ((sys%s_B and elem Se) xt. 1)" % (cutoff, cutoff))
+        cmd.select('sys%s_B' % cutoff, "sys%s_B + (sys%s_B (xt. 1 and elem H))" % (cutoff, cutoff))
+        # Re-derive monomer C (everything not QM or ligand) and re-cut its termini.
+        cmd.select('mono_C', "not sys%s_B and not lig_A" % cutoff)
+        cmd.select("mono_C", "mono_C + ((mono_C and elem S) xt. 1 and elem S)")
+        cmd.select("mono_C", "mono_C + ((mono_C and elem S) xt. 2)")
+        cmd.select("mono_C", "mono_C + ((mono_C and name CA) xt. 1 and elem H)")
+        cmd.select("mono_C", "mono_C + ((mono_C and name CA) xt. 1 and elem N)")
+        cmd.select("mono_C", "mono_C + ((mono_C and elem N) xt. 1)")
+        cmd.select("mono_C", "mono_C + ((mono_C and elem C) xt. 1 and elem O)")
+        cmd.select("mono_C", "mono_C + ((mono_C and elem C) xt. 3 and resn ACE)")
+        cmd.select("mono_C", "mono_C + ((mono_C and elem C) xt. 3 and resn NMA)")
+        cmd.select('sys%s_B' % cutoff, "not mono_C and not lig_A")
+        cmd.delete('forced_residues')
+        out.write(f"Number of new atoms added by force-included residues: {n_forced}\n")
+        out.write(f"Number of atoms in QM protein after force-include: {cmd.count_atoms('sys%s_B' % cutoff)}\n")
+
     cmd.save('QM.pdb', 'sys%s_B + lig_A' % cutoff)
     cmd.save('external.pdb', 'mono_C')
     cmd.save('ligand.pdb', 'lig_A')
@@ -198,7 +238,7 @@ def makepredictionary(cutoff:str) -> None:
 cmd.extend("fragmentprotein", fragmentprotein)
 cmd.extend("makepredictionary", makepredictionary)
 
-def run_cut_protein(pdb_file:str, sub:str, cutoff:str) -> None:
+def run_cut_protein(pdb_file:str, sub:str, cutoff:str, force_include_residues:list = None) -> None:
     """
    Calls the other necessary functions to cut the system in pdb_file
    by including everything that is {cutoff} angstroms away from {sub}
@@ -211,6 +251,10 @@ def run_cut_protein(pdb_file:str, sub:str, cutoff:str) -> None:
        atom or group to grow QM region around
     cutoff: str
        radius in angstroms for making cut 
+    force_include_residues: list
+       residue numbers (as they appear in pdb_file) that should always be
+       added to the QM region, regardless of the distance cutoff.
+       Default: None
 
     Returns
     -------
@@ -222,5 +266,9 @@ def run_cut_protein(pdb_file:str, sub:str, cutoff:str) -> None:
     with resources.path('sparcleqc.data', 'cut_protein.py') as file_path:
         cut_path = str(file_path)
     cmd.do(f'run {cut_path}')
-    cmd.do(f'fragmentprotein {sub}, monoC="be. {cutoff}"')
+    if force_include_residues:
+        force_residues = '+'.join(str(r) for r in force_include_residues)
+        cmd.do(f'fragmentprotein {sub}, monoC="be. {cutoff}", force_residues="{force_residues}"')
+    else:
+        cmd.do(f'fragmentprotein {sub}, monoC="be. {cutoff}"')
     cmd.do(f'makepredictionary {cutoff}')

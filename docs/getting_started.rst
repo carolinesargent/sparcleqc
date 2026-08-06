@@ -34,6 +34,8 @@ If specified (pre-capped), when utilizing Amber forcefields, SparcleQC can autom
 -----------------------------
 
 To create the quantum mechanical subsystem, SparcleQC will carve out a section of the protein based on a user-specified distance (cutoff_radius). Any residues with at least one atom in within the radius will be included in the QM region. If no specification is made, the radius will expand from the whole ligand. However, if desired, the radius can extend from one specific atom in the ligand. This can be chosen by specifying the atom serial number/atomid (seed) and corresponding PDB (seed_file) to grow the QM region from. SparcleQC will sever C-C bonds, specifically the bond between the carbon of the peptide bond and the alpha carbon in the protein backbone.
+
+If specific residues must be in the QM region regardless of the distance cutoff (e.g. a known catalytic residue that happens to fall outside cutoff_radius), list their residue numbers, as they appear in pdb_file, with force_include_residues. These residues are added on top of the normal distance-based cut, and the QM/MM boundary is re-drawn around them using the same C-C bond-severing rule described above. force_include_residues is ignored when template_path is used.
    
 .. figure:: _static/light_cutout.png
    :align: center
